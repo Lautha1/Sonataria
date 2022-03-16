@@ -1,0 +1,44 @@
+# Don't track these folders
+.vs
+
+# Build results
+**/[Dd]ebug/**/*.*
+**/[Dd]ebugPublic/**/*.*
+**/[Rr]elease/**/*.*
+**/[Rr]eleases/**/*.*
+[Ww][Ii][Nn]32/**/*.*
+[Aa][Rr][Mm]/**/*.*
+[Aa][Rr][Mm]64/**/*.*
+bld/**/*.*
+[Bb]in/**/*.*
+[Oo]bj/**/*.*
+[Ll]og/**/*.*
+[Ll]ogs/**/*.*
+
+# Whitelist for Debug and Release
+![Dd]ebug/Fonts/**/*.*
+![Dd]ebug/Settings/**/*.*
+![Dd]ebug/Textures/**/*.*
+![Dd]ebug/Songs/**/*.*
+
+![Rr]elease/Fonts/**/*.*
+![Rr]elease/Settings/**/*.*
+![Rr]elease/Textures/**/*.*
+![Rr]elease/Songs/**/*.*
+
+# Don't track these file types
+*.wav
+*.flac
+*.mp4
+*.m4v
+*.webm
+*.hevc
+
+# Still include Music in the MusicFX folder
+![Dd]ebug/MusicFX/**/*.*
+![Rr]elease/MusicFX/**/*.*
+
+# Don't track documentation from Dependencies
+dependencies/SFML/SFML-2.5.1/doc/
+dependencies/SFML/SFML-2.5.1/examples/
+dependencies/glew-2.1.0/doc/

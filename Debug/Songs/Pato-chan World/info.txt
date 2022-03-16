@@ -1,0 +1,8 @@
+songid-18
+title-パトちゃんワールド
+author-パトちゃん
+bpm-165
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-PChanWorld.flac

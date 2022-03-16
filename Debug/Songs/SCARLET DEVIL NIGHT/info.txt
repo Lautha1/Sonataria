@@ -1,0 +1,8 @@
+songid-28
+title-SCARLET DEVIL NIGHT
+author-Ryuko Pegasasu
+bpm-156
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-SCARLETDEVILNIGHT.wav

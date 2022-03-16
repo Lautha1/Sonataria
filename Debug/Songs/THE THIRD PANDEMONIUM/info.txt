@@ -1,0 +1,8 @@
+songid-11
+title-The Third Pandemonium
+author-Ryuko Pegasasu
+bpm-155
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-THETHIRDPANDEMONIUM.flac

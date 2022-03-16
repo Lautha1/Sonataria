@@ -1,0 +1,1784 @@
+﻿#include <fstream>
+#include <chrono>
+#include "ControllerInput.h"
+#include "GameRenderer.h"
+#include "GameState.h"
+#include <iostream>
+#include "Note.h"
+#include "Results.h"
+#include <SFML/Audio.hpp>
+#include <thread>
+#include <queue>
+#include <vector>
+#include "WheelNote.h"
+#include "Logger.h"
+#include <sstream>
+using namespace std;
+
+#include <windows.h>
+#include "resource.h"
+
+#include "OpenGLText.h"
+
+sf::Text createText(string, int, sf::Color, float, float);
+void parseInNotes(vector<Note>& lane, int LaneNum, string songPath, int diffNumber, int bpm);
+void parseInWheel(vector<WheelNote>& wheel, string songPath, int diffNumber, int bpm);
+void tokenize2(std::string const& str, const char delim, std::vector<std::string>& out);
+void updateAppearTime(vector<Note>& lane);
+void pullOutNotes(vector<Note>& lane, vector<Note>& laneA, vector<sf::Sprite*>& laneS, float time, int laneNumber);
+void pullOutWheelNotes(vector<WheelNote>& lane, vector<WheelNote>& laneA, vector<sf::Sprite*>& laneS, float time);
+void updateScreenTime(float& distance);
+
+std::chrono::milliseconds timespan(1000);
+
+// Define the size of the screen
+const float SCRWIDTH = 1920.f;
+const float SCRHEIGHT = 1080.f;
+
+// These only represent one side of the window
+const float PERFECT_WINDOW = 23.f;
+const float NEAR_WINDOW = 46.f;
+const float MISS_WINDOW = 80.f;
+const float SLAM_RANGE = 1.f;
+
+// The position of each lane on screen
+const float LANE_1_POS = SCRWIDTH / 2.f - 150.f;
+const float LANE_2_POS = SCRWIDTH / 2.f - 75.f;
+const float LANE_3_POS = SCRWIDTH / 2.f;
+const float LANE_4_POS = SCRWIDTH / 2.f + 75.f;
+const float LANE_5_POS = SCRWIDTH / 2.f + 150.f;
+
+// The position between each lane
+const float LANE_1_2_BETWEEN = (LANE_2_POS - LANE_1_POS) / 2.f + LANE_1_POS;
+const float LANE_2_3_BETWEEN = (LANE_3_POS - LANE_2_POS) / 2.f + LANE_2_POS;
+const float LANE_3_4_BETWEEN = (LANE_4_POS - LANE_3_POS) / 2.f + LANE_3_POS;
+const float LANE_4_5_BETWEEN = (LANE_5_POS - LANE_4_POS) / 2.f + LANE_4_POS;
+
+// The positions of the song scrubber
+const float SCRUB_START = 3.f * SCRWIDTH / 4.f - 90.f;
+const float SCRUB_END = 9.f * SCRWIDTH / 10.f + 120.f;
+const float SCRUB_LENGTH = SCRUB_END - SCRUB_START;
+
+// Where the wheel slam position is
+const float WHEEL_SLAM_POS = SCRWIDTH / 2.f;
+
+// Where the perfect line is on screen
+const float DISTANCE_TO_PERFECT = 921.f;
+
+// Where the judgement box is on screen
+const float JUDGEMENT_LOC = 4.f * SCRWIDTH / 5.f;
+
+// Paths to image files
+const string NOTE_TEXTURE = "Textures/Note.png";
+const string SLAM_LEFT_TEXTURE = "Textures/SlamLeft.png";
+const string SLAM_RIGHT_TEXTURE = "Textures/SlamRight.png";
+
+const string WHEEL_1LEFT = "Textures/WheelLines/1Left.png";
+const string WHEEL_2LEFT = "Textures/WheelLines/2Left.png";
+const string WHEEL_3LEFT = "Textures/WheelLines/3Left.png";
+const string WHEEL_4LEFT = "Textures/WheelLines/4Left.png";
+
+const string WHEEL_1RIGHT = "Textures/WheelLines/1Right.png";
+const string WHEEL_2RIGHT = "Textures/WheelLines/2Right.png";
+const string WHEEL_3RIGHT = "Textures/WheelLines/3Right.png";
+const string WHEEL_4RIGHT = "Textures/WheelLines/4Right.png";
+
+// Program wide constants
+const GLuint BG_TEX_ID = 1;
+const GLuint TRACK_TEX_ID = 2;
+
+ifstream inputFile;
+
+// Flag to set which graphics implementaion to use
+bool doUseNewGraphicsImplementation = true;
+
+/**
+ * Default constructor.
+ * 
+ */
+GameRenderer::GameRenderer() {
+	this->openGLInitialized = false;
+	track = new QuadSprite(L"Track");
+	background = new QuadSprite(L"Background");
+	theFont = nullptr;
+}
+
+/**
+ * Default deconstructor.
+ * 
+ */
+GameRenderer::~GameRenderer() {
+	delete background;
+	delete track;
+	delete theFont;
+}
+
+/**
+ * Handles the rendering in game.
+ * 
+ * @param gameWindow the game window
+ */
+void GameRenderer::render(sf::RenderWindow* gameWindow) {
+	
+	// Initialize counts
+	int perfectCount = 0;
+	int nearCount = 0;
+	int missCount = 0;
+
+	// Score of the song (while playing)
+	float score = 0000000;
+
+	// Used to track if there was a change in the speed
+	int oldSpeed = 0;
+
+	gameState.setSpeed(stoi(gameState.getSongPlaying().getBPM()));
+
+	//TODO: IF USER HAS CUSTOM SPEED CHANGE IT NOW
+
+	oldSpeed = gameState.getSpeed();
+
+	if (doUseNewGraphicsImplementation == true) {
+		// Use OpenGL version of graphics implementation
+		logger.log(L"OpenGL Game Renderer Active.");
+
+		// Set the game window to active in this thread
+		gameWindow->setActive(true);
+
+		//TODO: PORT ELSE LOGIC HERE
+
+		// Load the Audio Files
+		sf::Music countdown;
+		countdown.openFromFile("MusicFX/321countdown.wav");
+
+		sf::Music song;
+		song.openFromFile(gameState.getSongPlaying().getAudioFilePath());
+		float songDuration = (float)song.getDuration().asMilliseconds();
+
+		// OpenGL Setup
+		if (!this->openGLInitialized) {
+			this->openGLInitialized = true;
+
+			glEnable(GL_BLEND);
+
+			// INITIALIZE SPRITE SHADER
+			if (!spriteShader.initShader()) {
+				logger.logError(L"Failed to initialize sprite shader");
+				exit(1);
+			}
+
+			// INITIALIZE THE SPRITES
+			background->initSprite(spriteShader.getProgram());
+			track->initSprite(spriteShader.getProgram());
+
+			// INITIALIZE THE TEXTURES
+			TextureManager::Inst()->LoadTexture("Textures/temp_Background.png", BG_TEX_ID, GL_BGR);
+			background->setTextureID(BG_TEX_ID);
+			TextureManager::Inst()->LoadTexture("Textures/temp_Track.png", TRACK_TEX_ID, GL_BGR);
+			track->setTextureID(TRACK_TEX_ID);
+			//TextureManager::Inst()->LoadTexture("Textures/BigOval.png", BG_TEX_ID, GL_BGRA, GL_RGBA);
+
+			// SET THE TRANSFORMATIONS
+
+			// Background
+			background->scale(2.f * (16.f/9.f), 2.f, 1.f);
+
+			// Track
+			track->scale(1.f, 5.f, 1.f);
+			track->translate(0.f, 0.34f, -3.5f);
+			track->rotate(-65.f, 0.f, 0.f);
+
+			// INITIALIZE TEXT SHADER
+			if (!textShader.initShader()) {
+				logger.logError(L"Failed to initialize text shader");
+				exit(1);
+			}
+		}
+
+		// Generate font textures
+		if (theFont == nullptr) {
+			theFont = new OpenGLFont("Fonts/HonyaJi-Re.ttf", 128, 41000UL);
+		}
+
+		// INITIALIZE TEXT
+		OpenGLText* theText = new OpenGLText(L"Hello Text", *theFont);
+		OpenGLText* theText1 = new OpenGLText(L"alphaNum1", *theFont);
+		OpenGLText* theText2 = new OpenGLText(L"alphaNum2", *theFont);
+		OpenGLText* theText3 = new OpenGLText(L"alphaNum3", *theFont);
+
+		theText->initSprite(textShader.getProgram());
+		theText1->initSprite(textShader.getProgram());
+		theText2->initSprite(textShader.getProgram());
+		theText3->initSprite(textShader.getProgram());
+
+		theText1->translate(-100.f, 200.f, 0.f);
+		theText2->translate(-100.f, 400.f, 0.f);
+		theText3->translate(-100.f, 800.f, 0.f);
+
+		// Clear Color for Background
+		glClearColor(0.968627f, 0.658823f, 0.721568f, 1.0f);
+		glViewport(0, 0, 1920, 1080);
+
+		// Play the countdown
+		countdown.play();
+
+		// Do a render loop while playing to display the 3.2.1. countdown on screen
+		while (countdown.getStatus() == sf::Music::Status::Playing) {
+
+			// If the service button was pressed, stop the song
+			if (gameState.checkService() || gameState.getGameState() == GameState::CurrentState::SHUTDOWN) {
+				logger.log(L"Ending Game Render Loop.");
+				countdown.stop();
+				continue;
+			}
+			else {
+				// Draw the sprites
+				glUseProgram(spriteShader.getProgram());
+
+				// Draw the background
+				background->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC);
+
+				// Clear the depth buffer
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+				// Draw everything else
+				track->render(OpenGLSprite::PROJECTION::PERSPECTIVE);
+
+				// Draw all text
+				glUseProgram(textShader.getProgram());
+				theText->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"ひほわれよう存在する");
+				theText1->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"\"Hello\"", 1.0f, 0.0f, 0.0f);
+				theText2->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0.0f, 1.0f, 0.0f);
+				theText3->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"`~!@#$%^&*()-=_+[]\\{}|;':\",./<>?", 0.0f, 0.0f, 1.0f);
+
+				gameWindow->display();
+			}
+		}
+
+		// After countdown play the song
+		song.play();
+
+		// Do a render loop while playing the song
+		while (song.getStatus() == sf::Music::Status::Playing) {
+			
+			// If the service button was pressed, stop the song
+			if (gameState.checkService() || gameState.getGameState() == GameState::CurrentState::SHUTDOWN) {
+				logger.log(L"Ending Game Render Loop.");
+				song.stop();
+				continue;
+			}
+			else {
+				// Draw the sprites
+				glUseProgram(spriteShader.getProgram());
+
+				// Draw the background
+				background->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC);
+
+				// Clear the depth buffer
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+				// Draw everything else
+				track->render(OpenGLSprite::PROJECTION::PERSPECTIVE);
+
+				// Draw all text
+				glUseProgram(textShader.getProgram());
+				theText->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"ひほわれよう存在する");
+				theText1->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"\"Hello\"", 1.0f, 0.0f, 0.0f);
+				theText2->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0.0f, 1.0f, 0.0f);
+				theText3->render(OpenGLSprite::PROJECTION::ORTHOGRAPHIC, L"`~!@#$%^&*()-=_+[]\\{}|;':\",./<>?", 0.0f, 0.0f, 1.0f);
+
+				// TODO: Draw the notes
+				// Create a single pointer instance for each lane
+				// In a for loop over the notes, apply the transformation (set position) for where that note would be
+				// Render the note at that spot
+				// Go the the next note in the loop, and do the same thing with the same sprite.
+
+				// Ex:
+				/*
+				for n in laneXNotes:
+					laneXSprite->translate(WHERE it needs to be)
+					laneXSprite->render()
+				*/
+
+				gameWindow->display();
+			}
+		}
+
+		// End of Song
+	} else {
+		// Use SFML version of graphics implementation
+		logger.log(L"SFML Game Renderer Active.");
+
+		sf::Font basicFont;
+		if (!basicFont.loadFromFile("Fonts/HonyaJi-Re.ttf")) {
+			logger.logError(L"Error loading font.");
+		}
+
+		int lastJudgement = 0;
+
+		// Create a vector to hold all notes that will be used in each lane
+		vector<Note> lane1;
+		vector<Note> lane2;
+		vector<Note> lane3;
+		vector<Note> lane4;
+		vector<Note> lane5;
+		vector<WheelNote> wheel;
+
+		// Vectors to hold notes that are active on screen
+		vector<Note> lane1active;
+		vector<Note> lane2active;
+		vector<Note> lane3active;
+		vector<Note> lane4active;
+		vector<Note> lane5active;
+		vector<WheelNote> wheelactive;
+
+		// Vector to hold the sprites that are active
+		vector<sf::Sprite*> lane1sprite;
+		vector<sf::Sprite*> lane2sprite;
+		vector<sf::Sprite*> lane3sprite;
+		vector<sf::Sprite*> lane4sprite;
+		vector<sf::Sprite*> lane5sprite;
+		vector<sf::Sprite*> wheelsprite;
+
+		logger.log(L"Reading in Notes...");
+
+		//TODO: Update Wheel to use bpm system like used in notes
+		parseInNotes(lane1, 1, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+		parseInNotes(lane2, 2, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+		parseInNotes(lane3, 3, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+		parseInNotes(lane4, 4, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+		parseInNotes(lane5, 5, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+		parseInWheel(wheel, gameState.getSongPlaying().getPath(), gameState.getSongPlayingDifficulty(), gameState.getSpeed());
+
+		// Calculate the total notes by adding each lane together
+		int totalNotes = 0;
+		for (size_t i = 0; i < lane1.size(); i++) {
+			if (lane1[i].isHold()) {
+				totalNotes += lane1[i].getHoldNoteQuantity();
+			}
+			else {
+				totalNotes += 1;
+			}
+		}
+
+		for (size_t j = 0; j < lane2.size(); j++) {
+			if (lane2[j].isHold()) {
+				totalNotes += lane2[j].getHoldNoteQuantity();
+			}
+			else {
+				totalNotes += 1;
+			}
+		}
+
+		for (size_t k = 0; k < lane3.size(); k++) {
+			if (lane3[k].isHold()) {
+				totalNotes += lane3[k].getHoldNoteQuantity();
+			}
+			else {
+				totalNotes += 1;
+			}
+		}
+
+		for (size_t l = 0; l < lane4.size(); l++) {
+			if (lane4[l].isHold()) {
+				totalNotes += lane4[l].getHoldNoteQuantity();
+			}
+			else {
+				totalNotes += 1;
+			}
+		}
+
+		for (size_t m = 0; m < lane5.size(); m++) {
+			if (lane5[m].isHold()) {
+				totalNotes += lane5[m].getHoldNoteQuantity();
+			}
+			else {
+				totalNotes += 1;
+			}
+		}
+
+		for (size_t n = 0; n < wheel.size(); n++) {
+			if (wheel[n].isSlam()) {
+				totalNotes += 1;
+			}
+			else {
+				totalNotes += wheel[n].getNoteQuantity();
+			}
+		}
+
+		// Calculate the value that each note is worth based on the total notes
+		logger.log(L"Total Notes: " + to_wstring(totalNotes));
+		float perfectNoteScore = 1000000 / (float)totalNotes;
+		float nearNoteScore = perfectNoteScore / 2.f;
+
+		// Read in the song file
+		sf::Music song;
+		song.openFromFile(gameState.getSongPlaying().getAudioFilePath());
+		float songDuration = (float)song.getDuration().asMilliseconds();
+
+		// Draw a countdown on screen
+		sf::Text countdownText;
+		countdownText.setCharacterSize(36);
+		countdownText.setFillColor(sf::Color::White);
+		countdownText.setFont(basicFont);
+		for (int i = 3; i > 0; i--) {
+			gameWindow->clear();
+			countdownText.setString("GAME STARTING IN " + to_string(i) + "...");
+			countdownText.setOrigin(countdownText.getLocalBounds().left + countdownText.getLocalBounds().width / 2.0f, countdownText.getLocalBounds().top + countdownText.getLocalBounds().height / 2.0f);
+			countdownText.setPosition((SCRWIDTH / 2.f) - countdownText.getLocalBounds().left, SCRHEIGHT / 2.f);
+			gameWindow->draw(countdownText);
+			gameWindow->display();
+			this_thread::sleep_for(timespan);
+		}
+		gameWindow->clear();
+		countdownText.setString("GO!");
+		countdownText.setOrigin(countdownText.getLocalBounds().left + countdownText.getLocalBounds().width / 2.0f, countdownText.getLocalBounds().top + countdownText.getLocalBounds().height / 2.0f);
+		countdownText.setPosition((SCRWIDTH / 2.f) - countdownText.getLocalBounds().left, SCRHEIGHT / 2.f);
+		gameWindow->draw(countdownText);
+		gameWindow->display();
+		this_thread::sleep_for(timespan);
+
+		// Load textures into memory
+		sf::Texture gameBGT;
+		gameBGT.loadFromFile("Textures/GameBG.png");
+		sf::Sprite gameBG(gameBGT);
+		sf::Vector2u gameBGS = gameBGT.getSize();
+		gameBG.setOrigin(gameBGS.x / 2.f, gameBGS.y / 2.f);
+		gameBG.setPosition(SCRWIDTH / 2, SCRHEIGHT / 2);
+
+		sf::Texture judgementBox_Texture;
+		judgementBox_Texture.loadFromFile("Textures/Judgement/JudgementBox.png");
+		sf::Sprite judgementBox(judgementBox_Texture);
+		sf::Vector2u judgementBox_Size = judgementBox_Texture.getSize();
+		judgementBox.setOrigin(judgementBox_Size.x / 2.f, judgementBox_Size.y / 2.f);
+		judgementBox.setPosition(JUDGEMENT_LOC, SCRHEIGHT / 2);
+
+		sf::Texture perfectTexture;
+		perfectTexture.loadFromFile("Textures/Judgement/Perfect.png");
+		sf::Sprite perfectSprite(perfectTexture);
+		sf::Vector2u perfectSize = perfectTexture.getSize();
+		perfectSprite.setOrigin(perfectSize.x / 2.f, perfectSize.y / 2.f);
+		perfectSprite.setPosition(JUDGEMENT_LOC, SCRHEIGHT / 2);
+
+		sf::Texture nearTexture;
+		nearTexture.loadFromFile("Textures/Judgement/Near.png");
+		sf::Sprite nearSprite(nearTexture);
+		sf::Vector2u nearSize = nearTexture.getSize();
+		nearSprite.setOrigin(nearSize.x / 2.f, nearSize.y / 2.f);
+		nearSprite.setPosition(JUDGEMENT_LOC, SCRHEIGHT / 2);
+
+		sf::Texture missTexture;
+		missTexture.loadFromFile("Textures/Judgement/Miss.png");
+		sf::Sprite missSprite(missTexture);
+		sf::Vector2u missSize = missTexture.getSize();
+		missSprite.setOrigin(missSize.x / 2.f, missSize.y / 2.f);
+		missSprite.setPosition(JUDGEMENT_LOC, SCRHEIGHT / 2);
+
+		sf::Texture songJT;
+		songJT.loadFromFile(gameState.getSongPlaying().getJacketArtPath());
+		sf::Sprite songJ(songJT);
+		sf::Vector2u songJS = songJT.getSize();
+		songJ.setScale(0.525f, 0.525f);
+		songJ.setPosition(60.f, 60.f);
+
+		sf::Texture scrubberTexture;
+		scrubberTexture.loadFromFile("Textures/Scrubber.png");
+		sf::Sprite scrubber(scrubberTexture);
+		sf::Vector2u scrubberSize = scrubberTexture.getSize();
+		scrubber.setOrigin(scrubberSize.x / 2.f, scrubberSize.y / 2.f);
+		scrubber.setPosition(SCRUB_START, 295.f);
+
+		sf::Text songT;
+		songT.setCharacterSize(36);
+		songT.setFillColor(sf::Color::White);
+		songT.setFont(basicFont);
+		songT.setPosition(330.f, 100.f);
+		songT.setString(gameState.getSongPlaying().getTitle());
+
+		sf::Text songA;
+		songA.setCharacterSize(24);
+		songA.setFillColor(sf::Color::White);
+		songA.setFont(basicFont);
+		songA.setPosition(340.f, 195.f);
+		songA.setString(gameState.getSongPlaying().getArtist());
+
+		sf::Text songD;
+		songD.setCharacterSize(48);
+		songD.setFillColor(sf::Color::White);
+		songD.setFont(basicFont);
+		songD.setPosition(135.f, 300.f);
+		songD.setString(to_string(gameState.getSongPlayingDifficulty()));
+
+		sf::Text songBPM;
+		songBPM.setCharacterSize(24);
+		songBPM.setFillColor(sf::Color::White);
+		songBPM.setFont(basicFont);
+		songBPM.setPosition(365.f, 275.f);
+		songBPM.setString(gameState.getSongPlaying().getBPM());
+
+		sf::Text speedText;
+		speedText.setCharacterSize(24);
+		speedText.setFillColor(sf::Color::White);
+		speedText.setFont(basicFont);
+		speedText.setPosition(520.f, 275.f);
+
+		sf::Text scoreText;
+		scoreText.setCharacterSize(96);
+		scoreText.setFillColor(sf::Color::White);
+		scoreText.setFont(basicFont);
+		scoreText.setPosition(SCRWIDTH - 505.f, 105.f);
+
+		float distance = (float)(453075.9705 / pow(oldSpeed, 1.004140998));
+
+		int itemFront = NULL;
+
+		// Clear the input queue before the song starts
+		controllerInput.queue_mutexLock.lock();
+		controllerInput.inputQueue.clear();
+		controllerInput.queue_mutexLock.unlock();
+
+		// Clear the wheel last before start
+		controllerInput.resetLast();
+
+		typedef std::chrono::high_resolution_clock Time;
+		typedef std::chrono::milliseconds ms;
+		typedef std::chrono::duration<float> fsec;
+		auto songStartTime = Time::now();
+
+		// Start the song
+		song.play();
+
+		// Loop while the song is playing
+		while (song.getStatus() == sf::Music::Status::Playing) {
+
+			// Set current position in song
+			auto currentSongPosition = Time::now();
+			fsec fs = currentSongPosition - songStartTime;
+			ms currentSongOffset = std::chrono::duration_cast<ms>(fs);
+			// use curentSongOffset.count() to get millisecond value
+
+			gameWindow->clear();
+
+			// If the service button was pressed, stop the song
+			if (gameState.checkService()) {
+				logger.log(L"Ending Game Render Loop.");
+				song.stop();
+				break;
+			}
+
+			gameWindow->draw(gameBG);
+			gameWindow->draw(judgementBox);
+
+			// INPUT START
+			// Check if there is input to be handled
+			if (!controllerInput.inputQueue.empty()) {
+
+				// Lock the mutex
+				controllerInput.queue_mutexLock.lock();
+
+				// Pull off the top of the queue
+				itemFront = controllerInput.inputQueue.front();
+				controllerInput.inputQueue.pop_front();
+
+				// Unlock the mutex
+				controllerInput.queue_mutexLock.unlock();
+			}
+
+			// Handle the input that we just pulled off the the queue
+			if (itemFront != NULL) {
+				switch (itemFront) {
+					// Logic for lane 1
+					case 1:
+						//Note (not hold)
+						if (!lane1sprite.empty() && !lane1active[0].isHold() && lane1sprite[0]->getPosition().y + MISS_WINDOW >= DISTANCE_TO_PERFECT) {
+							float dist = lane1active[0].perfectTime - currentSongOffset.count();
+						
+							if (dist <= PERFECT_WINDOW && dist >= -PERFECT_WINDOW) {
+								score += perfectNoteScore;
+								perfectCount++;
+
+								lastJudgement = 1;
+
+								//Remove Note
+								lane1active.erase(lane1active.begin());
+								delete lane1sprite[0];
+								lane1sprite.erase(lane1sprite.begin());
+							}
+							else if (dist <= NEAR_WINDOW && dist >= -NEAR_WINDOW) {
+								score += nearNoteScore;
+								nearCount++;
+
+								lastJudgement = 2;
+
+								//Remove Note
+								lane1active.erase(lane1active.begin());
+								delete lane1sprite[0];
+								lane1sprite.erase(lane1sprite.begin());
+							}
+							else if (dist <= MISS_WINDOW) {
+								missCount++;
+							
+								lastJudgement = 3;
+
+								//Remove Note
+								lane1active.erase(lane1active.begin());
+								delete lane1sprite[0];
+								lane1sprite.erase(lane1sprite.begin());
+							}
+						}
+						else if (!lane1active.empty() && lane1active[0].isHold()) { //Hold Note
+							float dist = lane1active[0].perfectTime - currentSongOffset.count();
+
+							if (dist >= 0) { //Hold hasn't started yet
+								if (dist <= NEAR_WINDOW) { //Inside perfect window to start hold
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									lane1active[0].subtractHold();
+									lane1active[0].setHitHold(true);
+								}
+								else if (dist <= MISS_WINDOW) { //Miss perfect window for hold
+									missCount++;
+								
+									lastJudgement = 3;
+
+									lane1active[0].subtractHold();
+									lane1active[0].setHitHold(false);
+								}
+							}
+						
+							// Handle rest of hold, outside of input
+						}
+						break;
+					// Logic for lane 2
+					case 2:
+						if (!lane2sprite.empty() && !lane2active[0].isHold() && lane2sprite[0]->getPosition().y + MISS_WINDOW >= DISTANCE_TO_PERFECT) {
+							float dist = lane2active[0].perfectTime - currentSongOffset.count();
+						
+							if (dist <= PERFECT_WINDOW && dist >= -PERFECT_WINDOW) {
+								score += perfectNoteScore;
+								perfectCount++;
+
+								lastJudgement = 1;
+
+								//Remove Note
+								lane2active.erase(lane2active.begin());
+								delete lane2sprite[0];
+								lane2sprite.erase(lane2sprite.begin());
+							}
+							else if (dist <= NEAR_WINDOW && dist >= -NEAR_WINDOW) {
+								score += nearNoteScore;
+								nearCount++;
+
+								lastJudgement = 2;
+
+								//Remove Note
+								lane2active.erase(lane2active.begin());
+								delete lane2sprite[0];
+								lane2sprite.erase(lane2sprite.begin());
+							}
+							else if (dist <= MISS_WINDOW) {
+								missCount++;
+							
+								lastJudgement = 3;
+
+								//Remove Note
+								lane2active.erase(lane2active.begin());
+								delete lane2sprite[0];
+								lane2sprite.erase(lane2sprite.begin());
+							}
+						}
+						else if (!lane2active.empty() && lane2active[0].isHold()) {
+							float dist = lane2active[0].perfectTime - currentSongOffset.count();
+
+							if (dist >= 0) { //Hold hasn't started yet
+								if (dist <= NEAR_WINDOW) { //Inside perfect window to start hold
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									lane2active[0].subtractHold();
+									lane2active[0].setHitHold(true);
+								}
+								else if (dist <= MISS_WINDOW) { //Miss perfect window for hold
+									missCount++;
+								
+									lastJudgement = 3;
+
+									lane2active[0].subtractHold();
+									lane2active[0].setHitHold(false);
+								}
+							}
+
+							// Handle rest of hold, outside of input
+						}
+						break;
+					// Logic for lane 3
+					case 3:
+						if (!lane3sprite.empty() && !lane3active[0].isHold() && lane3sprite[0]->getPosition().y + MISS_WINDOW >= DISTANCE_TO_PERFECT) {
+							float dist = lane3active[0].perfectTime - currentSongOffset.count();
+						
+							if (dist <= PERFECT_WINDOW && dist >= -PERFECT_WINDOW) {
+								score += perfectNoteScore;
+								perfectCount++;
+
+								lastJudgement = 1;
+
+								//Remove Note
+								lane3active.erase(lane3active.begin());
+								delete lane3sprite[0];
+								lane3sprite.erase(lane3sprite.begin());
+							}
+							else if (dist <= NEAR_WINDOW && dist >= -NEAR_WINDOW) {
+								score += nearNoteScore;
+								nearCount++;
+
+								lastJudgement = 2;
+
+								//Remove Note
+								lane3active.erase(lane3active.begin());
+								delete lane3sprite[0];
+								lane3sprite.erase(lane3sprite.begin());
+							}
+							else if (dist <= MISS_WINDOW) {
+								missCount++;
+							
+								lastJudgement = 3;
+
+								//Remove Note
+								lane3active.erase(lane3active.begin());
+								delete lane3sprite[0];
+								lane3sprite.erase(lane3sprite.begin());
+							}
+						}
+						else if (!lane3active.empty() && lane3active[0].isHold()) {
+							float dist = lane3active[0].perfectTime - currentSongOffset.count();
+
+							if (dist >= 0) { //Hold hasn't started yet
+								if (dist <= NEAR_WINDOW) { //Inside perfect window to start hold
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									lane3active[0].subtractHold();
+									lane3active[0].setHitHold(true);
+								}
+								else if (dist <= MISS_WINDOW) { //Miss perfect window for hold
+									missCount++;
+								
+									lastJudgement = 3;
+
+									lane3active[0].subtractHold();
+									lane3active[0].setHitHold(false);
+								}
+							}
+
+							// Handle rest of hold, outside of input
+						}
+						break;
+					// Logic for lane 4
+					case 4:
+						if (!lane4sprite.empty() && !lane4active[0].isHold() && lane4sprite[0]->getPosition().y + MISS_WINDOW >= DISTANCE_TO_PERFECT) {
+							float dist = lane4active[0].perfectTime - currentSongOffset.count();
+						
+							if (dist <= PERFECT_WINDOW && dist >= -PERFECT_WINDOW) {
+								score += perfectNoteScore;
+								perfectCount++;
+
+								lastJudgement = 1;
+
+								//Remove Note
+								lane4active.erase(lane4active.begin());
+								delete lane4sprite[0];
+								lane4sprite.erase(lane4sprite.begin());
+							}
+							else if (dist <= NEAR_WINDOW && dist >= -NEAR_WINDOW) {
+								score += nearNoteScore;
+								nearCount++;
+
+								lastJudgement = 2;
+
+								//Remove Note
+								lane4active.erase(lane4active.begin());
+								delete lane4sprite[0];
+								lane4sprite.erase(lane4sprite.begin());
+							}
+							else if (dist <= MISS_WINDOW) {
+								missCount++;
+							
+								lastJudgement = 3;
+
+								//Remove Note
+								lane4active.erase(lane4active.begin());
+								delete lane4sprite[0];
+								lane4sprite.erase(lane4sprite.begin());
+							}
+						}
+						else if (!lane4active.empty() && lane4active[0].isHold()) {
+							float dist = lane4active[0].perfectTime - currentSongOffset.count();
+
+							if (dist >= 0) { //Hold hasn't started yet
+								if (dist <= NEAR_WINDOW) { //Inside perfect window to start hold
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									lane4active[0].subtractHold();
+									lane4active[0].setHitHold(true);
+								}
+								else if (dist <= MISS_WINDOW) { //Miss perfect window for hold
+									missCount++;
+								
+									lastJudgement = 3;
+
+									lane4active[0].subtractHold();
+									lane4active[0].setHitHold(false);
+								}
+							}
+
+							// Handle rest of hold, outside of input
+						}
+						break;
+					// Logic for lane 5
+					case 5:
+						if (!lane5sprite.empty() && !lane5active[0].isHold() && lane5sprite[0]->getPosition().y + MISS_WINDOW >= DISTANCE_TO_PERFECT) {
+							float dist = lane5active[0].perfectTime - currentSongOffset.count();
+						
+							if (dist <= PERFECT_WINDOW && dist >= -PERFECT_WINDOW) {
+								score += perfectNoteScore;
+								perfectCount++;
+
+								lastJudgement = 1;
+
+								//Remove Note
+								lane5active.erase(lane5active.begin());
+								delete lane5sprite[0];
+								lane5sprite.erase(lane5sprite.begin());
+							}
+							else if (dist <= NEAR_WINDOW && dist >= -NEAR_WINDOW) {
+								score += nearNoteScore;
+								nearCount++;
+
+								lastJudgement = 2;
+
+								//Remove Note
+								lane5active.erase(lane5active.begin());
+								delete lane5sprite[0];
+								lane5sprite.erase(lane5sprite.begin());
+							}
+							else if (dist <= MISS_WINDOW) {
+								missCount++;
+							
+								lastJudgement = 3;
+
+								//Remove Note
+								lane5active.erase(lane5active.begin());
+								delete lane5sprite[0];
+								lane5sprite.erase(lane5sprite.begin());
+							}
+						}
+						else if (!lane5active.empty() && lane5active[0].isHold()) {
+							float dist = lane5active[0].perfectTime - currentSongOffset.count();
+
+							if (dist >= 0) { //Hold hasn't started yet
+								if (dist <= NEAR_WINDOW) { //Inside perfect window to start hold
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									lane5active[0].subtractHold();
+									lane5active[0].setHitHold(true);
+								}
+								else if (dist <= MISS_WINDOW) { //Miss perfect window for hold
+									missCount++;
+								
+									lastJudgement = 3;
+
+									lane5active[0].subtractHold();
+									lane5active[0].setHitHold(false);
+								}
+							}
+
+							// Handle rest of hold, outside of input
+						}
+						break;
+				}
+
+				// After handling hit, set things back to null
+				itemFront = NULL;
+			}
+		
+			// If hold, handle here
+			if (!lane1active.empty() && lane1active[0].isHold()) {
+				float dist = lane1active[0].perfectTime - currentSongOffset.count();
+				if (!(lane1active[0].getHoldNotesRemaining() <= 0)) {
+					if (dist < 0 && lane1active[0].didHitHold()) { //Hold has started, and holding
+						float nextNote = lane1active[0].perfectTime + (lane1active[0].getHoldNoteDistance() * (float)lane1active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+					
+						if (pastDist <= 0) {
+							score += perfectNoteScore;
+							perfectCount++;
+
+							lastJudgement = 1;
+
+							lane1active[0].subtractHold();
+						}
+					}
+					else { //Hold has started, not holding
+						float nextNote = lane1active[0].perfectTime + (lane1active[0].getHoldNoteDistance() * (float)lane1active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							missCount++;
+						
+							lastJudgement = 3;
+
+							lane1active[0].subtractHold();
+						}
+					}
+
+					//Update Hold Status
+					if (currentSongOffset.count() > lane1active[0].perfectTime && currentSongOffset.count() <= lane1active[0].getEndTime()) {
+						if (controllerInput.getKeyboardState().getKeyState(1)) { //Btn 1 Pressed
+							if (!lane1active[0].didHitHold()) {
+								lane1active[0].setHitHold(true);
+							}
+						}
+						else { //Btn 1 Released
+							if (lane1active[0].didHitHold()) {
+								lane1active[0].setHitHold(false);
+							}
+						}
+					}
+				}
+			}
+
+			if (!lane2active.empty() && lane2active[0].isHold()) {
+				float dist = lane2active[0].perfectTime - currentSongOffset.count();
+				if (!(lane2active[0].getHoldNotesRemaining() <= 0)) {
+					if (dist < 0 && lane2active[0].didHitHold()) { //Hold has started, and holding
+						float nextNote = lane2active[0].perfectTime + (lane2active[0].getHoldNoteDistance() * (float)lane2active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							score += perfectNoteScore;
+							perfectCount++;
+
+							lastJudgement = 1;
+
+							lane2active[0].subtractHold();
+						}
+					}
+					else { //Hold has started, not holding
+						float nextNote = lane2active[0].perfectTime + (lane2active[0].getHoldNoteDistance() * (float)lane2active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							missCount++;
+						
+							lastJudgement = 3;
+
+							lane2active[0].subtractHold();
+						}
+					}
+
+					//Update Hold Status
+					if (currentSongOffset.count() > lane2active[0].perfectTime && currentSongOffset.count() <= lane2active[0].getEndTime()) {
+						if (controllerInput.getKeyboardState().getKeyState(2)) { //Btn 2 Pressed
+							if (!lane2active[0].didHitHold()) {
+								lane2active[0].setHitHold(true);
+							}
+						}
+						else { //Btn 2 Released
+							if (lane2active[0].didHitHold()) {
+								lane2active[0].setHitHold(false);
+							}
+						}
+					}
+				}
+			}
+
+			if (!lane3active.empty() && lane3active[0].isHold()) {
+				float dist = lane3active[0].perfectTime - currentSongOffset.count();
+				if (!(lane3active[0].getHoldNotesRemaining() <= 0)) {
+					if (dist < 0 && lane3active[0].didHitHold()) { //Hold has started, and holding
+						float nextNote = lane3active[0].perfectTime + (lane3active[0].getHoldNoteDistance() * (float)lane3active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							score += perfectNoteScore;
+							perfectCount++;
+
+							lastJudgement = 1;
+
+							lane3active[0].subtractHold();
+						}
+					}
+					else { //Hold has started, not holding
+						float nextNote = lane3active[0].perfectTime + (lane3active[0].getHoldNoteDistance() * (float)lane3active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							missCount++;
+						
+							lastJudgement = 3;
+
+							lane3active[0].subtractHold();
+						}
+					}
+
+					//Update Hold Status
+					if (currentSongOffset.count() > lane3active[0].perfectTime && currentSongOffset.count() <= lane3active[0].getEndTime()) {
+						if (controllerInput.getKeyboardState().getKeyState(3)) { //Btn 3 Pressed
+							if (!lane3active[0].didHitHold()) {
+								lane3active[0].setHitHold(true);
+							}
+						}
+						else { //Btn 3 Released
+							if (lane3active[0].didHitHold()) {
+								lane3active[0].setHitHold(false);
+							}
+						}
+					}
+				}
+			}
+
+			if (!lane4active.empty() && lane4active[0].isHold()) {
+				float dist = lane4active[0].perfectTime - currentSongOffset.count();
+				if (!(lane4active[0].getHoldNotesRemaining() <= 0)) {
+					if (dist < 0 && lane4active[0].didHitHold()) { //Hold has started, and holding
+						float nextNote = lane4active[0].perfectTime + (lane4active[0].getHoldNoteDistance() * (float)lane4active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							score += perfectNoteScore;
+							perfectCount++;
+
+							lastJudgement = 1;
+
+							lane4active[0].subtractHold();
+						}
+					}
+					else { //Hold has started, not holding
+						float nextNote = lane4active[0].perfectTime + (lane4active[0].getHoldNoteDistance() * (float)lane4active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							missCount++;
+						
+							lastJudgement = 3;
+
+							lane4active[0].subtractHold();
+						}
+					}
+
+					//Update Hold Status
+					if (currentSongOffset.count() > lane4active[0].perfectTime && currentSongOffset.count() <= lane4active[0].getEndTime()) {
+						if (controllerInput.getKeyboardState().getKeyState(4)) { //Btn 4 Pressed
+							if (!lane4active[0].didHitHold()) {
+								lane4active[0].setHitHold(true);
+							}
+						}
+						else { //Btn 4 Released
+							if (lane4active[0].didHitHold()) {
+								lane4active[0].setHitHold(false);
+							}
+						}
+					}
+				}
+			}
+
+			if (!lane5active.empty() && lane5active[0].isHold()) {
+				float dist = lane5active[0].perfectTime - currentSongOffset.count();
+				if (!(lane5active[0].getHoldNotesRemaining() <= 0)) {
+					if (dist < 0 && lane5active[0].didHitHold()) { //Hold has started, and holding
+						float nextNote = lane5active[0].perfectTime + (lane5active[0].getHoldNoteDistance() * (float)lane5active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							score += perfectNoteScore;
+							perfectCount++;
+
+							lastJudgement = 1;
+
+							lane5active[0].subtractHold();
+						}
+					}
+					else { //Hold has started, not holding
+						float nextNote = lane5active[0].perfectTime + (lane5active[0].getHoldNoteDistance() * (float)lane5active[0].getHoldNotesUsed());
+						float pastDist = nextNote - currentSongOffset.count();
+
+						if (pastDist <= 0) {
+							missCount++;
+						
+							lastJudgement = 3;
+
+							lane5active[0].subtractHold();
+						}
+					}
+
+					//Update Hold Status
+					if (currentSongOffset.count() > lane5active[0].perfectTime && currentSongOffset.count() <= lane5active[0].getEndTime()) {
+						if (controllerInput.getKeyboardState().getKeyState(5)) { //Btn 1 Pressed
+							if (!lane5active[0].didHitHold()) {
+								lane5active[0].setHitHold(true);
+							}
+						}
+						else { //Btn 1 Released
+							if (lane5active[0].didHitHold()) {
+								lane5active[0].setHitHold(false);
+							}
+						}
+					}
+				}
+			}
+
+			// Wheel Input Here
+			if (!wheelactive.empty()) {
+				if (wheelactive[0].isSlam()) { //Slam Notes
+					float dist = wheelactive[0].perfectTime - currentSongOffset.count();
+					// If note is within range
+					if (dist <= SLAM_RANGE && dist >= -SLAM_RANGE) {
+						switch (wheelactive[0].getDirection()) {
+							case 1: // Slam -> Direction
+								if (controllerInput.getWheelMovement() == 1) {
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									//Remove Note
+									wheelactive.erase(wheelactive.begin());
+									delete wheelsprite[0];
+									wheelsprite.erase(wheelsprite.begin());
+								}
+								else {
+									wheelactive.erase(wheelactive.begin());
+									delete wheelsprite[0];
+									wheelsprite.erase(wheelsprite.begin());
+									missCount++;
+
+									lastJudgement = 3;
+
+									// If there are no more wheel notes on screen, reset last wheel pos
+									if (wheelactive.empty()) {
+										controllerInput.resetLast();
+									}
+								}
+								break;
+							case -1: // Slam <- Direction
+								if (controllerInput.getWheelMovement() == -1) {
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									//Remove Note
+									wheelactive.erase(wheelactive.begin());
+									delete wheelsprite[0];
+									wheelsprite.erase(wheelsprite.begin());
+								}
+								else {
+									wheelactive.erase(wheelactive.begin());
+									delete wheelsprite[0];
+									wheelsprite.erase(wheelsprite.begin());
+									missCount++;
+
+									lastJudgement = 3;
+
+									// If there are no more wheel notes on screen, reset last wheel pos
+									if (wheelactive.empty()) {
+										controllerInput.resetLast();
+									}
+								}
+								break;
+						}
+					}
+				}
+				else { // Continouous Wheel Notes
+					float dist = wheelactive[0].perfectTime - currentSongOffset.count();
+					if (!(wheelactive[0].getHoldNotesRemaining() <= 0)) {
+						if (dist < 0) {
+							float nextNote = wheelactive[0].perfectTime + (wheelactive[0].getHoldNoteDistance() * (float)wheelactive[0].getHoldNotesUsed());
+							float pastDist = nextNote - currentSongOffset.count();
+
+							if (pastDist <= 0) {
+								if (wheelactive[0].getDirection() == controllerInput.getWheelMovement()) {
+									score += perfectNoteScore;
+									perfectCount++;
+
+									lastJudgement = 1;
+
+									wheelactive[0].subtractHold();
+									controllerInput.resetLast();
+								}
+								else {
+									missCount++;
+								
+									lastJudgement = 3;
+
+									wheelactive[0].subtractHold();
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// INPUT END
+
+			//Loads the notes into the active queues when their appearTime is less than the current time
+			pullOutNotes(lane1, lane1active, lane1sprite, (float)currentSongOffset.count(), 1);
+			pullOutNotes(lane2, lane2active, lane2sprite, (float)currentSongOffset.count(), 2);
+			pullOutNotes(lane3, lane3active, lane3sprite, (float)currentSongOffset.count(), 3);
+			pullOutNotes(lane4, lane4active, lane4sprite, (float)currentSongOffset.count(), 4);
+			pullOutNotes(lane5, lane5active, lane5sprite, (float)currentSongOffset.count(), 5);
+			pullOutWheelNotes(wheel, wheelactive, wheelsprite, (float)currentSongOffset.count());
+			// End Note Loading
+		
+			// UPDATE NOTE POSITIONS
+			if (!wheelactive.empty()) {
+				for (size_t i = 0; i < wheelactive.size(); i++) {
+					wheelsprite[i]->setPosition(WHEEL_SLAM_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - wheelactive[i].appearTime) / distance)));
+					gameWindow->draw(*wheelsprite[i]);
+				}
+			}
+
+			if (!lane1active.empty()) {
+				for (size_t i = 0; i < lane1active.size(); i++) {
+					lane1sprite[i]->setPosition(LANE_1_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - lane1active[i].appearTime) / distance)));
+					gameWindow->draw(*lane1sprite[i]);
+				}
+			}
+
+			if (!lane2active.empty()) {
+				for (size_t i = 0; i < lane2active.size(); i++) {
+					lane2sprite[i]->setPosition(LANE_2_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - lane2active[i].appearTime) / distance)));
+					gameWindow->draw(*lane2sprite[i]);
+				}
+			}
+
+			if (!lane3active.empty()) {
+				for (size_t i = 0; i < lane3active.size(); i++) {
+					lane3sprite[i]->setPosition(LANE_3_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - lane3active[i].appearTime) / distance)));
+					gameWindow->draw(*lane3sprite[i]);
+				}
+			}
+
+			if (!lane4active.empty()) {
+				for (size_t i = 0; i < lane4active.size(); i++) {
+					lane4sprite[i]->setPosition(LANE_4_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - lane4active[i].appearTime) / distance)));
+					gameWindow->draw(*lane4sprite[i]);
+				}
+			}
+
+			if (!lane5active.empty()) {
+				for (size_t i = 0; i < lane5active.size(); i++) {
+					lane5sprite[i]->setPosition(LANE_5_POS, (DISTANCE_TO_PERFECT * ((currentSongOffset.count() - lane5active[i].appearTime) / distance)));
+					gameWindow->draw(*lane5sprite[i]);
+				}
+			}
+			// UPDATE NOTE POSITIONS END
+		
+			// DELETE NOTE IF TOO FAR
+
+			//Lane 1 Notes
+			while (!lane1active.empty() && !lane1active[0].isHold() && lane1sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1active[0].getEndTime() + MISS_WINDOW) {
+				lane1active.erase(lane1active.begin());
+				delete lane1sprite[0];
+				lane1sprite.erase(lane1sprite.begin());
+				missCount++;
+
+				lastJudgement = 3;
+			}
+
+			//Lane 1 Holds
+			while (!lane1active.empty() && lane1active[0].isHold() && lane1sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1active[0].getEndTime() + MISS_WINDOW) {
+				lane1active.erase(lane1active.begin());
+				delete lane1sprite[0];
+				lane1sprite.erase(lane1sprite.begin());
+			}
+
+			//Lane 2 Notes
+			while (!lane2active.empty() && !lane2active[0].isHold() && lane2sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2active[0].getEndTime() + MISS_WINDOW) {
+				lane2active.erase(lane2active.begin());
+				delete lane2sprite[0];
+				lane2sprite.erase(lane2sprite.begin());
+				missCount++;
+			
+				lastJudgement = 3;
+			}
+
+			//Lane 2 Holds
+			while (!lane2active.empty() && lane2active[0].isHold() && lane2sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2active[0].getEndTime() + MISS_WINDOW) {
+				lane2active.erase(lane2active.begin());
+				delete lane2sprite[0];
+				lane2sprite.erase(lane2sprite.begin());
+			}
+
+			//Lane 3 Notes
+			while (!lane3active.empty() && !lane3active[0].isHold() && lane3sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3active[0].getEndTime() + MISS_WINDOW) {
+				lane3active.erase(lane3active.begin());
+				delete lane3sprite[0];
+				lane3sprite.erase(lane3sprite.begin());
+				missCount++;
+			
+				lastJudgement = 3;
+			}
+
+			//Lane 3 Holds
+			while (!lane3active.empty() && lane3active[0].isHold() && lane3sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3active[0].getEndTime() + MISS_WINDOW) {
+				lane3active.erase(lane3active.begin());
+				delete lane3sprite[0];
+				lane3sprite.erase(lane3sprite.begin());
+			}
+
+			//Lane 4 Notes
+			while (!lane4active.empty() && !lane4active[0].isHold() && lane4sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4active[0].getEndTime() + MISS_WINDOW) {
+				lane4active.erase(lane4active.begin());
+				delete lane4sprite[0];
+				lane4sprite.erase(lane4sprite.begin());
+				missCount++;
+			
+				lastJudgement = 3;
+			}
+
+			//Lane 4 Holds
+			while (!lane4active.empty() && lane4active[0].isHold() && lane4sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4active[0].getEndTime() + MISS_WINDOW) {
+				lane4active.erase(lane4active.begin());
+				delete lane4sprite[0];
+				lane4sprite.erase(lane4sprite.begin());
+			}
+
+			//Lane 5 Notes
+			while (!lane5active.empty() && !lane5active[0].isHold() && lane5sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5active[0].getEndTime() + MISS_WINDOW) {
+				lane5active.erase(lane5active.begin());
+				delete lane5sprite[0];
+				lane5sprite.erase(lane5sprite.begin());
+				missCount++;
+			
+				lastJudgement = 3;
+			}
+
+			//Lane 5 Holds
+			while (!lane5active.empty() && lane5active[0].isHold() && lane5sprite[0]->getPosition().y > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5active[0].getEndTime() + MISS_WINDOW) {
+				lane5active.erase(lane5active.begin());
+				delete lane5sprite[0];
+				lane5sprite.erase(lane5sprite.begin());
+			}
+		
+			//Wheel Continuous
+			while (!wheelactive.empty() && !wheelactive[0].isSlam() && wheelsprite[0]->getPosition().y > DISTANCE_TO_PERFECT + SLAM_RANGE && currentSongOffset.count() > wheelactive[0].getEndTime()) {
+				wheelactive.erase(wheelactive.begin());
+				delete wheelsprite[0];
+				wheelsprite.erase(wheelsprite.begin());
+
+				// If there are no more wheel notes on screen, reset last wheel pos
+				if (wheelactive.empty()) {
+					controllerInput.resetLast();
+				}
+			}
+
+			// DELETE NOTE IF TOO FAR END
+
+			// If changing the speed, make the speed green to indicate that
+			if (controllerInput.getKeyboardState().getKeyState(6) == true) {
+				speedText.setFillColor(sf::Color::Green);
+			}
+			else {
+				speedText.setFillColor(sf::Color::White);
+			}
+
+			//If speed is changed, update the note appear time and position accordingly
+			if (oldSpeed != gameState.getSpeed() && controllerInput.getKeyboardState().getKeyState(6) == false) {
+				updateAppearTime(lane1);
+				updateAppearTime(lane2);
+				updateAppearTime(lane3);
+				updateAppearTime(lane4);
+				updateAppearTime(lane5);
+				//TODO: WHEEL
+
+				//TODO: updateNotePosition
+				//TODO: if push notes back into prenotes queue and shift buffer back 1
+				oldSpeed = gameState.getSpeed();
+
+				updateScreenTime(distance);
+			}
+		
+			gameWindow->draw(songJ);
+			gameWindow->draw(songT);
+			gameWindow->draw(songA);
+			gameWindow->draw(songD);
+			gameWindow->draw(songBPM);
+
+			speedText.setString(to_string(gameState.getSpeed()));
+			gameWindow->draw(speedText);
+
+			// Update the score that is shown on screen
+			string scoreS = to_string((int)score);
+			while (scoreS.length() < 7) {
+				scoreS = "0" + scoreS;
+			}
+			scoreText.setString(scoreS);
+			gameWindow->draw(scoreText);
+
+			// Judgement Rulings
+			// 0/default : no display
+			// 1 : perfect
+			// 2 : near
+			// 3 : miss
+			switch (lastJudgement) {
+				case 0:
+					break;
+				case 1:
+					gameWindow->draw(perfectSprite);
+					break;
+				case 2:
+					gameWindow->draw(nearSprite);
+					break;
+				case 3:
+					gameWindow->draw(missSprite);
+					break;
+				default:
+					break;
+			}
+
+			// Update song scrubber position
+			scrubber.setPosition(SCRUB_START + ( (song.getPlayingOffset().asMilliseconds() / songDuration) * SCRUB_LENGTH ), 295.f);
+			gameWindow->draw(scrubber);
+
+			gameWindow->display();
+		}
+	}
+
+	// Only save the status of the song when the service button wasn't pressed
+	if (!gameState.checkService() && gameState.getGameState() != GameState::CurrentState::SHUTDOWN) {
+		// Sleep the thread for 2 seconds after the song ends
+		this_thread::sleep_for(2 * timespan);
+
+		logger.log(L"Song Ended - Game Renderer Shutting Down.");
+
+		// Make a new results object based on how the player did on that song
+		Results songResult(gameState.getSongPlaying(), gameState.getSongPlayingDifficulty(), (int)score, perfectCount, nearCount, missCount);
+
+		// Store the results in the game state
+		gameState.results.push_back(songResult);
+
+		logger.log(L"Results of song saved.");
+	}
+
+	// Need to clear the VAO to clean it up after drawing
+	glBindVertexArray(0);
+	gameWindow->pushGLStates();
+
+	// Set the game window to false
+	gameWindow->setActive(false);
+
+	// Return back to the screen renderer
+}
+
+/**
+ * Read in notes from a file.
+ * 
+ * @param lane Lane vector to store the notes in
+ * @param LaneNum Lane number to get the notes about
+ * @param songPath Path of the song
+ * @param diffNumber Difficulty of the song
+ * @param bpm BPM of the song
+ */
+void parseInNotes(vector<Note>& lane, int LaneNum, string songPath, int diffNumber, int bpm) {
+	string fPath = songPath + "charts/" + to_string(diffNumber) + "/L" + to_string(LaneNum) + ".txt";
+	inputFile.open(fPath);
+
+	string line = "";
+	const char delim = ':';
+	if (inputFile) {
+		while (inputFile >> line) {
+			std::vector<std::string> out;
+			tokenize2(line, delim, out);
+
+			bool hold = false;
+			if (out[1] == "1") {
+				hold = true;
+			}
+
+			Note temp(stof(out[0]), hold, stof(out[2]), stoi(out[3]), bpm);
+			
+			lane.push_back(temp);
+		}
+	}
+	inputFile.close();
+	logger.log(L"Lane " + to_wstring(LaneNum) + L" is ready.");
+}
+
+/**
+ * Readin the wheel notes from a file.
+ * 
+ * @param wheel WheelNote vector to store the notes in
+ * @param songPath path of the song
+ * @param diffNumber difficulty of the song
+ * @param bpm BPM of the song
+ */
+void parseInWheel(vector<WheelNote>& wheel, string songPath, int diffNumber, int bpm) {
+	string fPath = songPath + "charts/" + to_string(diffNumber) + "/Wheel.txt";
+	inputFile.open(fPath);
+
+	string line = "";
+	const char delim = ':';
+	if (inputFile) {
+		while (inputFile >> line) {
+			std::vector<std::string> out;
+			tokenize2(line, delim, out);
+
+			bool slam = false;
+			if (out[1] == "1") {
+				slam = true;
+			}
+			
+			WheelNote temp(stof(out[0]), slam, stoi(out[2]), stoi(out[3]), stoi(out[4]), stof(out[5]), stoi(out[6]), bpm);
+			
+			wheel.push_back(temp);
+		}
+	}
+	inputFile.close();
+	logger.log(L"Lane Wheel is Ready.");
+}
+
+/**
+ * Split the string based on the delim char.
+ * 
+ * @param str Original String
+ * @param delim char to split based on
+ * @param out Vector string split into
+ */
+void tokenize2(std::string const& str, const char delim, std::vector<std::string>& out) {
+
+	size_t start;
+	size_t end = 0;
+
+	while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
+	{
+		end = str.find(delim, start);
+		out.push_back(str.substr(start, end - start));
+	}
+}
+
+/**
+ * Update when the notes appear on screen.
+ * 
+ * @param lane Lane to adjust the notes of
+ */
+void updateAppearTime(vector<Note>& lane) {
+	for (size_t i = 0; i < lane.size(); i++) {
+		lane[i].speedChangeAppearTime(gameState.getSpeed());
+	}
+}
+
+/**
+ * Pull the wheel notes from the back log into the active vector.
+ * 
+ * @param lane Wheel Lane Vector
+ * @param laneA Active Wheel Lane Vector
+ * @param laneS Wheel Sprites Vector
+ * @param time current time in the song
+ */
+void pullOutWheelNotes(vector<WheelNote>& lane, vector<WheelNote>& laneA, vector<sf::Sprite*>& laneS, float time) {
+	if (!lane.empty()) {
+		if (lane[0].appearTime <= time) {
+			if (lane[0].isSlam()) { // Slam Notes
+				sf::Texture* slamTexture = new sf::Texture();
+				switch (lane[0].getDirection()) {
+					case 1: // Slam Right
+						slamTexture->loadFromFile(SLAM_RIGHT_TEXTURE);
+						break;
+					case -1: // Slam Left
+						slamTexture->loadFromFile(SLAM_LEFT_TEXTURE);
+						break;
+				}
+				sf::Vector2u tempSize = slamTexture->getSize();
+
+				sf::Sprite* temp = new sf::Sprite(*slamTexture);
+				temp->setOrigin(tempSize.x / 2.f, tempSize.y / 2.f);
+
+				int prePushSize = laneA.size();
+
+				laneA.push_back(lane[0]);
+				lane.erase(lane.begin());
+				laneS.push_back(temp);
+
+				// If the pushed note was the first one, reset the controller wheel last state
+				if (prePushSize == 0 && laneA.size() == 1) {
+					controllerInput.resetLast();
+				}
+			}
+			else { // Other Wheels
+				sf::Texture *longWheelTexture = new sf::Texture();
+				if (lane[0].getDirection() == 1) { // Wheel ->
+					switch (lane[0].getCrossLengthRight()) {
+						case 1:
+							longWheelTexture->loadFromFile(WHEEL_1RIGHT);
+							break;
+						case 2:
+							longWheelTexture->loadFromFile(WHEEL_2RIGHT);
+							break;
+						case 3:
+							longWheelTexture->loadFromFile(WHEEL_3RIGHT);
+							break;
+						case 4:
+							longWheelTexture->loadFromFile(WHEEL_4RIGHT);
+							break;
+					}
+				}
+				else if (lane[0].getDirection() == -1) { // Wheel <-
+					switch (lane[0].getCrossLengthLeft()) {
+						case 1:
+							longWheelTexture->loadFromFile(WHEEL_1LEFT);
+							break;
+						case 2:
+							longWheelTexture->loadFromFile(WHEEL_2LEFT);
+							break;
+						case 3:
+							longWheelTexture->loadFromFile(WHEEL_3LEFT);
+							break;
+						case 4:
+							longWheelTexture->loadFromFile(WHEEL_4LEFT);
+							break;
+					}
+				}
+				sf::Vector2u tempSize = longWheelTexture->getSize();
+
+				sf::Sprite* temp = new sf::Sprite(*longWheelTexture);
+				temp->setOrigin(tempSize.x / 2.f, (float)tempSize.y);
+
+				// Calculate the scale in Y by multiplying: Wheel Length (ms) * Screen To Perfect (px) / Screen Time (ms) / noteSize.y (px)
+				float scaleY = (float)((lane[0].getWheelNoteLength() * DISTANCE_TO_PERFECT) / (453075.9705 / pow(gameState.getSpeed(), 1.004140998)) / tempSize.y);
+
+				temp->setScale(1, scaleY);
+
+				float wPos = lane[0].getWheelPos();
+
+				if (wPos == 1.5) {
+					temp->setPosition(LANE_1_2_BETWEEN, 0.f);
+				}
+				else if (wPos == 2) {
+					temp->setPosition(LANE_2_POS, 0.f);
+				}
+				else if (wPos == 2.5) {
+					temp->setPosition(LANE_2_3_BETWEEN, 0.f);
+				}
+				else if (wPos == 3) {
+					temp->setPosition(LANE_3_POS, 0.f);
+				}
+				else if (wPos == 3.5) {
+					temp->setPosition(LANE_3_4_BETWEEN, 0.f);
+				}
+				else if (wPos == 4) {
+					temp->setPosition(LANE_4_POS, 0.f);
+				}
+				else if (wPos == 4.5) {
+					temp->setPosition(LANE_4_5_BETWEEN, 0.f);
+				}
+
+				laneA.push_back(lane[0]);
+				lane.erase(lane.begin());
+				laneS.push_back(temp);
+			}
+		}
+	}
+}
+
+/**
+ * Pull out the notes from the backlog.
+ * 
+ * @param lane Notes Vector
+ * @param laneA Active Notes Vector
+ * @param laneS Notes Sprites Vector
+ * @param time current time
+ * @param laneNumber Lane Number
+ */
+void pullOutNotes(vector<Note>& lane, vector<Note>& laneA, vector<sf::Sprite*>& laneS, float time, int laneNumber) {
+	if (!lane.empty()) {
+		if (lane[0].appearTime <= time) {
+			sf::Texture* regularNoteTexture = new sf::Texture();
+			if (lane[0].isHold()) { // Hold Notes
+				regularNoteTexture->loadFromFile(NOTE_TEXTURE);
+				sf::Vector2u tempSize = regularNoteTexture->getSize();
+
+				sf::Sprite* temp = new sf::Sprite(*regularNoteTexture);
+				temp->setOrigin(tempSize.x / 2.f, (float)tempSize.y);
+
+				// Calculate the scale in Y by multiplying: Hold Length (ms) * Screen To Perfect (px) / Screen Time (ms) / noteSize.y (px)
+				float scaleY = (float)((lane[0].getHoldLength() * DISTANCE_TO_PERFECT) / (453075.9705 / pow(gameState.getSpeed(), 1.004140998)) / tempSize.y);
+
+				temp->setScale(1, scaleY);
+
+				switch (laneNumber) {
+					case 1:
+						temp->setPosition(LANE_1_POS, 0.f);
+						break;
+					case 2:
+						temp->setPosition(LANE_2_POS, 0.f);
+						break;
+					case 3:
+						temp->setPosition(LANE_3_POS, 0.f);
+						break;
+					case 4:
+						temp->setPosition(LANE_4_POS, 0.f);
+						break;
+					case 5:
+						temp->setPosition(LANE_5_POS, 0.f);
+						break;
+				}
+
+				laneA.push_back(lane[0]);
+				lane.erase(lane.begin());
+				laneS.push_back(temp);
+			}
+			else { // Chip Notes
+				laneA.push_back(lane[0]);
+				lane.erase(lane.begin());
+
+				regularNoteTexture->loadFromFile(NOTE_TEXTURE);
+				sf::Vector2u tempSize = regularNoteTexture->getSize();
+
+				sf::Sprite* temp = new sf::Sprite(*regularNoteTexture);
+				temp->setOrigin(tempSize.x / 2.f, tempSize.y / 2.f);
+
+				switch (laneNumber) {
+					case 1:
+						temp->setPosition(LANE_1_POS, 0.f);
+						break;
+					case 2:
+						temp->setPosition(LANE_2_POS, 0.f);
+						break;
+					case 3:
+						temp->setPosition(LANE_3_POS, 0.f);
+						break;
+					case 4:
+						temp->setPosition(LANE_4_POS, 0.f);
+						break;
+					case 5:
+						temp->setPosition(LANE_5_POS, 0.f);
+						break;
+				}
+
+				laneS.push_back(temp);
+			}
+		}
+	}
+}
+
+/**
+ * Calculate the distance of the note.
+ * 
+ * @param distance
+ */
+void updateScreenTime(float& distance) {
+	distance = (float)(453075.9705 / pow(gameState.getSpeed(), 1.004140998));
+}

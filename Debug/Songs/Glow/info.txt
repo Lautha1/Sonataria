@@ -1,0 +1,8 @@
+songid-1
+title-Glow
+author-Sean Barry and Julia Butenhoff
+bpm-160
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-GlowALMOSTFINAL.wav

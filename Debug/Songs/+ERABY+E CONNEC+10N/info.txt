@@ -1,0 +1,8 @@
+songid-35
+title-+ERABY+E CONNEC+10N
+author-Camellia
+bpm-230
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-+ERABY+ECONNEC+10N.flac

@@ -1,0 +1,8 @@
+songid-10
+title-本当の気持ち
+author-いぬみぎ
+bpm-163
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-TrueFeelings.flac

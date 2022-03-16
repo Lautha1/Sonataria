@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{6114A29F-A220-4B67-99BD-F6CE108EE0F2}</ProjectGuid>
+    <RootNamespace>UntitledRhythmGame</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;_ITERATOR_DEBUG_LEVEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;PacDrive32.lib;%(AdditionalDependencies);iphlpapi.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;_ITERATOR_DEBUG_LEVEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;PacDrive32.lib;%(AdditionalDependencies);iphlpapi.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;%(AdditionalDependencies);PacDrive32.lib;iphlpapi.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;%(AdditionalDependencies);PacDrive32.lib;iphlpapi.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Chart.cpp" />
+    <ClCompile Include="ControllerInput.cpp" />
+    <ClCompile Include="GameRenderer.cpp" />
+    <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Key.cpp" />
+    <ClCompile Include="KeyboardState.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matrices.cpp" />
+    <ClCompile Include="Networking.cpp" />
+    <ClCompile Include="Note.cpp" />
+    <ClCompile Include="OpenGLFont.cpp" />
+    <ClCompile Include="OpenGLShader.cpp" />
+    <ClCompile Include="OpenGLSprite.cpp" />
+    <ClCompile Include="OpenGLText.cpp" />
+    <ClCompile Include="QuadSprite.cpp" />
+    <ClCompile Include="Results.cpp" />
+    <ClCompile Include="RFIDCardReader.cpp" />
+    <ClCompile Include="ScreenRenderer.cpp" />
+    <ClCompile Include="SlicedSprite.cpp" />
+    <ClCompile Include="Song.cpp" />
+    <ClCompile Include="SpriteShader.cpp" />
+    <ClCompile Include="SystemSettings.cpp" />
+    <ClCompile Include="TextShader.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="Transformable.cpp" />
+    <ClCompile Include="TriangleSprite.cpp" />
+    <ClCompile Include="unzip.cpp" />
+    <ClCompile Include="TextureList.cpp" />
+    <ClCompile Include="UserData.cpp" />
+    <ClCompile Include="VideoSprite.cpp" />
+    <ClCompile Include="WheelNote.cpp" />
+    <ClCompile Include="WindowsAudio.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Chart.h" />
+    <ClInclude Include="ControllerInput.h" />
+    <ClInclude Include="GameRenderer.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="Key.h" />
+    <ClInclude Include="KeyboardState.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="Matrices.h" />
+    <ClInclude Include="Networking.h" />
+    <ClInclude Include="Note.h" />
+    <ClInclude Include="OpenGLFont.h" />
+    <ClInclude Include="OpenGLShader.h" />
+    <ClInclude Include="OpenGLSprite.h" />
+    <ClInclude Include="OpenGLText.h" />
+    <ClInclude Include="QuadSprite.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Results.h" />
+    <ClInclude Include="RFIDCardReader.h" />
+    <ClInclude Include="ScreenRenderer.h" />
+    <ClInclude Include="SlicedSprite.h" />
+    <ClInclude Include="Song.h" />
+    <ClInclude Include="SpriteShader.h" />
+    <ClInclude Include="SystemSettings.h" />
+    <ClInclude Include="TextShader.h" />
+    <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Transformable.h" />
+    <ClInclude Include="TriangleSprite.h" />
+    <ClInclude Include="unzip.h" />
+    <ClInclude Include="TextureList.h" />
+    <ClInclude Include="UserData.h" />
+    <ClInclude Include="Vectors.h" />
+    <ClInclude Include="VideoSprite.h" />
+    <ClInclude Include="WheelNote.h" />
+    <ClInclude Include="WindowsAudio.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fragment.shader" />
+    <None Include="textFragment.shader" />
+    <None Include="textVertex.shader" />
+    <None Include="vertex.shader" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

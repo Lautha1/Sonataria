@@ -1,0 +1,8 @@
+songid-32
+title-Dance with Silence
+author-Camellia
+bpm-128
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-DancewithSilence.flac

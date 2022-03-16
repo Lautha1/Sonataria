@@ -1,0 +1,1784 @@
+﻿#include "ControllerInput.h"
+#include "GameRenderer.h"
+#include "GameState.h"
+#include <iostream>
+#include "Networking.h"
+#include "ScreenRenderer.h"
+#include <string>
+#include <filesystem>
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+#include "unzip.h"
+#include <fstream>
+#include "WindowsAudio.h"
+#include "SystemSettings.h"
+#include "Logger.h"
+using namespace std;
+
+ScreenRenderer screenRenderer;
+
+sf::Text createText(string, int, sf::Color);
+sf::Text createText(string, int, sf::Color, float, float);
+sf::Text createText(wstring, int, sf::Color, float, float);
+void drawInit(sf::RenderWindow* gameWindow);
+void drawNetChkTxt(sf::RenderWindow* gameWindow, int netChk);
+void drawUpdChkTxt(sf::RenderWindow* gameWindow, int netChk, int updChk);
+void rThread(sf::RenderWindow* window);
+
+// Declare the size of the screen
+const int SCRWIDTH = 1920;
+const int SCRHEIGHT = 1080;
+
+string newVersion;
+
+// Holds all the song paths until all of the songs are loaded
+vector<string> songPaths;
+
+// Holds all of the created songs
+int songSpots = 0;
+
+GameRenderer gameRenderer;
+
+/**
+ * Constructor for the screen renderer.
+ * 
+ */
+ScreenRenderer::ScreenRenderer() {
+	
+	logger.log(L"Beginning Startup for Untitled Rhythm Game");
+
+	// Needed to make sure the game can delete stuff if needed (allows time for the old version to close)
+	std::chrono::milliseconds timespan(1000);
+	this_thread::sleep_for(3 * timespan);
+
+	logger.log(L"Checking for old versions...");
+	// Check for old versions of the game and delete them
+	ifstream inFile;
+	inFile.open("C:/old_version.txt");
+	if (!inFile) {
+		logger.logError(L"Old Version File NOT Detected!");
+	}
+	else {
+		string contents;
+		inFile >> contents;
+		if (contents == "" || contents == " ") {
+			logger.log(L"No old versions detected.");
+		}
+		else {
+			string oldPath = "C:/" + contents;
+
+			uintmax_t n = filesystem::remove_all(oldPath);
+			logger.log(L"Cleaned up " + to_wstring(n) + L" files.");
+			
+
+			std::ofstream ofs("C:/old_version.txt", std::ios::out | std::ios::trunc); // clear contents
+			ofs.close();
+
+			filesystem::remove("C:/URG_UPDATE/Update.zip");
+
+			logger.log(L"Cleaned up " + to_wstring(n + 1) + L" files.");
+		}
+	}
+
+	this->testMenuPos = 0;
+	this->testMenuTotalOptions = 5;
+	this->testMenuIOChkPos = 0;
+	this->testMenuIOCheckTotalOptions = 2;
+	this->testMenuSoundOptionsPos = 0;
+	this->testMenuSoundOptionsTotalOptions = 2;
+	this->testMenuSoundOptionsSelected = false;
+	this->testMenuNetworkingPos = 0;
+	this->testMenuNetworkingTotalOptions = 2;
+	this->songSelectHoverOver = 0;
+	this->wheelRelation = 25;
+	this->currentSongPage = 1;
+	this->difficultyHoverOver = 0;
+	this->isNetworkChecking = false;
+
+	std::string dir = "./Songs";
+
+	logger.log(L"Reading in song paths...");
+
+	// Read in Songs (looks for info.txt files)
+	for (auto& item : filesystem::recursive_directory_iterator(dir))
+	{
+		if (!filesystem::is_regular_file(item.path())
+			|| item.path().extension() != ".txt")
+			continue;
+
+		if (item.path().filename() != "info.txt") {
+			continue;
+		}
+
+		logger.log(L"Found song at: " + item.path().wstring());
+		songPaths.push_back(item.path().string());
+	}
+
+	logger.log(L"Total Song Count: " + to_wstring(songPaths.size()));
+
+	// Calculate how many songs are missing to make the total multiple of 6
+	int remainder = (6 - (songPaths.size() % 6));
+	if (remainder == 6) {
+		remainder = 0;
+	}
+
+	songSpots = songPaths.size() + remainder;
+
+	logger.log(L"Song Spots Needed: " + to_wstring(songSpots));
+
+	// In the array of song paths, replace some characters
+	for (size_t k = 0; k < songPaths.size(); k++) {
+		replace(songPaths[k].begin(), songPaths[k].end(), '\\', '/');
+	}
+
+	
+	// Adds the songs that are real to the songs vector
+	for (size_t i = 0; i < songPaths.size(); i++) {
+		Song tmp(songPaths[i]);
+		songs.push_back(tmp);
+	}
+	
+	logger.log(L"Creating Dummy Songs: " + to_wstring(remainder));
+
+	// Adds in the number of dummy songs to made a full 6 roster
+	Song temp;
+	for (int j = 0; j < remainder; j++) {
+		songs.push_back(temp);
+	}
+	
+	logger.log(L"Size of Songs Vector: " + to_wstring(songs.size()));
+
+	// Set the number of pages of songs
+	this->numOfSongPages = songSpots / 6;
+
+	// Add the first 6 songs to setup the first page of songs
+	for (int l = 0; l < 6; l++) {
+		currentPageSongs.push_back(songs[l]);
+	}
+
+	logger.log(L"Starting to load in saved settings.");
+
+	systemSettings.initSettings();
+}
+
+/**
+ * Default deconstructor.
+ * 
+ */
+ScreenRenderer::~ScreenRenderer() {
+
+}
+
+/**
+ * Render the screen.
+ * 
+ * @param gameWindow the window to render to
+ */
+void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
+
+	logger.log(L"Screen Renderer Now Active.");
+	
+	// Set the game window to active
+	gameWindow->setActive(true);
+
+	logger.log(L"Screen Renderer Has Control of Active Game Window.");
+
+	sf::Font basicFont;
+	if (!basicFont.loadFromFile("Fonts/HonyaJi-Re.ttf")) {
+		logger.logError(L"Error loading font.");
+	}
+
+	// The rendering loop
+	while (gameWindow->isOpen()) {
+		
+		// If the service button is pressed, break the loop and deactive the render loop
+		if (gameState.checkService()) {
+			logger.log(L"Ending Screen Render Loop.");
+			break;
+		}
+
+		// Clear the screen
+		gameWindow->clear();
+		
+		// Switch based on what game state we are in
+		if (gameState.getGameState() == GameState::CurrentState::STARTUP) {
+
+			// DRAW EVERYTHING FIRST
+			drawInit(gameWindow);
+
+			sf::Text netChkTxt = createText("CHECKING...", 36, sf::Color::Yellow, 1030.f, 250.f);
+			netChkTxt.setFont(basicFont);
+			gameWindow->draw(netChkTxt);
+
+			sf::Text updChkTxt = createText("WAITING", 36, sf::Color::White, 1030.f, 300.f);
+			updChkTxt.setFont(basicFont);
+			gameWindow->draw(updChkTxt);
+
+			gameWindow->display();
+
+			// AFTER DRAWING EVERYTHING - PERFORM THE ACTUAL CHECKS FOR EACH THING
+
+			// CHECK NETWORK
+			// 1 - ONLINE/CAN CONNECT
+			// 2 - OFFLINE/COULDN'T CONNECT
+			// 3 - MAINT
+			int netChk = network.checkConnection();
+
+			switch (netChk) {
+				case 1:
+					gameState.setOnlineState(GameState::OnlineState::ONLINE);
+					break;
+				case 2:
+					gameState.setOnlineState(GameState::OnlineState::OFFLINE);
+					break;
+				case 3:
+					gameState.setOnlineState(GameState::OnlineState::MAINTENENCE);
+					break;
+			}
+
+			gameWindow->clear();
+			drawInit(gameWindow);
+			drawNetChkTxt(gameWindow, netChk);
+			gameWindow->draw(updChkTxt);
+			gameWindow->display();
+
+			// CHECK UPDATES
+			// Network offline/maint - skip updates check
+			int updChk = 0;
+			if(netChk == 1) {
+				newVersion = network.checkForUpdates();
+
+				if (!(newVersion == network.getLocalVersion())) {
+					updChk = 1;
+				}
+				else {
+					updChk = 2;
+				}
+			}
+			gameWindow->clear();
+			drawInit(gameWindow);
+			drawNetChkTxt(gameWindow, netChk);
+			drawUpdChkTxt(gameWindow, netChk, updChk);
+			gameWindow->display();
+
+			// DO ANYTHING ELSE HERE BEFORE PASSING TO UPDATES OR TITLE SCREEN
+
+			std::chrono::milliseconds timespan(1000);
+			this_thread::sleep_for(2 * timespan);
+
+			if (updChk == 1) {
+				gameState.setGameState(GameState::CurrentState::UPDATES);
+			} else {
+				gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
+			}
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::UPDATES) {
+
+			// Once inside this else if conditional, the game should never leave it. (UNLESS THE UPDATE FAILS TO DOWNLOAD)
+			// After the game download/extracts/starts the new update, this version should close.
+
+			sf::Text titleTxt = createText("System Update", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text oldVersion = createText(network.getLocalVersion(), 36, sf::Color::White, 510.f, 300.f);
+			oldVersion.setFont(basicFont);
+
+			sf::Text arrow = createText("->", 36, sf::Color::White, titleTxt.getPosition().x, 300.f);
+			arrow.setFont(basicFont);
+
+			sf::Text nVersion = createText(newVersion, 36, sf::Color::White, 1200.f, 300.f);
+			nVersion.setFont(basicFont);
+
+			sf::Text warningTxt = createText("DO NOT POWER OFF OR DISCONNECT FROM NETWORK!", 36, sf::Color::White);
+			warningTxt.setFont(basicFont);
+			warningTxt.setOrigin(warningTxt.getLocalBounds().left + warningTxt.getLocalBounds().width / 2.0f, warningTxt.getLocalBounds().top + warningTxt.getLocalBounds().height / 2.0f);
+			warningTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - warningTxt.getLocalBounds().left), 950.f));
+
+			sf::Text warningTxt2 = createText("GAME WILL REBOOT WHEN COMPLETED!", 36, sf::Color::White);
+			warningTxt2.setFont(basicFont);
+			warningTxt2.setOrigin(warningTxt2.getLocalBounds().left + warningTxt2.getLocalBounds().width / 2.0f, warningTxt2.getLocalBounds().top + warningTxt2.getLocalBounds().height / 2.0f);
+			warningTxt2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - warningTxt2.getLocalBounds().left), 1000.f));
+
+			sf::Text status = createText("Downloading...", 36, sf::Color::White);
+			status.setFont(basicFont);
+			status.setOrigin(status.getLocalBounds().left + status.getLocalBounds().width / 2.0f, status.getLocalBounds().top + status.getLocalBounds().height / 2.0f);
+			status.setPosition(sf::Vector2f(((SCRWIDTH / 2) - status.getLocalBounds().left), 650.f));
+			
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(oldVersion);
+			gameWindow->draw(arrow);
+			gameWindow->draw(nVersion);
+			gameWindow->draw(warningTxt);
+			gameWindow->draw(warningTxt2);
+			gameWindow->draw(status);
+			gameWindow->display();
+
+			// Download the Update
+			if (network.downloadUpdate()) {
+				gameWindow->clear();
+				gameWindow->draw(titleTxt);
+				gameWindow->draw(oldVersion);
+				gameWindow->draw(arrow);
+				gameWindow->draw(nVersion);
+				gameWindow->draw(warningTxt);
+				gameWindow->draw(warningTxt2);
+
+				status.setString("Extracting...");
+				gameWindow->draw(status);
+				gameWindow->display();
+
+				// Extract the Update
+				HZIP hz;
+
+				hz = OpenZip(_T("C:/URG_UPDATE/Update.zip"), 0);
+				SetUnzipBaseDir(hz, _T("C:/"));
+				ZIPENTRY ze;
+				GetZipItem(hz, -1, &ze);
+				int numItems = ze.index;
+				for (int zi = 0; zi < numItems; zi++) {
+					GetZipItem(hz, zi, &ze);
+					UnzipItem(hz, zi, ze.name);
+				}
+				CloseZip(hz);
+
+				gameWindow->clear();
+				gameWindow->draw(titleTxt);
+				gameWindow->draw(oldVersion);
+				gameWindow->draw(arrow);
+				gameWindow->draw(nVersion);
+				gameWindow->draw(warningTxt);
+				gameWindow->draw(warningTxt2);
+
+				status.setString("Modifying Startup...");
+				gameWindow->draw(status);
+				gameWindow->display();
+
+				// Update the Bat File
+				std::ofstream ofs("C:/Rhythm.bat", std::ios::out | std::ios::trunc); // clear contents
+
+				string startCommand = "start \"URG\" /d C:\\" + newVersion + "\\ \"Untitled Rhythm Game.exe\"";
+
+				ofs << startCommand;
+
+				ofs.close();
+
+				std::ofstream ofs2("C:/old_version.txt", std::ios::out | std::ios::trunc); // clear contents
+
+				string version = network.getLocalVersion();
+
+				ofs2 << version;
+
+				ofs2.close();
+
+				gameWindow->clear();
+				gameWindow->draw(titleTxt);
+				gameWindow->draw(oldVersion);
+				gameWindow->draw(arrow);
+				gameWindow->draw(nVersion);
+				gameWindow->draw(warningTxt);
+				gameWindow->draw(warningTxt2);
+
+				status.setString("Restarting...");
+				gameWindow->draw(status);
+				gameWindow->display();
+
+				// Launch the new verison
+				system("start \"URG\" /d C:\\ \"Rhythm.bat\"");
+
+				// Close the old version
+				exit(-1);
+			}
+			else {
+				gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
+				logger.logError(L"Failed to download update file!");
+			}
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
+
+			// Reset everything and draw the title screen
+			resetAll();
+
+			sf::Texture titleTexture;
+			titleTexture.loadFromFile("Textures/Title_Screen.png");
+
+			sf::Sprite title(titleTexture);
+			sf::Vector2u titleSize = titleTexture.getSize();
+			title.setOrigin(titleSize.x / 2.f, titleSize.y / 2.f);
+			title.setPosition(SCRWIDTH / 2, SCRHEIGHT / 2);
+			gameWindow->draw(title);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {
+
+			// Display all the text options on the test main menu screen
+			sf::Text titleTxt = createText("MAIN MENU", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+			
+			sf::Text ioCheckTxt = createText("I/O CHECK", 36, sf::Color::White);
+			ioCheckTxt.setFont(basicFont);
+			ioCheckTxt.setOrigin(ioCheckTxt.getLocalBounds().left + ioCheckTxt.getLocalBounds().width / 2.0f, ioCheckTxt.getLocalBounds().top + ioCheckTxt.getLocalBounds().height / 2.0f);
+			ioCheckTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - ioCheckTxt.getLocalBounds().left), 300.f));
+			
+			sf::Text soundOptionsTxt = createText("SOUND OPTIONS", 36, sf::Color::White);
+			soundOptionsTxt.setFont(basicFont);
+			soundOptionsTxt.setOrigin(soundOptionsTxt.getLocalBounds().left + soundOptionsTxt.getLocalBounds().width / 2.0f, soundOptionsTxt.getLocalBounds().top + soundOptionsTxt.getLocalBounds().height / 2.0f);
+			soundOptionsTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - soundOptionsTxt.getLocalBounds().left), 350.f));
+
+			sf::Text networkingTxt = createText("NETWORKING", 36, sf::Color::White);
+			networkingTxt.setFont(basicFont);
+			networkingTxt.setOrigin(networkingTxt.getLocalBounds().left + networkingTxt.getLocalBounds().width / 2.0f, networkingTxt.getLocalBounds().top + networkingTxt.getLocalBounds().height / 2.0f);
+			networkingTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - networkingTxt.getLocalBounds().left), 400.f));
+
+			sf::Text sysInfoTxt = createText("SYSTEM INFORMATION", 36, sf::Color::White);
+			sysInfoTxt.setFont(basicFont);
+			sysInfoTxt.setOrigin(sysInfoTxt.getLocalBounds().left + sysInfoTxt.getLocalBounds().width / 2.0f, sysInfoTxt.getLocalBounds().top + sysInfoTxt.getLocalBounds().height / 2.0f);
+			sysInfoTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - sysInfoTxt.getLocalBounds().left), 450.f));
+			
+			//ADD NEW ITEMS HERE
+
+			sf::Text gameModeTxt = createText("GAME MODE", 36, sf::Color::White);
+			gameModeTxt.setFont(basicFont);
+			gameModeTxt.setOrigin(gameModeTxt.getLocalBounds().left + gameModeTxt.getLocalBounds().width / 2.0f, gameModeTxt.getLocalBounds().top + gameModeTxt.getLocalBounds().height / 2.0f);
+			gameModeTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - gameModeTxt.getLocalBounds().left), 800.f));
+
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 970.f));
+
+			sf::Text instruction2 = createText("BT-2 | DOWN", 24, sf::Color::White);
+			instruction2.setFont(basicFont);
+			instruction2.setOrigin(instruction2.getLocalBounds().left + instruction2.getLocalBounds().width / 2.0f, instruction2.getLocalBounds().top + instruction2.getLocalBounds().height / 2.0f);
+			instruction2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction2.getLocalBounds().left), 1000.f));
+
+			sf::Text instruction3 = createText("BT-4 | UP", 24, sf::Color::White);
+			instruction3.setFont(basicFont);
+			instruction3.setOrigin(instruction3.getLocalBounds().left + instruction3.getLocalBounds().width / 2.0f, instruction3.getLocalBounds().top + instruction3.getLocalBounds().height / 2.0f);
+			instruction3.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction3.getLocalBounds().left), 1030.f));
+
+			// Make the "hovered" over text red
+			switch (testMenuPos) {
+				case 0:
+					ioCheckTxt.setFillColor(sf::Color::Red);
+					break;
+				case 1:
+					soundOptionsTxt.setFillColor(sf::Color::Red);
+					break;
+				case 2:
+					networkingTxt.setFillColor(sf::Color::Red);
+					break;
+				case 3:
+					sysInfoTxt.setFillColor(sf::Color::Red);
+					break;
+				case 4:
+					gameModeTxt.setFillColor(sf::Color::Red);
+					break;
+			}
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(ioCheckTxt);
+			gameWindow->draw(soundOptionsTxt);
+			gameWindow->draw(networkingTxt);
+			gameWindow->draw(sysInfoTxt);
+			gameWindow->draw(gameModeTxt);
+			gameWindow->draw(instruction1);
+			gameWindow->draw(instruction2);
+			gameWindow->draw(instruction3);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_IOCHECK) {
+			
+			// Draw the text on the IO check menu
+			sf::Text titleTxt = createText("I/O CHECK", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text inputCheckTxt = createText("INPUT CHECK", 36, sf::Color::White);
+			inputCheckTxt.setFont(basicFont);
+			inputCheckTxt.setOrigin(inputCheckTxt.getLocalBounds().left + inputCheckTxt.getLocalBounds().width / 2.0f, inputCheckTxt.getLocalBounds().top + inputCheckTxt.getLocalBounds().height / 2.0f);
+			inputCheckTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - inputCheckTxt.getLocalBounds().left), 300.f));
+
+			//ADD STUFF HERE
+
+			sf::Text exitTxt = createText("EXIT", 36, sf::Color::White);
+			exitTxt.setFont(basicFont);
+			exitTxt.setOrigin(exitTxt.getLocalBounds().left + exitTxt.getLocalBounds().width / 2.0f, exitTxt.getLocalBounds().top + exitTxt.getLocalBounds().height / 2.0f);
+			exitTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - exitTxt.getLocalBounds().left), 800.f));
+
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 970.f));
+
+			sf::Text instruction2 = createText("BT-2 | DOWN", 24, sf::Color::White);
+			instruction2.setFont(basicFont);
+			instruction2.setOrigin(instruction2.getLocalBounds().left + instruction2.getLocalBounds().width / 2.0f, instruction2.getLocalBounds().top + instruction2.getLocalBounds().height / 2.0f);
+			instruction2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction2.getLocalBounds().left), 1000.f));
+
+			sf::Text instruction3 = createText("BT-4 | UP", 24, sf::Color::White);
+			instruction3.setFont(basicFont);
+			instruction3.setOrigin(instruction3.getLocalBounds().left + instruction3.getLocalBounds().width / 2.0f, instruction3.getLocalBounds().top + instruction3.getLocalBounds().height / 2.0f);
+			instruction3.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction3.getLocalBounds().left), 1030.f));
+
+			// Make the "hovered" over text red
+			switch (testMenuIOChkPos) {
+				case 0:
+					inputCheckTxt.setFillColor(sf::Color::Red);
+					break;
+				case 1:
+					exitTxt.setFillColor(sf::Color::Red);
+					break;
+			}
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(inputCheckTxt);
+			gameWindow->draw(exitTxt);
+			gameWindow->draw(instruction1);
+			gameWindow->draw(instruction2);
+			gameWindow->draw(instruction3);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_INPUTCHECK) {
+			
+			// Draw the text on the input check screen
+			sf::Text titleTxt = createText("I/O CHECK", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text titleTxt2 = createText("INPUT CHECK", 36, sf::Color::White);
+			titleTxt2.setFont(basicFont);
+			titleTxt2.setOrigin(titleTxt2.getLocalBounds().left + titleTxt2.getLocalBounds().width / 2.0f, titleTxt2.getLocalBounds().top + titleTxt2.getLocalBounds().height / 2.0f);
+			titleTxt2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt2.getLocalBounds().left), 130.f));
+
+			sf::Text btn1 = createText("1 BUTTON", 36, sf::Color::White, 650.f, 300.f);
+			btn1.setFont(basicFont);
+
+			sf::Text btn2 = createText("2 BUTTON", 36, sf::Color::White, 650.f, 350.f);
+			btn2.setFont(basicFont);
+
+			sf::Text btn3 = createText("3 BUTTON", 36, sf::Color::White, 650.f, 400.f);
+			btn3.setFont(basicFont);
+
+			sf::Text btn4 = createText("4 BUTTON", 36, sf::Color::White, 650.f, 450.f);
+			btn4.setFont(basicFont);
+
+			sf::Text btn5 = createText("5 BUTTON", 36, sf::Color::White, 650.f, 500.f);
+			btn5.setFont(basicFont);
+
+			sf::Text wheel = createText("WHEEL", 36, sf::Color::White, 650.f, 550.f);
+			wheel.setFont(basicFont);
+
+			sf::Text btn1State = createText("OFF", 36, sf::Color::White, 1200.f, 300.f);
+			btn1State.setFont(basicFont);
+
+			sf::Text btn2State = createText("OFF", 36, sf::Color::White, 1200.f, 350.f);
+			btn2State.setFont(basicFont);
+
+			sf::Text btn3State = createText("OFF", 36, sf::Color::White, 1200.f, 400.f);
+			btn3State.setFont(basicFont);
+
+			sf::Text btn4State = createText("OFF", 36, sf::Color::White, 1200.f, 450.f);
+			btn4State.setFont(basicFont);
+
+			sf::Text btn5State = createText("OFF", 36, sf::Color::White, 1200.f, 500.f);
+			btn5State.setFont(basicFont);
+
+			// Update the wheel text based on the position
+			sf::Text wheelLoc = createText(to_string(controllerInput.getWheelPos()), 36, sf::Color::White, 1200.f, 550.f);
+			wheelLoc.setFont(basicFont);
+
+			sf::Text exitTxt = createText("EXIT", 36, sf::Color::Red);
+			exitTxt.setFont(basicFont);
+			exitTxt.setOrigin(exitTxt.getLocalBounds().left + exitTxt.getLocalBounds().width / 2.0f, exitTxt.getLocalBounds().top + exitTxt.getLocalBounds().height / 2.0f);
+			exitTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - exitTxt.getLocalBounds().left), 800.f));
+
+			// Update the states of the buttons based on their stored state
+			if (controllerInput.getKeyboardState().getKeyState(1)) {
+				btn1State.setFillColor(sf::Color::Green);
+				btn1State.setString("ON");
+			}
+			else {
+				btn1State.setFillColor(sf::Color::Red);
+				btn1State.setString("OFF");
+			}
+
+			if (controllerInput.getKeyboardState().getKeyState(2)) {
+				btn2State.setFillColor(sf::Color::Green);
+				btn2State.setString("ON");
+			}
+			else {
+				btn2State.setFillColor(sf::Color::Red);
+				btn2State.setString("OFF");
+			}
+
+			if (controllerInput.getKeyboardState().getKeyState(3)) {
+				btn3State.setFillColor(sf::Color::Green);
+				btn3State.setString("ON");
+			}
+			else {
+				btn3State.setFillColor(sf::Color::Red);
+				btn3State.setString("OFF");
+			}
+
+			if (controllerInput.getKeyboardState().getKeyState(4)) {
+				btn4State.setFillColor(sf::Color::Green);
+				btn4State.setString("ON");
+			}
+			else {
+				btn4State.setFillColor(sf::Color::Red);
+				btn4State.setString("OFF");
+			}
+
+			if (controllerInput.getKeyboardState().getKeyState(5)) {
+				btn5State.setFillColor(sf::Color::Green);
+				btn5State.setString("ON");
+			}
+			else {
+				btn5State.setFillColor(sf::Color::Red);
+				btn5State.setString("OFF");
+			}
+
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 1000.f));
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(titleTxt2);
+			gameWindow->draw(exitTxt);
+			gameWindow->draw(btn1);
+			gameWindow->draw(btn2);
+			gameWindow->draw(btn3);
+			gameWindow->draw(btn4);
+			gameWindow->draw(btn5);
+			gameWindow->draw(wheel);
+			gameWindow->draw(btn1State);
+			gameWindow->draw(btn2State);
+			gameWindow->draw(btn3State);
+			gameWindow->draw(btn4State);
+			gameWindow->draw(btn5State);
+			gameWindow->draw(wheelLoc);
+			gameWindow->draw(instruction1);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SYSINFO) {
+			
+			// Draw the text on the system info screen
+			sf::Text titleTxt = createText("SYSTEM INFORMATION", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text exitTxt = createText("EXIT", 36, sf::Color::Red);
+			exitTxt.setFont(basicFont);
+			exitTxt.setOrigin(exitTxt.getLocalBounds().left + exitTxt.getLocalBounds().width / 2.0f, exitTxt.getLocalBounds().top + exitTxt.getLocalBounds().height / 2.0f);
+			exitTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - exitTxt.getLocalBounds().left), 800.f));
+
+			sf::Text updVerTxt = createText("VERSION ID", 36, sf::Color::White, 550.f, 300.f);
+			updVerTxt.setFont(basicFont);
+
+			sf::Text updVer = createText("URG:" + network.getLocalVersion(), 36, sf::Color::White, 1100.f, 300.f);
+			updVer.setFont(basicFont);
+			
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 1000.f));
+
+			//DRAW MORE HERE
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(exitTxt);
+			gameWindow->draw(updVerTxt);
+			gameWindow->draw(updVer);
+			gameWindow->draw(instruction1);
+			
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
+			
+			// Draw the song select screen
+
+			// Draw what track we are currently on based on the size of the results vector
+			string trackS = "Track: ";
+			switch (gameState.results.size()) {
+				case 0:
+					trackS += "1";
+					break;
+				case 1:
+					trackS += "F";
+					break;
+				case 2:
+					trackS += "EX";
+					break;
+			}
+			sf::Text trackNum = createText(trackS, 48, sf::Color::White);
+			trackNum.setFont(basicFont);
+			gameWindow->draw(trackNum);
+
+			// Draw some main large textures
+			sf::Texture bigOvalTexture;
+			bigOvalTexture.loadFromFile("Textures/BigOval.png");
+			sf::Sprite bigOval(bigOvalTexture);
+			sf::Vector2u bigOvalSize = bigOvalTexture.getSize();
+			bigOval.setOrigin(bigOvalSize.x / 2.f, bigOvalSize.y / 2.f);
+			bigOval.setPosition(SCRWIDTH / 2, 1130.f);
+			gameWindow->draw(bigOval);
+
+			sf::Texture song1Texture;
+			song1Texture.loadFromFile(this->currentPageSongs[0].getRoundArtPath());
+			sf::Sprite song1(song1Texture);
+			sf::Vector2u song1Size = song1Texture.getSize();
+			song1.setOrigin(song1Size.x / 2.f, song1Size.y / 2.f);
+			song1.setPosition(((SCRWIDTH / 2) - 660.f), 925.f);
+			gameWindow->draw(song1);
+
+			sf::Texture song2Texture;
+			song2Texture.loadFromFile(this->currentPageSongs[1].getRoundArtPath());
+			sf::Sprite song2(song2Texture);
+			sf::Vector2u song2Size = song2Texture.getSize();
+			song2.setOrigin(song2Size.x / 2.f, song2Size.y / 2.f);
+			song2.setPosition(((SCRWIDTH / 2) - 420.f), 760.f);
+			gameWindow->draw(song2);
+
+			sf::Texture song3Texture;
+			song3Texture.loadFromFile(this->currentPageSongs[2].getRoundArtPath());
+			sf::Sprite song3(song3Texture);
+			sf::Vector2u song3Size = song3Texture.getSize();
+			song3.setOrigin(song3Size.x / 2.f, song3Size.y / 2.f);
+			song3.setPosition(((SCRWIDTH / 2) - 142.f), 690.f);
+			gameWindow->draw(song3);
+
+			sf::Texture song4Texture;
+			song4Texture.loadFromFile(this->currentPageSongs[3].getRoundArtPath());
+			sf::Sprite song4(song4Texture);
+			sf::Vector2u song4Size = song4Texture.getSize();
+			song4.setOrigin(song4Size.x / 2.f, song4Size.y / 2.f);
+			song4.setPosition(((SCRWIDTH / 2) + 142.f), 690.f);
+			gameWindow->draw(song4);
+
+			sf::Texture song5Texture;
+			song5Texture.loadFromFile(this->currentPageSongs[4].getRoundArtPath());
+			sf::Sprite song5(song5Texture);
+			sf::Vector2u song5Size = song5Texture.getSize();
+			song5.setOrigin(song5Size.x / 2.f, song5Size.y / 2.f);
+			song5.setPosition(((SCRWIDTH / 2) + 420.f), 760.f);
+			gameWindow->draw(song5);
+
+			sf::Texture song6Texture;
+			song6Texture.loadFromFile(this->currentPageSongs[5].getRoundArtPath());
+			sf::Sprite song6(song6Texture);
+			sf::Vector2u song6Size = song6Texture.getSize();
+			song6.setOrigin(song6Size.x / 2.f, song6Size.y / 2.f);
+			song6.setPosition(((SCRWIDTH / 2) + 660.f), 925.f);
+			gameWindow->draw(song6);
+
+			// Circle selection icon around the round jacket arts
+			// This moves based on which song is currently being hovered over
+			sf::Texture selectionTexture;
+			selectionTexture.loadFromFile("./Textures/Select.png");
+			sf::Sprite selection(selectionTexture);
+			sf::Vector2u selectionSize = selectionTexture.getSize();
+			selection.setOrigin(selectionSize.x / 2.f, selectionSize.y / 2.f);
+			selection.setPosition(((SCRWIDTH / 2) - 660.f), 925.f);
+			switch (this->songSelectHoverOver) {
+				case 0:
+					selection.setPosition(((SCRWIDTH / 2) - 660.f), 925.f);
+					break;
+				case 1:
+					selection.setPosition(((SCRWIDTH / 2) - 420.f), 760.f);
+					break;
+				case 2:
+					selection.setPosition(((SCRWIDTH / 2) - 142.f), 690.f);
+					break;
+				case 3:
+					selection.setPosition(((SCRWIDTH / 2) + 142.f), 690.f);
+					break;
+				case 4:
+					selection.setPosition(((SCRWIDTH / 2) + 420.f), 760.f);
+					break;
+				case 5:
+					selection.setPosition(((SCRWIDTH / 2) + 660.f), 925.f);
+					break;
+			}
+			gameWindow->draw(selection);
+
+			sf::Texture titleRectTexture;
+			titleRectTexture.loadFromFile("./Textures/LongRect.png");
+			sf::Sprite titleRect(titleRectTexture);
+			sf::Vector2u titleRectSize = titleRectTexture.getSize();
+			titleRect.setOrigin(titleRectSize.x / 2.f, titleRectSize.y / 2.f);
+			titleRect.setScale(1.4f, .5f);
+			titleRect.setPosition(((SCRWIDTH / 2) - 50.f), 150.f);
+			gameWindow->draw(titleRect);
+
+			sf::Texture artistRectTexture;
+			artistRectTexture.loadFromFile("./Textures/LongRect.png");
+			sf::Sprite artistRect(artistRectTexture);
+			sf::Vector2u artistRectSize = artistRectTexture.getSize();
+			artistRect.setOrigin(artistRectSize.x / 2.f, artistRectSize.y / 2.f);
+			artistRect.setScale(.7f, .4f);
+			artistRect.setPosition(((SCRWIDTH / 2) - 50.f), 265.f);
+			gameWindow->draw(artistRect);
+
+			sf::Texture bpmRectTexture;
+			bpmRectTexture.loadFromFile("./Textures/LongRect.png");
+			sf::Sprite bpmRect(bpmRectTexture);
+			sf::Vector2u bpmRectSize = bpmRectTexture.getSize();
+			bpmRect.setOrigin(bpmRectSize.x / 2.f, bpmRectSize.y / 2.f);
+			bpmRect.setScale(.25f, .4f);
+			bpmRect.setPosition(((SCRWIDTH / 2) + 270.f), 265.f);
+			gameWindow->draw(bpmRect);
+
+			// Update the upper text boxes based on the data from the song that is currently hovered over
+			sf::Text titleText = createText(this->currentPageSongs[this->songSelectHoverOver].getTitle(), 36, sf::Color::White, 780.f, 130.f);
+			titleText.setFont(basicFont);
+			gameWindow->draw(titleText);
+
+			sf::Text artistText = createText(this->currentPageSongs[this->songSelectHoverOver].getArtist(), 36, sf::Color::White, 780.f, 240.f);
+			artistText.setFont(basicFont);
+			gameWindow->draw(artistText);
+
+			sf::Text bpmText = createText(this->currentPageSongs[this->songSelectHoverOver].getBPM(), 36, sf::Color::White, 1185.f, 240.f);
+			bpmText.setFont(basicFont);
+			gameWindow->draw(bpmText);
+
+			sf::Texture boxTexture;
+			boxTexture.loadFromFile("./Textures/Box.png");
+			sf::Vector2u boxSize = boxTexture.getSize();
+
+			sf::Sprite diffBox1(boxTexture);
+			diffBox1.setOrigin(boxSize.x / 2.f, boxSize.y / 2.f);
+			diffBox1.setScale(1.f, 1.f);
+			diffBox1.setPosition(((SCRWIDTH / 2) - 120.f), 375.f);
+			gameWindow->draw(diffBox1);
+
+			sf::Sprite diffBox2(boxTexture);
+			diffBox2.setOrigin(boxSize.x / 2.f, boxSize.y / 2.f);
+			diffBox2.setScale(1.f, 1.f);
+			diffBox2.setPosition(((SCRWIDTH / 2) + 10.f), 375.f);
+			gameWindow->draw(diffBox2);
+
+			sf::Sprite diffBox3(boxTexture);
+			diffBox3.setOrigin(boxSize.x / 2.f, boxSize.y / 2.f);
+			diffBox3.setScale(1.f, 1.f);
+			diffBox3.setPosition(((SCRWIDTH / 2) + 140.f), 375.f);
+			gameWindow->draw(diffBox3);
+
+			sf::Sprite diffBox4(boxTexture);
+			diffBox4.setOrigin(boxSize.x / 2.f, boxSize.y / 2.f);
+			diffBox4.setScale(1.f, 1.f);
+			diffBox4.setPosition(((SCRWIDTH / 2) + 270.f), 375.f);
+			gameWindow->draw(diffBox4);
+
+			sf::Text diff1Txt = createText("-", 36, sf::Color::White, ((SCRWIDTH / 2) - 130.f), 355.f);
+			diff1Txt.setFont(basicFont);
+
+			sf::Text diff2Txt = createText("-", 36, sf::Color::White, ((SCRWIDTH / 2) + 0.f), 355.f);
+			diff2Txt.setFont(basicFont);
+
+			sf::Text diff3Txt = createText("-", 36, sf::Color::White, ((SCRWIDTH / 2) + 120.f), 355.f);
+			diff3Txt.setFont(basicFont);
+
+			sf::Text diff4Txt = createText("-", 36, sf::Color::White, ((SCRWIDTH / 2) + 250.f), 355.f);
+			diff4Txt.setFont(basicFont);
+
+			//If there is less than 4 difficulties availible for the song, else = 4 difficulties
+			if (this->currentPageSongs[this->songSelectHoverOver].getNumberOfDifficulties() < 4) {
+				switch (this->currentPageSongs[this->songSelectHoverOver].getNumberOfDifficulties()) {
+					case 0:
+						//DO NOTHING
+						break;
+					case 1:
+						diff1Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(0)));
+						break;
+					case 2:
+						diff1Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(0)));
+						diff2Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(1)));
+						break;
+					case 3:
+						diff1Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(0)));
+						diff2Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(1)));
+						diff3Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(2)));
+						break;
+				}
+			}
+			else {
+				diff1Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(0)));
+				diff2Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(1)));
+				diff3Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(2)));
+				diff4Txt.setString(to_string(this->currentPageSongs[this->songSelectHoverOver].getDifficultyNumber(3)));
+			}
+			gameWindow->draw(diff1Txt);
+			gameWindow->draw(diff2Txt);
+			gameWindow->draw(diff3Txt);
+			gameWindow->draw(diff4Txt);
+
+			// Draw the bar that shows what difficulty is currently selected
+			sf::Texture diffSelectorTexture;
+			diffSelectorTexture.loadFromFile("./Textures/Selector.png");
+			sf::Sprite diffSelector(diffSelectorTexture);
+			sf::Vector2u diffSelectorSize = diffSelectorTexture.getSize();
+			diffSelector.setOrigin(diffSelectorSize.x / 2.f, diffSelectorSize.y / 2.f);
+			diffSelector.setPosition(((SCRWIDTH / 2) - 120.f), 430.f);
+			switch (this->difficultyHoverOver) {
+			case 0:
+				diffSelector.setPosition(((SCRWIDTH / 2) - 120.f), 430.f);
+				break;
+			case 1:
+				diffSelector.setPosition(((SCRWIDTH / 2) + 10.f), 430.f);
+				break;
+			case 2:
+				diffSelector.setPosition(((SCRWIDTH / 2) + 140.f), 430.f);
+				break;
+			case 3:
+				diffSelector.setPosition(((SCRWIDTH / 2) + 270.f), 430.f);
+				break;
+			}
+			gameWindow->draw(diffSelector);
+
+			sf::Texture jacketArtTexture;
+			jacketArtTexture.loadFromFile(this->currentPageSongs[this->songSelectHoverOver].getJacketArtPath());
+			sf::Sprite jacketArt(jacketArtTexture);
+			sf::Vector2u jacketArtSize = jacketArtTexture.getSize();
+			jacketArt.setOrigin(jacketArtSize.x / 2.f, jacketArtSize.y / 2.f);
+			jacketArt.setScale(.75f, .75f);
+			jacketArt.setPosition(((SCRWIDTH / 2) - 350.f), 225.f);
+			gameWindow->draw(jacketArt);
+
+			string pageS = "Page: " + to_string(this->currentSongPage) + " of " + to_string(this->numOfSongPages);
+			sf::Text instruction1 = createText(pageS, 24, sf::Color::Black);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 970.f));
+			gameWindow->draw(instruction1);
+
+			sf::Text instruction2 = createText("<- Wheel -> | Change Song", 24, sf::Color::Black);
+			instruction2.setFont(basicFont);
+			instruction2.setOrigin(instruction2.getLocalBounds().left + instruction2.getLocalBounds().width / 2.0f, instruction2.getLocalBounds().top + instruction2.getLocalBounds().height / 2.0f);
+			instruction2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction2.getLocalBounds().left), 1000.f));
+			gameWindow->draw(instruction2);
+
+			sf::Text instruction3 = createText("BT-4 | Cycle Difficulty", 24, sf::Color::Black);
+			instruction3.setFont(basicFont);
+			instruction3.setOrigin(instruction3.getLocalBounds().left + instruction3.getLocalBounds().width / 2.0f, instruction3.getLocalBounds().top + instruction3.getLocalBounds().height / 2.0f);
+			instruction3.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction3.getLocalBounds().left), 1030.f));
+			gameWindow->draw(instruction3);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::GAME) {
+			
+			// Pass off to the Game Renderer
+
+			// Clear the screen
+			gameWindow->clear();
+
+			// Set the screen to not active
+			gameWindow->setActive(false);
+
+			// Launch the game renderer in a new thread and wait for it to complete
+			sf::Thread thread(&rThread, gameWindow);
+			thread.launch();
+			thread.wait();
+
+			// Re-activate the game window in this thread
+			gameWindow->setActive(true);
+
+			// Transition to results since a song has now completed
+			if (gameState.getGameState() != GameState::CurrentState::SHUTDOWN) {
+				gameState.setGameState(GameState::CurrentState::RESULTS);
+			}
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
+
+			// Draw the results from the song that was just played
+			sf::Text resultsTxt = createText("RESULTS", 36, sf::Color::White, 150.f, 100.f);
+			resultsTxt.setFont(basicFont);
+			gameWindow->draw(resultsTxt);
+
+			sf::Texture jacketArtTexture;
+			jacketArtTexture.loadFromFile(gameState.results[gameState.results.size() - 1].getSong().getJacketArtPath());
+			sf::Sprite jacketArt(jacketArtTexture);
+			sf::Vector2u jacketArtSize = jacketArtTexture.getSize();
+			jacketArt.setOrigin(jacketArtSize.x / 2.f, jacketArtSize.y / 2.f);
+			jacketArt.setScale(.5f, .5f);
+			jacketArt.setPosition(((SCRWIDTH / 2) - 350.f), 225.f);
+			gameWindow->draw(jacketArt);
+
+			sf::Text titleTxt = createText(gameState.results[gameState.results.size() - 1].getSong().getTitle(), 42, sf::Color::White, 750.f, 150.f);
+			titleTxt.setFont(basicFont);
+			gameWindow->draw(titleTxt);
+
+			sf::Text artistTxt = createText(gameState.results[gameState.results.size() - 1].getSong().getArtist(), 24, sf::Color::White, 750.f, 200.f);
+			artistTxt.setFont(basicFont);
+			gameWindow->draw(artistTxt);
+
+			sf::Text difficultyTxt = createText(to_string(gameState.results[gameState.results.size() - 1].getDifficulty()), 24, sf::Color::White, 750.f, 230.f);
+			difficultyTxt.setFont(basicFont);
+			gameWindow->draw(difficultyTxt);
+
+			string scoreS = string(7 - to_string(gameState.results[gameState.results.size() - 1].getScore()).length(), '0').append(to_string(gameState.results[gameState.results.size() - 1].getScore()));
+			sf::Text score = createText("Score: " + scoreS, 24, sf::Color::White, 750.f, 260.f);
+			score.setFont(basicFont);
+			gameWindow->draw(score);
+
+			sf::Text perfectCount = createText("Perfect: " + to_string(gameState.results[gameState.results.size() - 1].getPerfectCount()), 24, sf::Color::White, 750.f, 320.f);
+			perfectCount.setFont(basicFont);
+			gameWindow->draw(perfectCount);
+
+			sf::Text nearCount = createText("Near: " + to_string(gameState.results[gameState.results.size() - 1].getNearCount()), 24, sf::Color::White, 750.f, 350.f);
+			nearCount.setFont(basicFont);
+			gameWindow->draw(nearCount);
+
+			sf::Text missCount = createText("Miss: " + to_string(gameState.results[gameState.results.size() - 1].getMissCount()), 24, sf::Color::White, 750.f, 380.f);
+			missCount.setFont(basicFont);
+			gameWindow->draw(missCount);
+
+			sf::Text instructTxt = createText("Please press \"Start\" to continue...", 42, sf::Color::White, 1200.f, 1000.f);
+			instructTxt.setFont(basicFont);
+			gameWindow->draw(instructTxt);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
+
+			// Draw the results of the three songs that were played (this won't be used if the player gets EX track)
+			sf::Text resultsTxt = createText("FINAL RESULTS", 36, sf::Color::White, 150.f, 100.f);
+			resultsTxt.setFont(basicFont);
+			gameWindow->draw(resultsTxt);
+
+			sf::Texture jacketArtTexture;
+			jacketArtTexture.loadFromFile(gameState.results[gameState.results.size() - 1].getSong().getJacketArtPath());
+			sf::Sprite jacketArt(jacketArtTexture);
+			sf::Vector2u jacketArtSize = jacketArtTexture.getSize();
+			jacketArt.setOrigin(jacketArtSize.x / 2.f, jacketArtSize.y / 2.f);
+			jacketArt.setScale(.5f, .5f);
+			jacketArt.setPosition(((SCRWIDTH / 2) - 350.f), 225.f);
+			gameWindow->draw(jacketArt);
+
+			sf::Text titleTxt = createText(gameState.results[0].getSong().getTitle(), 42, sf::Color::White, 750.f, 150.f);
+			titleTxt.setFont(basicFont);
+			gameWindow->draw(titleTxt);
+
+			sf::Text artistTxt = createText(gameState.results[0].getSong().getArtist(), 24, sf::Color::White, 750.f, 200.f);
+			artistTxt.setFont(basicFont);
+			gameWindow->draw(artistTxt);
+
+			sf::Text difficultyTxt = createText(to_string(gameState.results[0].getDifficulty()), 24, sf::Color::White, 750.f, 230.f);
+			difficultyTxt.setFont(basicFont);
+			gameWindow->draw(difficultyTxt);
+
+			string scoreS = string(7 - to_string(gameState.results[0].getScore()).length(), '0').append(to_string(gameState.results[0].getScore()));
+			sf::Text score = createText("Score: " + scoreS, 24, sf::Color::White, 750.f, 260.f);
+			score.setFont(basicFont);
+			gameWindow->draw(score);
+
+			sf::Texture jacketArtTexture2;
+			jacketArtTexture2.loadFromFile(gameState.results[1].getSong().getJacketArtPath());
+			sf::Sprite jacketArt2(jacketArtTexture2);
+			sf::Vector2u jacketArtSize2 = jacketArtTexture2.getSize();
+			jacketArt2.setOrigin(jacketArtSize2.x / 2.f, jacketArtSize2.y / 2.f);
+			jacketArt2.setScale(.5f, .5f);
+			jacketArt2.setPosition(((SCRWIDTH / 2) - 350.f), 525.f);
+			gameWindow->draw(jacketArt2);
+
+			sf::Text titleTxt2 = createText(gameState.results[1].getSong().getTitle(), 42, sf::Color::White, 750.f, 450.f);
+			titleTxt2.setFont(basicFont);
+			gameWindow->draw(titleTxt2);
+
+			sf::Text artistTxt2 = createText(gameState.results[1].getSong().getArtist(), 24, sf::Color::White, 750.f, 500.f);
+			artistTxt2.setFont(basicFont);
+			gameWindow->draw(artistTxt2);
+
+			sf::Text difficultyTxt2 = createText(to_string(gameState.results[1].getDifficulty()), 24, sf::Color::White, 750.f, 530.f);
+			difficultyTxt2.setFont(basicFont);
+			gameWindow->draw(difficultyTxt2);
+
+			string scoreS2 = string(7 - to_string(gameState.results[1].getScore()).length(), '0').append(to_string(gameState.results[1].getScore()));
+			sf::Text score2 = createText("Score: " + scoreS2, 24, sf::Color::White, 750.f, 560.f);
+			score2.setFont(basicFont);
+			gameWindow->draw(score2);
+
+			sf::Texture jacketArtTexture3;
+			jacketArtTexture3.loadFromFile(gameState.results[2].getSong().getJacketArtPath());
+			sf::Sprite jacketArt3(jacketArtTexture3);
+			sf::Vector2u jacketArtSize3 = jacketArtTexture3.getSize();
+			jacketArt3.setOrigin(jacketArtSize3.x / 2.f, jacketArtSize3.y / 2.f);
+			jacketArt3.setScale(.5f, .5f);
+			jacketArt3.setPosition(((SCRWIDTH / 2) - 350.f), 825.f);
+			gameWindow->draw(jacketArt3);
+
+			sf::Text titleTxt3 = createText(gameState.results[2].getSong().getTitle(), 42, sf::Color::White, 750.f, 750.f);
+			titleTxt3.setFont(basicFont);
+			gameWindow->draw(titleTxt3);
+
+			sf::Text artistTxt3 = createText(gameState.results[2].getSong().getArtist(), 24, sf::Color::White, 750.f, 800.f);
+			artistTxt3.setFont(basicFont);
+			gameWindow->draw(artistTxt3);
+
+			sf::Text difficultyTxt3 = createText(to_string(gameState.results[2].getDifficulty()), 24, sf::Color::White, 750.f, 830.f);
+			difficultyTxt3.setFont(basicFont);
+			gameWindow->draw(difficultyTxt3);
+
+			string scoreS3 = string(7 - to_string(gameState.results[2].getScore()).length(), '0').append(to_string(gameState.results[2].getScore()));
+			sf::Text score3 = createText("Score: " + scoreS3, 24, sf::Color::White, 750.f, 860.f);
+			score3.setFont(basicFont);
+			gameWindow->draw(score3);
+
+			sf::Text instructTxt = createText("Please press \"Start\" to return to title screen...", 42, sf::Color::White, 1000.f, 1000.f);
+			instructTxt.setFont(basicFont);
+			gameWindow->draw(instructTxt);
+
+			gameWindow->display();
+		} 
+		else if (gameState.getGameState() == GameState::CurrentState::ERROR_CODE) {
+			// TODO: TO BE CREATED.
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SOUNDOPTIONS) {
+
+			// Draw the text on the sound options menu
+			sf::Text titleTxt = createText("SOUND OPTIONS", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text sysAudioTxt = createText("System Volume", 36, sf::Color::White, 650.f, 300.f);
+			sysAudioTxt.setFont(basicFont);
+
+			float sysVol = windowsAudio.GetSystemVolume(WindowsAudio::VolumeUnit::Scalar) * 100.f;
+			sf::Text sysVolLevelTxt = createText(to_string(floor(sysVol)), 36, sf::Color::White, 1200.f, 300.f);
+			sysVolLevelTxt.setFont(basicFont);
+
+			sf::Text exitTxt = createText("EXIT", 36, sf::Color::White);
+			exitTxt.setFont(basicFont);
+			exitTxt.setOrigin(exitTxt.getLocalBounds().left + exitTxt.getLocalBounds().width / 2.0f, exitTxt.getLocalBounds().top + exitTxt.getLocalBounds().height / 2.0f);
+			exitTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - exitTxt.getLocalBounds().left), 800.f));
+
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 970.f));
+
+			sf::Text instruction2 = createText("BT-2 | DOWN", 24, sf::Color::White);
+			instruction2.setFont(basicFont);
+			instruction2.setOrigin(instruction2.getLocalBounds().left + instruction2.getLocalBounds().width / 2.0f, instruction2.getLocalBounds().top + instruction2.getLocalBounds().height / 2.0f);
+			instruction2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction2.getLocalBounds().left), 1000.f));
+
+			sf::Text instruction3 = createText("BT-4 | UP", 24, sf::Color::White);
+			instruction3.setFont(basicFont);
+			instruction3.setOrigin(instruction3.getLocalBounds().left + instruction3.getLocalBounds().width / 2.0f, instruction3.getLocalBounds().top + instruction3.getLocalBounds().height / 2.0f);
+			instruction3.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction3.getLocalBounds().left), 1030.f));
+
+			// Make the "hovered" over text red
+			switch (this->testMenuSoundOptionsPos) {
+				case 0:
+					sysAudioTxt.setFillColor(sf::Color::Red);
+					break;
+				case 1:
+					exitTxt.setFillColor(sf::Color::Red);
+					break;
+			}
+
+			if (this->testMenuSoundOptionsSelected) {
+				switch (this->testMenuSoundOptionsPos) {
+					case 0:
+						sysAudioTxt.setFillColor(sf::Color::Green);
+						break;
+				}
+			}
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(sysAudioTxt);
+			gameWindow->draw(sysVolLevelTxt);
+			gameWindow->draw(exitTxt);
+			gameWindow->draw(instruction1);
+			gameWindow->draw(instruction2);
+			gameWindow->draw(instruction3);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_NETWORKING) {
+			
+			// Draw the text on the networking menu
+			sf::Text titleTxt = createText("NETWORKING", 36, sf::Color::White);
+			titleTxt.setFont(basicFont);
+			titleTxt.setOrigin(titleTxt.getLocalBounds().left + titleTxt.getLocalBounds().width / 2.0f, titleTxt.getLocalBounds().top + titleTxt.getLocalBounds().height / 2.0f);
+			titleTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - titleTxt.getLocalBounds().left), 80.f));
+
+			sf::Text netStatTxt = createText("NETWORK STATUS", 36, sf::Color::White, 650.f, 300.f);
+			netStatTxt.setFont(basicFont);
+
+			sf::Text netStatStateTxt = createText(gameState.getOnlineStateStr(), 36, sf::Color::White, 1200.f, 300.f);
+			netStatStateTxt.setFont(basicFont);
+
+			// Add More Stuff Here
+
+			switch (gameState.getOnlineState()) {
+				case GameState::OnlineState::MAINTENENCE:
+					netStatStateTxt.setFillColor(sf::Color::Yellow);
+					break;
+				case GameState::OnlineState::OFFLINE:
+					netStatStateTxt.setFillColor(sf::Color::Red);
+					break;
+				case GameState::OnlineState::ONLINE:
+					netStatStateTxt.setFillColor(sf::Color::Green);
+					break;
+				default:
+					//Unused
+					break;
+			}
+
+			sf::Text testConnTxt = createText("TEST CONNECTION", 36, sf::Color::White);
+			testConnTxt.setFont(basicFont);
+			testConnTxt.setOrigin(testConnTxt.getLocalBounds().left + testConnTxt.getLocalBounds().width / 2.0f, testConnTxt.getLocalBounds().top + testConnTxt.getLocalBounds().height / 2.0f);
+			testConnTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - testConnTxt.getLocalBounds().left), 750.f));
+
+			sf::Text exitTxt = createText("EXIT", 36, sf::Color::White);
+			exitTxt.setFont(basicFont);
+			exitTxt.setOrigin(exitTxt.getLocalBounds().left + exitTxt.getLocalBounds().width / 2.0f, exitTxt.getLocalBounds().top + exitTxt.getLocalBounds().height / 2.0f);
+			exitTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - exitTxt.getLocalBounds().left), 800.f));
+
+			switch (this->testMenuNetworkingPos) {
+				case 0:
+					if (this->isNetworkChecking == true) {
+						testConnTxt.setString("CHECKING...");
+						testConnTxt.setFillColor(sf::Color::Yellow);
+						testConnTxt.setOrigin(testConnTxt.getLocalBounds().left + testConnTxt.getLocalBounds().width / 2.0f, testConnTxt.getLocalBounds().top + testConnTxt.getLocalBounds().height / 2.0f);
+						testConnTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - testConnTxt.getLocalBounds().left), 750.f));
+					}
+					else {
+						testConnTxt.setString("TEST CONNECTION");
+						testConnTxt.setFillColor(sf::Color::Red);
+						testConnTxt.setOrigin(testConnTxt.getLocalBounds().left + testConnTxt.getLocalBounds().width / 2.0f, testConnTxt.getLocalBounds().top + testConnTxt.getLocalBounds().height / 2.0f);
+						testConnTxt.setPosition(sf::Vector2f(((SCRWIDTH / 2) - testConnTxt.getLocalBounds().left), 750.f));
+					}
+					break;
+				case 1:
+					exitTxt.setFillColor(sf::Color::Red);
+					break;
+			}
+
+			sf::Text instruction1 = createText("BT-START | SELECT", 24, sf::Color::White);
+			instruction1.setFont(basicFont);
+			instruction1.setOrigin(instruction1.getLocalBounds().left + instruction1.getLocalBounds().width / 2.0f, instruction1.getLocalBounds().top + instruction1.getLocalBounds().height / 2.0f);
+			instruction1.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction1.getLocalBounds().left), 970.f));
+
+			sf::Text instruction2 = createText("BT-2 | DOWN", 24, sf::Color::White);
+			instruction2.setFont(basicFont);
+			instruction2.setOrigin(instruction2.getLocalBounds().left + instruction2.getLocalBounds().width / 2.0f, instruction2.getLocalBounds().top + instruction2.getLocalBounds().height / 2.0f);
+			instruction2.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction2.getLocalBounds().left), 1000.f));
+
+			sf::Text instruction3 = createText("BT-4 | UP", 24, sf::Color::White);
+			instruction3.setFont(basicFont);
+			instruction3.setOrigin(instruction3.getLocalBounds().left + instruction3.getLocalBounds().width / 2.0f, instruction3.getLocalBounds().top + instruction3.getLocalBounds().height / 2.0f);
+			instruction3.setPosition(sf::Vector2f(((SCRWIDTH / 2) - instruction3.getLocalBounds().left), 1030.f));
+
+			gameWindow->draw(titleTxt);
+			gameWindow->draw(netStatTxt);
+			gameWindow->draw(netStatStateTxt);
+			gameWindow->draw(testConnTxt);
+			gameWindow->draw(exitTxt);
+			gameWindow->draw(instruction1);
+			gameWindow->draw(instruction2);
+			gameWindow->draw(instruction3);
+
+			gameWindow->display();
+		}
+		else if (gameState.getGameState() == GameState::CurrentState::SHUTDOWN) {
+			logger.log(L"Shutting down - ending Screen Render Loop.");
+			break;
+		}
+	}
+
+	gameWindow->setActive(false);
+}
+
+/**
+ * Create a new text object.
+ * 
+ * @param text String of text
+ * @param charSize Size of the text
+ * @param color Color of the text
+ * @param xPos x position on screen
+ * @param yPos y position on screen
+ * @return reference to the text object
+ */
+sf::Text createText(string text, int charSize, sf::Color color, float xPos, float yPos) {
+	sf::Text newText;
+	newText.setString(text);
+	newText.setCharacterSize(charSize);
+	newText.setFillColor(color);
+	newText.setPosition(xPos, yPos);
+	return newText;
+}
+
+/**
+ * Create a new text object.
+ *
+ * @param text Wide String of text
+ * @param charSize Size of the text
+ * @param color Color of the text
+ * @param xPos x position on screen
+ * @param yPos y position on screen
+ * @return reference to the text object
+ */
+sf::Text createText(wstring text, int charSize, sf::Color color, float xPos, float yPos) {
+	sf::Text newText;
+	newText.setString(text);
+	newText.setCharacterSize(charSize);
+	newText.setFillColor(color);
+	newText.setPosition(xPos, yPos);
+	return newText;
+}
+
+/**
+ * Draws the initial startup screen.
+ * 
+ * @param gameWindow the render window
+ */
+void drawInit(sf::RenderWindow* gameWindow) {
+	
+	//Locally used for the update code only
+	Networking n;
+
+	sf::Font basicFont;
+	if (!basicFont.loadFromFile("Fonts/HonyaJi-Re.ttf")) {
+		cout << "Error loading font" << endl;
+	}
+	
+	sf::Text updateDateTxt = createText("URG:" + n.getLocalVersion(), 36, sf::Color::White, 60.f, 50.f);
+	updateDateTxt.setFont(basicFont);
+	gameWindow->draw(updateDateTxt);
+
+	sf::Text titleTxt = createText("UNTITLED RHYTHM GAME STARTUP...", 36, sf::Color::White, 130.f, 140.f);
+	titleTxt.setFont(basicFont);
+	gameWindow->draw(titleTxt);
+
+	sf::Text networkTxt = createText("NETWORK", 36, sf::Color::White, 200.f, 250.f);
+	networkTxt.setFont(basicFont);
+	gameWindow->draw(networkTxt);
+
+	sf::Text col1 = createText(":", 36, sf::Color::White, 1000.f, 250.f);
+	col1.setFont(basicFont);
+	gameWindow->draw(col1);
+
+	sf::Text updateTxt = createText("UPDATE CHECK", 36, sf::Color::White, 200.f, 300.f);
+	updateTxt.setFont(basicFont);
+	gameWindow->draw(updateTxt);
+
+	sf::Text col2 = createText(":", 36, sf::Color::White, 1000.f, 300.f);
+	col2.setFont(basicFont);
+	gameWindow->draw(col2);
+}
+
+/**
+ * Draws the network check text.
+ * 
+ * @param gameWindow the network text
+ * @param netChk the status of the network
+ */
+void drawNetChkTxt(sf::RenderWindow* gameWindow, int netChk) {
+
+	sf::Font basicFont;
+	if (!basicFont.loadFromFile("Fonts/HonyaJi-Re.ttf")) {
+		logger.logError(L"Error loading font.");
+	}
+
+	sf::Color grey(161, 161, 161, 255);
+
+	if (netChk == 1) {
+		sf::Text netChkTxt = createText("ONLINE", 36, sf::Color::Green, 1030.f, 250.f);
+		netChkTxt.setFont(basicFont);
+		gameWindow->draw(netChkTxt);
+	} else if (netChk == 2) {
+		sf::Text netChkTxt = createText("OFFLINE", 36, sf::Color::Red, 1030.f, 250.f);
+		netChkTxt.setFont(basicFont);
+		gameWindow->draw(netChkTxt);
+	} else if (netChk == 3) {
+		sf::Text netChkTxt = createText("MAINTENANCE", 36, grey, 1030.f, 250.f);
+		netChkTxt.setFont(basicFont);
+		gameWindow->draw(netChkTxt);
+	}
+}
+
+/**
+ * Draws the updates check text.
+ * 
+ * @param gameWindow the game window
+ * @param netChk status of the network
+ * @param updChk statys if there is updates
+ */
+void drawUpdChkTxt(sf::RenderWindow* gameWindow, int netChk, int updChk) {
+	sf::Font basicFont;
+	if (!basicFont.loadFromFile("Fonts/HonyaJi-Re.ttf")) {
+		logger.logError(L"Error loading font.");
+	}
+
+	//0 - Skipped
+	//1 - Updates availible
+	//2 - No Updates
+
+	if (netChk == 2 || netChk == 3) {
+		sf::Text updChkTxt = createText("SKIP", 36, sf::Color::Yellow, 1030.f, 300.f);
+		updChkTxt.setFont(basicFont);
+		gameWindow->draw(updChkTxt);
+	} 
+	else if (netChk == 1) {
+		if (updChk == 0) {
+			sf::Text updChkTxt = createText("SKIP", 36, sf::Color::Yellow, 1030.f, 300.f);
+			updChkTxt.setFont(basicFont);
+			gameWindow->draw(updChkTxt);
+		} else if(updChk == 1) {
+			sf::Text updChkTxt = createText("AVAILIBLE", 36, sf::Color::Green, 1030.f, 300.f);
+			updChkTxt.setFont(basicFont);
+			gameWindow->draw(updChkTxt);
+		} else if (updChk == 2) {
+			sf::Text updChkTxt = createText("NONE", 36, sf::Color::Green, 1030.f, 300.f);
+			updChkTxt.setFont(basicFont);
+			gameWindow->draw(updChkTxt);
+		}
+	}
+}
+
+/**
+ * Creates a new text object.
+ * 
+ * @param text String of Text
+ * @param charSize Size of Text
+ * @param color Color of text
+ * @return reference to new text object
+ */
+sf::Text createText(string text, int charSize, sf::Color color) {
+	sf::Text newText;
+	newText.setString(text);
+	newText.setCharacterSize(charSize);
+	newText.setFillColor(color);
+
+	return newText;
+}
+
+/**
+ * Increase the test menu position by 1.
+ * 
+ */
+void ScreenRenderer::testMenuPosPlus() {
+	this->testMenuPos++;
+	if (this->testMenuPos > (this->testMenuTotalOptions - 1)) {
+		this->testMenuPos = 0;
+	}
+}
+
+/**
+ * Decrease the test menu position by 1.
+ * 
+ */
+void ScreenRenderer::testMenuPosMinus() {
+	this->testMenuPos--;
+	if (this->testMenuPos < 0) {
+		this->testMenuPos = this->testMenuTotalOptions - 1;
+	}
+}
+
+/**
+ * Reset the position of the test menus.
+ * 
+ */
+void ScreenRenderer::testMenuReset() {
+	this->testMenuPos = 0;
+	this->testMenuIOChkPos = 0;
+}
+
+/**
+ * Get the test menu position.
+ * 
+ * @return the position of the test menu
+ */
+int ScreenRenderer::getTestMenuPos() {
+	return this->testMenuPos;
+}
+
+/**
+ * Inscrease io check menu by 1.
+ * 
+ */
+void ScreenRenderer::testMenuIOCheckPosPlus() {
+	this->testMenuIOChkPos++;
+	if (this->testMenuIOChkPos > (this->testMenuIOCheckTotalOptions - 1)) {
+		this->testMenuIOChkPos = 0;
+	}
+}
+
+/**
+ * Decrease io check menu by 1.
+ * 
+ */
+void ScreenRenderer::testMenuIOCheckPosMinus() {
+	this->testMenuIOChkPos--;
+	if (this->testMenuIOChkPos < 0) {
+		this->testMenuIOChkPos = this->testMenuIOCheckTotalOptions - 1;
+	}
+}
+
+/**
+ * Get the position of the io check menu.
+ * 
+ * @return io check menu position
+ */
+int ScreenRenderer::getTestMenuIOCheckPos() {
+	return this->testMenuIOChkPos;
+}
+
+/**
+ * Increase the sound options menu by 1.
+ * 
+ */
+void ScreenRenderer::testMenuSoundOptionsPosPlus() {
+	this->testMenuSoundOptionsPos++;
+	if (this->testMenuSoundOptionsPos > (this->testMenuSoundOptionsTotalOptions - 1)) {
+		this->testMenuSoundOptionsPos = 0;
+	}
+}
+
+/**
+ * Decrease the sound options menu by 1.
+ * 
+ */
+void ScreenRenderer::testMenuSoundOptionsPosMinus() {
+	this->testMenuSoundOptionsPos--;
+	if (this->testMenuSoundOptionsPos < 0) {
+		this->testMenuSoundOptionsPos = this->testMenuSoundOptionsTotalOptions - 1;
+	}
+}
+
+/**
+ * Get the position of the sound options menu.
+ * 
+ * @return sound options menu position
+ */
+int ScreenRenderer::getTestMenuSoundOptionsPos() {
+	return this->testMenuSoundOptionsPos;
+}
+
+/**
+ * Get the state of the sound options selected value.
+ * 
+ * @return state of the sound options selected value
+ */
+bool ScreenRenderer::getTestMenuSoundOptionsSelected() {
+	return this->testMenuSoundOptionsSelected;
+}
+
+/**
+ * Set the sound options value.
+ * 
+ * @param newValue the new state
+ */
+void ScreenRenderer::setTestMenuSoundOptionsSelected(bool newValue) {
+	this->testMenuSoundOptionsSelected = newValue;
+}
+
+/**
+ * Update the song hovered over based on the amount the wheel changed.
+ * 
+ * @param value amount wheel changed
+ */
+void ScreenRenderer::updateWheelRelation(int value) {
+	this->wheelRelation += value;
+
+	// <0 | Change Page Backwards (-1) and set wheelRelation to 290 to give a buffer
+	//0 - 50 | First Song Selected
+	//51 - 100 | Second Song Selected
+	//101 - 150 | Third Song Selected
+	//151 - 200 | Fourth Song Selected
+	//201 - 250 | Fifth Song Selected
+	//251 - 300 | Sixth Song Selected
+	// >300 | Change Page Forwards (1) and set whgeelRelation to 10 to give a buffer
+	int before = this->songSelectHoverOver;
+
+	if (this->wheelRelation < 0) {
+		this->wheelRelation = 290;
+		this->songSelectHoverOver = 5 ;
+		changeSongPage(-1);
+	}
+	else if (this->wheelRelation >= 0 && this->wheelRelation < 51) {
+		this->songSelectHoverOver = 0;
+	}
+	else if (this->wheelRelation >= 51 && this->wheelRelation < 101) {
+		this->songSelectHoverOver = 1;
+	}
+	else if (this->wheelRelation >= 101 && this->wheelRelation < 151) {
+		this->songSelectHoverOver = 2;
+	}
+	else if (this->wheelRelation >= 151 && this->wheelRelation < 201) {
+		this->songSelectHoverOver = 3;
+	}
+	else if (this->wheelRelation >= 201 && this->wheelRelation < 251) {
+		this->songSelectHoverOver = 4;
+	} 
+	else if (this->wheelRelation >= 251 && this->wheelRelation < 301) {
+		this->songSelectHoverOver = 5;
+	}
+	else if (this->wheelRelation >= 301) {
+		this->wheelRelation = 10;
+		this->songSelectHoverOver = 0;
+		changeSongPage(1);
+	}
+	
+	if (before != this->songSelectHoverOver) {
+		this->difficultyHoverOver = 0;
+	}
+}
+
+/**
+ * Change the song page.
+ * 
+ * @param direction direction to change the page
+ */
+void ScreenRenderer::changeSongPage(int direction) {
+	//1 = advance page forward ->
+	//-1 = advance page backwards <-
+
+	this->currentSongPage += direction;
+	if (this->currentSongPage <= 0) { //If it goes to 0 or less, put it on the max page
+		this->currentSongPage = this->numOfSongPages;
+	}
+	else if (this->currentSongPage > this->numOfSongPages) { //If it goes above max number of pages, put it back to first page
+		this->currentSongPage = 1;
+	}
+	
+	this->currentPageSongs.clear();
+	int startingPoint = (this->currentSongPage - 1) * 6;
+	for (int i = 0; i < 6; i++) {
+		this->currentPageSongs.push_back(this->songs[(startingPoint + i)]);
+	}
+
+	logger.log(L"Switching Song Select to Page: " + to_wstring(this->currentSongPage));
+}
+
+/**
+ * Change the difficulty selected.
+ * 
+ * @param direction to change the hover over
+ */
+void ScreenRenderer::changeDifficultySelected(int direction) {
+	//1 = advance difficulty forward ->
+	//-1 = advance difficulty backwards <-
+
+	this->difficultyHoverOver += direction;
+	if (this->difficultyHoverOver < 0) {
+		this->difficultyHoverOver = this->currentPageSongs[this->songSelectHoverOver].getNumberOfDifficulties() - 1;
+	}
+	else if (this->difficultyHoverOver >= this->currentPageSongs[this->songSelectHoverOver].getNumberOfDifficulties()) {
+		this->difficultyHoverOver = 0;
+	}
+}
+
+/**
+ * Get the position of the song that is being overed over.
+ * 
+ * @return position of the song being hovered over
+ */
+int ScreenRenderer::getSongHoverOver() {
+	return this->songSelectHoverOver;
+}
+
+/**
+ * Checks if the song is currently valid to play.
+ * 
+ * @return true if song is valid
+ */
+bool ScreenRenderer::isCurrentSongValidToPlay() {
+	return this->currentPageSongs[this->songSelectHoverOver].isSongValid();
+}
+
+/**
+ * Starts the game renderer.
+ * 
+ * @param window the game window
+ */
+void rThread(sf::RenderWindow* window) {
+	gameRenderer.render(window);
+}
+
+/**
+ * Get the song being hovered over.
+ * 
+ * @return song hovered over
+ */
+int ScreenRenderer::getSongSelectHoverOver() {
+	return this->songSelectHoverOver;
+}
+
+/**
+ * Get the difficulty being hovered over.
+ * 
+ * @return difficulty being hovered over
+ */
+int ScreenRenderer::getDifficultyHoverOver() {
+	return this->difficultyHoverOver;
+}
+
+/**
+ * Get the option being hovered over.
+ * 
+ * @return position of the item
+ */
+int ScreenRenderer::getTestMenuNetworkingPos() {
+	return this->testMenuNetworkingPos;
+}
+
+/**
+ * Increase the networking menu by 1.
+ *
+ */
+void ScreenRenderer::testMenuNetworkingPosPlus() {
+	this->testMenuNetworkingPos++;
+	if (this->testMenuNetworkingPos > (this->testMenuNetworkingTotalOptions - 1)) {
+		this->testMenuNetworkingPos = 0;
+	}
+}
+
+/**
+ * Decrease the networking menu by 1.
+ *
+ */
+void ScreenRenderer::testMenuNetworkingPosMinus() {
+	this->testMenuNetworkingPos--;
+	if (this->testMenuNetworkingPos < 0) {
+		this->testMenuNetworkingPos = this->testMenuNetworkingTotalOptions - 1;
+	}
+}
+
+/**
+ * Reset the screen renderer.
+ * 
+ */
+void ScreenRenderer::reset() {
+
+	this->songSelectHoverOver = 0;
+	this->wheelRelation = 25;
+	this->currentSongPage = 1;
+	this->difficultyHoverOver = 0;
+}
+
+/**
+ * Reset the screen renderer, game state and controller input.
+ * 
+ */
+void ScreenRenderer::resetAll() {
+	gameState.resetResults();
+	this->reset();
+	controllerInput.reset();
+}

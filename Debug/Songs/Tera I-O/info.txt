@@ -1,0 +1,8 @@
+songid-36
+title-Tera IO
+author-Camellia
+bpm-200
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-TeraIO.flac

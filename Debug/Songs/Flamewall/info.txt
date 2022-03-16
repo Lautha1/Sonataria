@@ -1,0 +1,8 @@
+songid-38
+title-Flamewall
+author-Camellia
+bpm-300
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-Flamewall.flac

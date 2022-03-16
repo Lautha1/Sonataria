@@ -1,0 +1,8 @@
+songid-20
+title-ETERNAL FLAMES [S_RON "IGNITE" HYPER EDIT]
+author-S'RON
+bpm-160
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-ETERNALFLAMES[S_RONIGNITEHYPER EDIT].flac

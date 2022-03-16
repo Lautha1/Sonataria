@@ -1,0 +1,8 @@
+songid-6
+title-BPM=RT
+author-t+pazolite
+bpm-245.25
+diffs-1
+jacketArt-jacket.png
+roundArt-round.png
+audioFile-BPM=RT.flac
