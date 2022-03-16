@@ -243,5 +243,14 @@
     <None Include="textFragment.shader">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="glslshad.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="videoFragment.shader">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="videoVertex.shader">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

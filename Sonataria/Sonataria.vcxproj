@@ -256,9 +256,12 @@ copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.shader" />
+    <None Include="glslshad.bin" />
     <None Include="textFragment.shader" />
     <None Include="textVertex.shader" />
     <None Include="vertex.shader" />
+    <None Include="videoFragment.shader" />
+    <None Include="videoVertex.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

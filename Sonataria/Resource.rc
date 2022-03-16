@@ -50,13 +50,17 @@ END
 // GLSLSHADER
 //
 
-IDR_VERTEX_SHADER       GLSLSHADER              "vertex.shader"
+IDR_VERTEX_SHADER          GLSLSHADER              "vertex.shader"
 
-IDR_FRAGMENT_SHADER     GLSLSHADER              "fragment.shader"
+IDR_FRAGMENT_SHADER        GLSLSHADER              "fragment.shader"
 
-IDR_TEXT_FRAGMENT_SHADER GLSLSHADER              "textFragment.shader"
+IDR_TEXT_FRAGMENT_SHADER   GLSLSHADER              "textFragment.shader"
 
-IDR_TEXT_VERTEX_SHADER  GLSLSHADER              "textVertex.shader"
+IDR_TEXT_VERTEX_SHADER     GLSLSHADER              "textVertex.shader"
+
+IDR_VIDEO_VERTEX_SHADER    GLSLSHADER              "videoVertex.shader"
+
+IDR_VIDEO_FRAGMENT_SHADER  GLSLSHADER              "videoFragment.shader"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
