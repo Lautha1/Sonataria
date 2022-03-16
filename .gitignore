@@ -26,7 +26,11 @@ bld/**/*.*
 ![Rr]elease/Textures/**/*.*
 ![Rr]elease/Songs/**/*.*
 
-# Don't track these file types
+# Whitelist the glew Release folders
+!dependencies/glew-2.1.0/bin/Release/**/*.*
+!dependencies/glew-2.1.0/lib/Release/**/*.*
+
+# Don't track audio and video file types
 *.wav
 *.flac
 *.mp4

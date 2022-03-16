@@ -86,6 +86,23 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;PacDrive32.lib;%(AdditionalDependencies);iphlpapi.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)dependencies\FreeImage\x32\FreeImage.dll $(OutputPath)
+copy $(SolutionDir)dependencies\FreeType\include\freetype.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\glew-2.1.0\bin\Release\Win32\glew32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\openal32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\PacDrive\bin\PacDrive32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-audio-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-graphics-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-network-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-system-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-window-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
+</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy Dependent DLLs to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -94,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;_ITERATOR_DEBUG_LEVEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -123,6 +140,23 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;%(AdditionalDependencies);PacDrive32.lib;iphlpapi.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)dependencies\FreeImage\x32\FreeImage.dll $(OutputPath)
+copy $(SolutionDir)dependencies\FreeType\include\freetype.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\glew-2.1.0\bin\Release\Win32\glew32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\openal32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\PacDrive\bin\PacDrive32.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-audio-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-graphics-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-network-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-system-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-window-d-2.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
+</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy Dependent DLLs to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -133,7 +167,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
