@@ -83,8 +83,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;PacDrive32.lib;%(AdditionalDependencies);iphlpapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\ffmpeg-4.5\lib;$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;avcodec.lib;avformat.lib;avutil.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-network-d.lib;sfml-window-d.lib;PacDrive32.lib;%(AdditionalDependencies);iphlpapi.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)dependencies\FreeImage\x32\FreeImage.dll $(OutputPath)
@@ -98,7 +98,10 @@ copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-network-d-2.dll  $(Outp
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-system-d-2.dll  $(OutputPath)
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-window-d-2.dll  $(OutputPath)
 copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
-</Command>
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avcodec-59.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avformat-59.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avutil-57.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy Dependent DLLs to output directory</Message>
@@ -137,8 +140,8 @@ copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;%(AdditionalDependencies);PacDrive32.lib;iphlpapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\ffmpeg-4.5\lib;$(SolutionDir)dependencies\FreeImage\x32\;$(SolutionDir)dependencies\SFML\SFML-2.5.1\lib;$(SolutionDir)dependencies\PacDrive\lib;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32;$(SolutionDir)dependencies\FreeType\lib;$(SolutionDir)dependencies\uFCoder\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FreeImage.lib;opengl32.lib;glu32.lib;glew32.lib;freetype.lib;legacy_stdio_definitions.lib;uFCoder-x86.lib;avcodec.lib;avformat.lib;avutil.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-network.lib;sfml-window.lib;PacDrive32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)dependencies\FreeImage\x32\FreeImage.dll $(OutputPath)
@@ -152,7 +155,10 @@ copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-network-d-2.dll  $(Outp
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-system-d-2.dll  $(OutputPath)
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-window-d-2.dll  $(OutputPath)
 copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
-</Command>
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avcodec-59.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avformat-59.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avutil-57.dll  $(OutputPath)
+copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy Dependent DLLs to output directory</Message>
@@ -211,6 +217,7 @@ copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
     <ClCompile Include="unzip.cpp" />
     <ClCompile Include="TextureList.cpp" />
     <ClCompile Include="UserData.cpp" />
+    <ClCompile Include="VideoShader.cpp" />
     <ClCompile Include="VideoSprite.cpp" />
     <ClCompile Include="WheelNote.cpp" />
     <ClCompile Include="WindowsAudio.cpp" />
@@ -249,6 +256,7 @@ copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
     <ClInclude Include="TextureList.h" />
     <ClInclude Include="UserData.h" />
     <ClInclude Include="Vectors.h" />
+    <ClInclude Include="VideoShader.h" />
     <ClInclude Include="VideoSprite.h" />
     <ClInclude Include="WheelNote.h" />
     <ClInclude Include="WindowsAudio.h" />
