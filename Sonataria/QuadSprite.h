@@ -1,6 +1,6 @@
 #pragma once
 #include "OpenGLSprite.h"
-#include "Transformable.h"
+#include "Animatable.h"
 
 // Full vertex data (for easier initialization)
 struct QuadVertData {
@@ -8,7 +8,7 @@ struct QuadVertData {
 	Vector2 tex;
 };
 
-class QuadSprite : public OpenGLSprite, public Transformable
+class QuadSprite : public OpenGLSprite, public Animatable
 {
 public:
 	QuadSprite(const std::wstring& newName);

@@ -203,6 +203,7 @@ copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</
     <ClCompile Include="ControllerInput.cpp" />
     <ClCompile Include="GameRenderer.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Animatable.cpp" />
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="KeyboardState.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -241,6 +242,7 @@ copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</
     <ClInclude Include="ControllerInput.h" />
     <ClInclude Include="GameRenderer.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="Animatable.h" />
     <ClInclude Include="Key.h" />
     <ClInclude Include="KeyboardState.h" />
     <ClInclude Include="Logger.h" />
