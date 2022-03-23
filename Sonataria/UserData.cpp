@@ -50,3 +50,7 @@ bool UserData::isValidUser() {
 	}
 	return false;
 }
+
+string UserData::getDisplayName() {
+	return this->DisplayName;
+}

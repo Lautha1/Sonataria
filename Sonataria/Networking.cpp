@@ -1,10 +1,12 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 
+
 #include <iostream>
+#include "Logger.h"
 #include "Networking.h"
 #include <winsock2.h>
-#include "Logger.h"
+#include "HTTPRequest.hpp"
 using namespace std;
 
 Networking network;
@@ -26,7 +28,10 @@ const int PORT = 57015;
  */
 Networking::Networking() {
 	// Set the version of the game
-	this->version = "20220120-J-01";
+	this->version = "20220323-J-01";
+
+	// Set the information for connecting to the server
+	this->ServerAddress = "http://127.0.0.1:3000";
 }
 
 /**
@@ -44,6 +49,39 @@ Networking::~Networking() {
  */
 string Networking::getLocalVersion() {
 	return this->version;
+}
+
+bool Networking::GetProfileData(string cardID) {
+	try {
+		// Build the URL for the connection
+		string URL = this->ServerAddress + "/data/profile/" + cardID;
+		http::Request request{ URL };
+
+		logger.log("Attempting to retrieve profile data... [" + URL + "]");
+
+		// Set a GET Request
+		const auto response = request.send("GET", "", {}, std::chrono::seconds(5));
+
+		if (response.status.code == http::Status::Ok) {
+			// Store the response into data
+			string data = string{ response.body.begin(), response.body.end() };
+
+			// TODO: SAVE THE DATA INTO USERDATA
+
+			logger.log(data);
+
+			return true;
+		}
+		else {
+			logger.logError("Invalid HTTP Status Code: " + to_string(response.status.code));
+			return false;
+		}
+	}
+	catch (const std::exception& e) {
+		logger.logError("Login Request Failed: ");
+		logger.logError(e.what());
+		return false;
+	}
 }
 
 /**

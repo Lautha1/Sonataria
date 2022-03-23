@@ -12,7 +12,9 @@ class UserData {
 		~UserData();
 		void clearData();
 		void setUserData(int, string);
+		
 		bool isValidUser();
+		string getDisplayName();
 
 	private:
 		string DisplayName;

@@ -17,13 +17,19 @@ class Networking {
 	public:
 		Networking();
 		~Networking();
+
+		string getLocalVersion();
+
+		bool GetProfileData(string);
+
 		int checkConnection();
 		string checkForUpdates();
-		string getLocalVersion();
 		bool downloadUpdate();
+		
 
 	private:
 		string version;
+		string ServerAddress;
 };
 
 extern Networking network;

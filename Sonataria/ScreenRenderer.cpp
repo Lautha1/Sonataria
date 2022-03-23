@@ -12,6 +12,7 @@
 #include <tchar.h>
 #include "TextureList.h"
 #include "unzip.h"
+#include "UserData.h"
 #include "WindowsAudio.h"
 using namespace std;
 
@@ -58,6 +59,7 @@ int updateDownloadStatus = -1;
 void execStartupChecks();
 void execDownloadUpdate();
 void rThread(sf::RenderWindow* window);
+void checkForProfile(int& loginComplete);
 
 /**
  * Constructor for the screen renderer.
@@ -335,11 +337,15 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 	// Login Thread States
 	/*
-	* 0 - Not completed
-	* 1 - Successfully Completed
-	* 2 - Not Online
+	* -1 - Thread Not Started
+	* 0  - Not completed
+	* 1  - Successfully Completed
+	* 2  - Not Successful For X Reason
 	*/
-	int loginComplete = 1;
+	int loginComplete = -1;
+
+	// Forward declaration of this thread for use in login
+	sf::Thread loginThread(&checkForProfile, loginComplete);
 
 	// The rendering loop
 	/*
@@ -413,23 +419,43 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				if (RFIDCardReader::getCardReader()->getLastCardData() != "") {
 					// TODO: LAUNCH THE THREAD TO DO THE LOGIN
 
+					switch (loginComplete) {
+						case -1:
+							// Launch a thread to attempt getting the profile data
+							loginThread.launch();
 
-					if (loginComplete == 1) {
-						gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
-						controllerInput.reset();
-						timerRunning = false;
-					}
-					else if (loginComplete == 2) {
-						// Can't login as we are offline or unable to connect
-						// TODO: SHOW ERROR AND ERROR NOISE
+							// Set variable so we know it is checking
+							loginComplete = 0;
+							break;
+						case 0:
+							// TODO: Display a graphic showing that it is attempting to login
+							break;
+						case 1:
+							if (userData.isValidUser()) {
+								// User has a valid profile and already exists
+								gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
+							}
+							else {
+								// User doesn't have a profile yet, go to profile creation
+								// TODO: PROFILE CREATION
+								gameState.setGameState(GameState::CurrentState::CREATE_PROFILE);
+							}
+							controllerInput.reset();
+							timerRunning = false;
+							break;
+						case 2:
+							// Can't login as we were unable to connect or some other error occurred
+							// TODO: SHOW ERROR AND ERROR NOISE
+							break;
 					}
 				}
 			//}
+			// TODO: ELSE BLOCK: DRAW GRAPHICS FOR IF SERVER IS OFFLINE OR ON MAINT FOR PRELOGIN
 		}
 
 		// DRAW ALL OTHER GRAPHICS
 		{
-			// TODO: DRAW GRAPHICS FOR IF SERVER IS OFFLINE OR ON MAINT FOR PRELOGIN
+			
 		}
 
 		// Switch over to the text shader
@@ -994,7 +1020,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				testMenuTitle->reset();
 				testMenuTitle->translate(0.f, 900.f, 0.f);
 				testMenuTitle->scale(0.5f);
-				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, RFIDCardReader::getCardReader()->getLastCardData(), ALIGNMENT::CENTERED);
+				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, userData.getDisplayName(), ALIGNMENT::CENTERED);
 			}
 		}
 
@@ -1447,4 +1473,23 @@ void execDownloadUpdate() {
 void rThread(sf::RenderWindow* window) {
 	GameRenderer gameRenderer;
 	gameRenderer.render(window);
+}
+
+void checkForProfile(int& loginComplete) {
+	// Grab the card ID to check for a profile
+	string cardID = RFIDCardReader::getCardReader()->getLastCardData();
+
+	// Clear out the last user data if any
+	userData.clearData();
+
+	// Attempt to get the profile data | Set login complete when done
+	// IF SUCCESS set loginComplete = 1
+	// IF FAILED set loginComplete = 2
+	if (network.GetProfileData(cardID)) {
+		// Grabbed the profile data successfully
+		loginComplete = 1;
+	}
+	else {
+		loginComplete = 2;
+	}
 }
