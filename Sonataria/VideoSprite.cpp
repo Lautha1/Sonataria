@@ -11,6 +11,7 @@ VideoSprite::VideoSprite(const std::wstring& newName) : QuadSprite(newName)
 VideoSprite::~VideoSprite()
 {
     delete myDecoder;
+    glDeleteTextures(3, textures);
 }
 
 bool VideoSprite::loadVideo(const char* videoFilename)
@@ -27,20 +28,18 @@ bool VideoSprite::loadVideo(const char* videoFilename)
     const int height = myDecoder->getHeight();
 
     // Generate the textures in OpenGL state only
-    glGenTextures(1, &this->textures[0]);
-    glBindTexture(GL_TEXTURE_2D, this->textures[0]);
+    glGenTextures(3, textures);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glGenTextures(1, &this->textures[1]);
-    glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width / 2, height / 2, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glGenTextures(1, &this->textures[2]);
-    glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+    glBindTexture(GL_TEXTURE_2D, textures[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width / 2, height / 2, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -52,11 +51,10 @@ bool VideoSprite::loadVideo(const char* videoFilename)
 	return true;
 }
 
-void VideoSprite::update(int elapsedTimeMillis)
+void VideoSprite::update(double elapsedTimeSec)
 {
-    // Attempt to update the video frame
-    if (!videoDone) {
-        if (!myDecoder->decodeFrame()) {
+    if (!videoDone && elapsedTimeSec >= curFrameTimestampSec) {
+        if ((curFrameTimestampSec = myDecoder->decodeFrame()) < 0) {
             myDecoder->closeDecoder();
             videoDone = true;
         }
@@ -67,14 +65,23 @@ void VideoSprite::render(PROJECTION projType) const
 {
     // Bind the three texture planes to the first three texture targets
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, this->textures[0]);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+    glBindTexture(GL_TEXTURE_2D, textures[2]);
 
     // Render the underlying quad
     QuadSprite::render(projType);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

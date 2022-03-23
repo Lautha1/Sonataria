@@ -152,18 +152,19 @@ bool TextureLoader::BindTexture(const unsigned int texID)
 	}
 
 	//otherwise, binding failed
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return false;
 }
 
 void TextureLoader::UnloadAllTextures()
 {
-	// start at the begginning of the texture map
-	std::map<unsigned int, GLuint>::iterator i = m_texID.begin();
+	// start at the beginning of the texture map
+	auto i = m_texID.begin();
 
-	// Unload the textures untill the end of the texture map is found
+	// Unload the textures until the end of the texture map is found
 	while (i != m_texID.end()) {
 		UnloadTexture(i->first);
-		i++;
+		++i;
 	}
 
 	// clear the texture map

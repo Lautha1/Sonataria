@@ -10,7 +10,7 @@ public:
 	virtual ~VideoSprite();
 
 	bool loadVideo(const char* videoFilename);
-	void update(int elapsedTimeMillis);
+	void update(double elapsedTimeSec);
 	virtual void render(PROJECTION projType) const;
 
 protected:
@@ -19,6 +19,7 @@ protected:
 
 	// Playback state
 	bool videoDone;
+	double curFrameTimestampSec;
 
 	// Internal texture IDs
 	GLuint textures[3];

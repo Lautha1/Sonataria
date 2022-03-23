@@ -42,7 +42,7 @@ protected:
 
 	// Singleton model (prevent default copy constructor and assignment operator)
 	TextureLoader(const TextureLoader& tm) {}
-	TextureLoader& operator=(const TextureLoader& tm) {}
+	TextureLoader& operator=(const TextureLoader& tm) { return (*this); }
 
 	// Singleton instance
 	static TextureLoader* m_inst;

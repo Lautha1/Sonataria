@@ -245,6 +245,9 @@ bool AVDecode::prepareToDecode(const char* src_filename) {
         video_dst_bufsize = ret;
     }
 
+    /* Compute time base (in seconds) for pkt->pts */
+    pkt_time_base = video_dec_ctx->pkt_timebase.num/(double)video_dec_ctx->pkt_timebase.den;
+
     /* dump input information to stderr */
     av_dump_format(fmt_ctx, 0, src_filename, 0);
 
@@ -268,21 +271,22 @@ bool AVDecode::prepareToDecode(const char* src_filename) {
     return true;
 }
 
-bool AVDecode::decodeFrame() {
+double AVDecode::decodeFrame() {
     /* read frames from the file */
     while (av_read_frame(fmt_ctx, pkt) >= 0) {
         if (pkt->stream_index == video_stream_idx) {
+            curFrameTimestampMsec = pkt->pts * pkt_time_base;
             int ret = decode_packet(video_dec_ctx, pkt);
             av_packet_unref(pkt);
-            if (ret < 0) { return false; }
-            return true;
+            if (ret < 0) { return -1.0; }
+            return curFrameTimestampMsec;
         }
 
         // Not a video packet so get another one
         av_packet_unref(pkt);
     }
 
-    return false;
+    return -1.0;
 }
 
 void AVDecode::closeDecoder() {

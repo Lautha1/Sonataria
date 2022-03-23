@@ -12,14 +12,14 @@ const vec3 B_cf = vec3(1.164383,  2.017232,  0.000000);
 const vec3 offset = vec3(-0.0625, -0.5, -0.5);
 
 // Main input and output
-in vec2 f_uv;
+in vec4 f_uv;
 out vec4 frag_color;
 
 void main() {
 	// Read the individual y, u, and v values
-	float y = texture(f_yTexture, f_uv).r;
-	float u = texture(f_uTexture, f_uv).r;
-	float v = texture(f_vTexture, f_uv).r;
+	float y = texture(f_yTexture, f_uv.xy).r;
+	float u = texture(f_uTexture, f_uv.xy).r;
+	float v = texture(f_vTexture, f_uv.xy).r;
 
 	// Construct the vector and offset the values
 	vec3 yuv = vec3(y, u, v);

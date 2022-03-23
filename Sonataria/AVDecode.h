@@ -17,7 +17,7 @@ public:
 	~AVDecode();
 
 	bool prepareToDecode(const char* src_filename);
-	bool decodeFrame();
+	double decodeFrame();
 	void closeDecoder();
 
 	void setTextureIDs(GLuint yTexID = 0, GLuint uTexID = 0, GLuint vTexID = 0);
@@ -42,6 +42,8 @@ protected:
 	AVFrame* frame;
 	AVPacket* pkt;
 	int video_frame_count;
+	double pkt_time_base;
+	double curFrameTimestampMsec;
 
 	GLuint textureIDs[3];
 

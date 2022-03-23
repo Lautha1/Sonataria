@@ -1,22 +1,25 @@
 ﻿#define _USE_MATH_DEFINES
-
 #include <cmath>
+
 #include <fstream>
 #include <chrono>
+#include <iostream>
+#include <thread>
+using namespace std;
+
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+
+#include <windows.h>
+
 #include "ControllerInput.h"
 #include "GameRenderer.h"
 #include "GameState.h"
-#include <iostream>
 #include "Results.h"
-#include <SFML/Audio.hpp>
-#include <thread>
-#include <queue>
 #include "Logger.h"
-#include <sstream>
-using namespace std;
 
-#include <windows.h>
-#include "resource.h"
+#include "QuadSprite.h"
+#include "VideoSprite.h"
 
 #include "OpenGLText.h"
 #include "TextureList.h"
@@ -86,6 +89,7 @@ GameRenderer::GameRenderer() {
 	wheelPixelNote = new QuadSprite(L"Wheel Note in Pixel Units");
 	holdPixelNote = new QuadSprite(L"Hold Note in Pixel Units");
 	noteJudgement = new QuadSprite(L"Judgement for Notes");
+	testVideo = new VideoSprite(L"Test video sprite");
 }
 
 /**
@@ -101,6 +105,7 @@ GameRenderer::~GameRenderer() {
 	delete wheelPixelNote;
 	delete holdPixelNote;
 	delete noteJudgement;
+	delete testVideo;
 }
 
 /**
@@ -220,6 +225,25 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			logger.logError(L"Failed to initialize text shader");
 			exit(1);
 		}
+
+		// INITIALIZE VIDEO SHADER
+		if (!videoShader.initShader()) {
+			logger.logError(L"Failed to initialize video shader");
+			exit(1);
+		}
+
+		// Initialize videos
+		//if (!testVideo->loadVideo("Songs/+ERABY+E CONNEC+10N/+ERABY+ECONNEC+10N.mp4"))
+		//{
+		//	logger.logError("Failed to load video 'Songs/+ERABY+E CONNEC+10N/+ERABY+ECONNEC+10N.mp4'");
+		//}
+
+		// Link video sprite and shader
+		//testVideo->initSprite(videoShader.getProgram());
+
+		// Load first frame
+		//testVideo->scale(2.f * (16.f / 9.f), -2.f, 1.f);
+		//testVideo->update(0);
 	}
 
 	// INITIALIZE TEXT
@@ -355,7 +379,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			// Clear the depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-			// Draw everything else
+			// Draw track and track sprites
 			track->render(PROJECTION::PERSPECTIVE);
 
 			// Draw all text
@@ -390,6 +414,9 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		fsec fs = currentSongPosition - songStartTime;
 		ms currentSongOffset = std::chrono::duration_cast<ms>(fs);
 		// Use currentSongOffset.count() to get millisecond value
+
+		// Allow video to update
+		//testVideo->update((double)fs.count());
 
 		// If the service button was pressed, stop the song
 		if (gameState.checkService() || gameState.getGameState() == GameState::CurrentState::SHUTDOWN) {
@@ -1141,16 +1168,22 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 			// ** END INPUT **
 
-			// Use the sprite shader
-			glUseProgram(spriteShader.getProgram());
+			// Draw background video
+			//glUseProgram(videoShader.getProgram());
+			//testVideo->render(PROJECTION::ORTHOGRAPHIC);
 
 			// ** MAKE SURE TO MIND ORDER IF YOU REDRAW ANYTHING **
 
-			// Draw the background
-			background->render(PROJECTION::ORTHOGRAPHIC);
-
 			// Clear the depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
+
+			// Use the sprite shader
+			glUseProgram(spriteShader.getProgram());
+
+			// Draw judgement text
+			if (currentSongOffset.count() < clearTime) {
+				noteJudgement->render(PROJECTION::ORTHOGRAPHIC);
+			}
 
 			// Draw all other graphics
 			track->render(PROJECTION::PERSPECTIVE);
@@ -1162,10 +1195,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			drawLaneNotes(5, lane5, currentSongOffset, missCount, distance);
 			drawWheelNotes(wheel, currentSongOffset, missCount, distance);
 			OpenGLSprite::popMatrix();
-
-			if (currentSongOffset.count() < clearTime) {
-				noteJudgement->render(PROJECTION::ORTHOGRAPHIC);
-			}
 
 			// Draw all text
 			glUseProgram(textShader.getProgram());

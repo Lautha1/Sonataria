@@ -88,19 +88,32 @@
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)dependencies\FreeImage\x32\FreeImage.dll $(OutputPath)
+
 copy $(SolutionDir)dependencies\FreeType\include\freetype.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\glew-2.1.0\bin\Release\Win32\glew32.dll  $(OutputPath)
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\openal32.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\PacDrive\bin\PacDrive32.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-audio-d-2.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-graphics-d-2.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-network-d-2.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-system-d-2.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\SFML\SFML-2.5.1\bin\sfml-window-d-2.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\uFCoder\bin\uFCoder-x86.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avcodec-59.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avformat-59.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\avutil-57.dll  $(OutputPath)
+
 copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</Command>
     </PostBuildEvent>
     <PostBuildEvent>

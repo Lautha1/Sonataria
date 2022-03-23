@@ -6,19 +6,18 @@
  * @author Julia Butenhoff
  */
 #pragma once
-#include <SFML/Graphics.hpp>
-#include <GL/glew.h>
-
 #include <vector>
 using namespace std;
 
-#include "QuadSprite.h"
-#include "SlicedSprite.h"
 #include "SpriteShader.h"
 #include "TextShader.h"
-#include "OpenGLFont.h"
+#include "VideoShader.h"
+
 #include "Note.h"
 #include "WheelNote.h"
+
+class QuadSprite;
+class VideoSprite;
 
 enum JUDGEMENT {
 	PERFECT_HIT,
@@ -35,6 +34,7 @@ class GameRenderer {
 
 		SpriteShader spriteShader;
 		TextShader textShader;
+		VideoShader videoShader;
 
 		QuadSprite* track;
 		QuadSprite* background;
@@ -46,6 +46,8 @@ class GameRenderer {
 		QuadSprite* holdPixelNote;
 
 		QuadSprite* noteJudgement;
+
+		VideoSprite* testVideo;
 
 	public:
 		GameRenderer();
