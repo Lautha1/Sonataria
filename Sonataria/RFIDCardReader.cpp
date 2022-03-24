@@ -165,4 +165,5 @@ string RFIDCardReader::getLastCardData() {
 
 void RFIDCardReader::clearLastCardData() {
     lastCardData = "";
+    cardUID = "";
 }

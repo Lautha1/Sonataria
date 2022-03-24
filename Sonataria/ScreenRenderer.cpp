@@ -1492,4 +1492,7 @@ void checkForProfile(int& loginComplete) {
 	else {
 		loginComplete = 2;
 	}
+	
+	// Clear the card out of the RFID Reader
+	RFIDCardReader::getCardReader()->clearLastCardData();
 }

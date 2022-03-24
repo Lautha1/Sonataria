@@ -1,5 +1,6 @@
 #include "GameState.h"
 #include <iostream>
+#include "RFIDCardReader.h"
 
 GameState gameState;
 
@@ -68,8 +69,8 @@ void GameState::onStateLoad(GameState::CurrentState stateLoaded) {
 		case GameState::CurrentState::TITLE_SCREEN:
 			resetResults();
 			break;
-		default:
-			//Do Nothing
+		case GameState::CurrentState::PRELOGIN:
+			RFIDCardReader::getCardReader()->clearLastCardData();
 			break;
 	}
 }
