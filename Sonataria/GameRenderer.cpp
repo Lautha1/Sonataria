@@ -17,6 +17,7 @@ using namespace std;
 #include "GameState.h"
 #include "Results.h"
 #include "Logger.h"
+#include "UserData.h"
 
 #include "QuadSprite.h"
 #include "VideoSprite.h"
@@ -128,8 +129,11 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 	gameState.setSpeed(stoi(gameState.getSongPlaying().getBPM()));
 	oldSpeed = gameState.getSpeed();
 
-	// TODO: IF USER HAS CUSTOM SPEED CHANGE IT NOW
-	//oldSpeed = userSettings.getSpeed();
+	// If the user has a custom speed, set it now
+	if (userData.useCustomSpeed()) {
+		oldSpeed = userData.getGameSpeed();
+		gameState.setSpeed(oldSpeed);
+	}
 
 	// Set the judgement "clear" off screen time back to default at 0
 	float clearTime = 0;
@@ -1073,100 +1077,105 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			}
 
 			// Delete notes if too far
+			{
+				// Lane 1 Note
+				while (!lane1.empty() && !lane1[0].isHold() && lane1[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1[0].getEndTime() + MISS_WINDOW) {
+					missCount++;
 
-			// Lane 1 Note
-			while (!lane1.empty() && !lane1[0].isHold() && lane1[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1[0].getEndTime() + MISS_WINDOW) {
-				missCount++;
+					drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
 
-				drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
+					lane1.erase(lane1.begin());
+				}
 
-				lane1.erase(lane1.begin());
+				// Lane 1 Hold
+				while (!lane1.empty() && lane1[0].isHold() && lane1[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1[0].getEndTime() + MISS_WINDOW) {
+					// Don't need to apply a miss as the holds miss are taken care of elsewhere
+
+					lane1.erase(lane1.begin());
+				}
+
+				// Lane 2 Note
+				while (!lane2.empty() && !lane2[0].isHold() && lane2[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2[0].getEndTime() + MISS_WINDOW) {
+					missCount++;
+
+					drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
+
+					lane2.erase(lane2.begin());
+				}
+
+				// Lane 2 Hold
+				while (!lane2.empty() && lane2[0].isHold() && lane2[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2[0].getEndTime() + MISS_WINDOW) {
+					// Don't need to apply a miss as the holds miss are taken care of elsewhere
+
+					lane2.erase(lane2.begin());
+				}
+
+				// Lane 3 Note
+				while (!lane3.empty() && !lane3[0].isHold() && lane3[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3[0].getEndTime() + MISS_WINDOW) {
+					missCount++;
+
+					drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
+
+					lane3.erase(lane3.begin());
+				}
+
+				// Lane 3 Hold
+				while (!lane3.empty() && lane3[0].isHold() && lane3[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3[0].getEndTime() + MISS_WINDOW) {
+					// Don't need to apply a miss as the holds miss are taken care of elsewhere
+
+					lane3.erase(lane3.begin());
+				}
+
+				// Lane 4 Note
+				while (!lane4.empty() && !lane4[0].isHold() && lane4[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4[0].getEndTime() + MISS_WINDOW) {
+					missCount++;
+
+					drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
+
+					lane4.erase(lane4.begin());
+				}
+
+				// Lane 4 Hold
+				while (!lane4.empty() && lane4[0].isHold() && lane4[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4[0].getEndTime() + MISS_WINDOW) {
+					// Don't need to apply a miss as the holds miss are taken care of elsewhere
+
+					lane4.erase(lane4.begin());
+				}
+
+				// Lane 5 Note
+				while (!lane5.empty() && !lane5[0].isHold() && lane5[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5[0].getEndTime() + MISS_WINDOW) {
+					missCount++;
+
+					drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
+
+					lane5.erase(lane5.begin());
+				}
+
+				// Lane 5 Hold
+				while (!lane5.empty() && lane5[0].isHold() && lane5[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5[0].getEndTime() + MISS_WINDOW) {
+					// Don't need to apply a miss as the holds miss are taken care of elsewhere
+
+					lane5.erase(lane5.begin());
+				}
+
+				// Wheel Continuous
+				while (!wheel.empty() && !wheel[0].isSlam() && currentSongOffset.count() > wheel[0].getEndTime()) {
+					// Don't need to apply a miss as the miss is taken care of elsewhere
+
+					wheel.erase(wheel.begin());
+
+					// Reset controller last
+					controllerInput.resetLast();
+				}
+
+				// Wheel slams are taken care of in the input section
 			}
-
-			// Lane 1 Hold
-			while (!lane1.empty() && lane1[0].isHold() && lane1[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane1[0].getEndTime() + MISS_WINDOW) {
-				// Don't need to apply a miss as the holds miss are taken care of elsewhere
-
-				lane1.erase(lane1.begin());
-			}
-
-			// Lane 2 Note
-			while (!lane2.empty() && !lane2[0].isHold() && lane2[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2[0].getEndTime() + MISS_WINDOW) {
-				missCount++;
-
-				drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
-
-				lane2.erase(lane2.begin());
-			}
-
-			// Lane 2 Hold
-			while (!lane2.empty() && lane2[0].isHold() && lane2[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane2[0].getEndTime() + MISS_WINDOW) {
-				// Don't need to apply a miss as the holds miss are taken care of elsewhere
-
-				lane2.erase(lane2.begin());
-			}
-
-			// Lane 3 Note
-			while (!lane3.empty() && !lane3[0].isHold() && lane3[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3[0].getEndTime() + MISS_WINDOW) {
-				missCount++;
-
-				drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
-
-				lane3.erase(lane3.begin());
-			}
-
-			// Lane 3 Hold
-			while (!lane3.empty() && lane3[0].isHold() && lane3[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane3[0].getEndTime() + MISS_WINDOW) {
-				// Don't need to apply a miss as the holds miss are taken care of elsewhere
-
-				lane3.erase(lane3.begin());
-			}
-
-			// Lane 4 Note
-			while (!lane4.empty() && !lane4[0].isHold() && lane4[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4[0].getEndTime() + MISS_WINDOW) {
-				missCount++;
-
-				drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
-
-				lane4.erase(lane4.begin());
-			}
-
-			// Lane 4 Hold
-			while (!lane4.empty() && lane4[0].isHold() && lane4[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane4[0].getEndTime() + MISS_WINDOW) {
-				// Don't need to apply a miss as the holds miss are taken care of elsewhere
-
-				lane4.erase(lane4.begin());
-			}
-
-			// Lane 5 Note
-			while (!lane5.empty() && !lane5[0].isHold() && lane5[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5[0].getEndTime() + MISS_WINDOW) {
-				missCount++;
-
-				drawJudgement(JUDGEMENT::MISS, currentSongOffset, clearTime);
-
-				lane5.erase(lane5.begin());
-			}
-
-			// Lane 5 Hold
-			while (!lane5.empty() && lane5[0].isHold() && lane5[0].getYPos() > DISTANCE_TO_PERFECT + MISS_WINDOW && currentSongOffset.count() > lane5[0].getEndTime() + MISS_WINDOW) {
-				// Don't need to apply a miss as the holds miss are taken care of elsewhere
-
-				lane5.erase(lane5.begin());
-			}
-
-			// Wheel Continuous
-			while (!wheel.empty() && !wheel[0].isSlam() && currentSongOffset.count() > wheel[0].getEndTime()) {
-				// Don't need to apply a miss as the miss is taken care of elsewhere
-
-				wheel.erase(wheel.begin());
-
-				// Reset controller last
-				controllerInput.resetLast();
-			}
-
-			// Wheel slams are taken care of in the input section
 
 			// ** END INPUT **
+
+			// Render Background
+			glUseProgram(spriteShader.getProgram());
+			background->render(PROJECTION::ORTHOGRAPHIC);
 
 			// Draw background video
 			//glUseProgram(videoShader.getProgram());
@@ -1221,6 +1230,8 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 				updateAppearTime(lane4);
 				updateAppearTime(lane5);
 				updateAppearTime(wheel);
+
+				oldSpeed = gameState.getSpeed();
 			}
 		}
 	}

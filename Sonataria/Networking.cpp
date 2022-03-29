@@ -7,6 +7,7 @@
 #include "Networking.h"
 #include <winsock2.h>
 #include "HTTPRequest.hpp"
+#include "UserData.h"
 using namespace std;
 
 Networking network;
@@ -66,9 +67,8 @@ bool Networking::GetProfileData(string cardID) {
 			// Store the response into data
 			string data = string{ response.body.begin(), response.body.end() };
 
-			// TODO: SAVE THE DATA INTO USERDATA
-
-			logger.log(data);
+			// Set the user settings
+			userData.setUserData(data);
 
 			return true;
 		}

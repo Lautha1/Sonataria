@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;$(SolutionDir)dependencies\ffmpeg-4.5\include;$(SolutionDir)dependencies\HTTPRequest-0.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;$(SolutionDir)dependencies\ffmpeg-4.5\include;$(SolutionDir)dependencies\HTTPRequest-0.2\include;$(SolutionDir)dependencies\JSON\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;_ITERATOR_DEBUG_LEVEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -144,7 +144,7 @@ copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;$(SolutionDir)dependencies\ffmpeg-4.5\include;$(SolutionDir)dependencies\HTTPRequest-0.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FreeImage\x32;$(SolutionDir)dependencies\PacDrive\include;$(SolutionDir)dependencies\SFML\SFML-2.5.1\include;$(SolutionDir)dependencies\glew-2.1.0\include;$(SolutionDir)dependencies\FreeType\include;$(SolutionDir)dependencies\uFCoder\include;$(SolutionDir)dependencies\ffmpeg-4.5\include;$(SolutionDir)dependencies\HTTPRequest-0.2\include;$(SolutionDir)dependencies\JSON\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>UNICODE;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

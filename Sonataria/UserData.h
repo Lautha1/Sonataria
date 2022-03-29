@@ -11,14 +11,26 @@ class UserData {
 		UserData();
 		~UserData();
 		void clearData();
-		void setUserData(int, string);
+		void setUserData(string);
 		
 		bool isValidUser();
 		string getDisplayName();
 
+		bool useCustomSpeed();
+		int getGameSpeed();
+
 	private:
+		// Profile Information
 		string DisplayName;
-		int CardNumber;
+		string CardNumber;
+		string Title;
+		int Level;
+		int EXP;
+		int PlayCount;
+
+		// Game Settings
+		bool UseCustomSpeed;
+		int Speed;
 };
 
 extern UserData userData;

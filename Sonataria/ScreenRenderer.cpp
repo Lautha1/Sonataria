@@ -417,8 +417,6 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 			// GameState should store this
 			//if (network.networkStatus == 1) {
 				if (RFIDCardReader::getCardReader()->getLastCardData() != "") {
-					// TODO: LAUNCH THE THREAD TO DO THE LOGIN
-
 					switch (loginComplete) {
 						case -1:
 							// Launch a thread to attempt getting the profile data
