@@ -24,6 +24,10 @@ public:
 	void shear(float value);
 	inline void scale(float s) { scale(s, s, s); }
 
+	void setTranslate(float x, float y, float z);
+	void setRotate(float x, float y, float z);
+	void setScale(float x, float y, float z);
+
 	void setPivot(float x, float y, float z);
 	void setPosition(float newX, float newY);
 	void setPositionY(float newY);

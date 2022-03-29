@@ -26,8 +26,9 @@ struct AnimationData
 {
 	InterpolationType type;
 	PropertyType prop;
-	Vector3 start, end;
-	double durationRate;
+	Vector3 startOrDelta, end;
+	float durationRate;
+	int64_t beginTime;
 };
 
 class Animatable : public Transformable
@@ -36,15 +37,15 @@ public:
 	Animatable();
 	~Animatable();
 
-	void addMotion(PropertyType prop, Vector3 delta, double rate);
+	void addMotion(PropertyType prop, Vector3 delta, float rate);
 	void addInterpolation(InterpolationType interpType, PropertyType prop,
-		Vector3 start, Vector3 end, double durationMsecs);
+		Vector3 start, Vector3 end, float durationMsecs);
 
 	void update(int64_t currentSongOffset);
 
 private:
 	std::vector<AnimationData> anims;
 
-	void applyMotion(AnimationData anim);
-	void applyLinear(AnimationData anim);
+	void applyMotion(AnimationData &anim);
+	void applyLinear(AnimationData &anim, int64_t currentSongOffset);
 };

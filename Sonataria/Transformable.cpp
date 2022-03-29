@@ -62,6 +62,30 @@ void Transformable::scale(float sX, float sY, float sZ)
 	updateTransformation();
 }
 
+void Transformable::setTranslate(float x, float y, float z)
+{
+	mPosition.x = x;
+	mPosition.y = y;
+	mPosition.z = z;
+	updateTransformation();
+}
+
+void Transformable::setRotate(float x, float y, float z)
+{
+	mRotation.x = x;
+	mRotation.y = y;
+	mRotation.z = z;
+	updateTransformation();
+}
+
+void Transformable::setScale(float x, float y, float z)
+{
+	mScale.x = x;
+	mScale.y = y;
+	mScale.z = z;
+	updateTransformation();
+}
+
 void Transformable::shear(float value)
 {
 	mShear += value;
