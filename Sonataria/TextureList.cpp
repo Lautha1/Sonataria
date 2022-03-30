@@ -34,9 +34,12 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Judgement/temp_Near.png", 10, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Judgement/temp_Perfect.png", 11, GL_BGRA, GL_RGBA, nullptr },
 
-	{ "Fonts/HonyaJi-Re.ttf", 12, 0, 0, nullptr },
+	{ "Textures/MissingJacketArt.png", 12, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/MissingRoundArt.png", 13, GL_BGRA, GL_RGBA, nullptr },
 
-	{ "Textures/temp_LoginScreen.png", 13, GL_BGR, GL_RGB, nullptr }
+	{ "Fonts/HonyaJi-Re.ttf", 14, 0, 0, nullptr },
+
+	{ "Textures/temp_LoginScreen.png", 15, GL_BGR, GL_RGB, nullptr }
 };
 
 // Declare static members of TextureList

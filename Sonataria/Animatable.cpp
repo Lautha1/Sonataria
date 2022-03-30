@@ -26,15 +26,32 @@ void Animatable::addInterpolation(InterpolationType interpType, PropertyType pro
 
 void Animatable::update(int64_t currentSongOffset)
 {
-	 for (auto curAnim: anims)
-	 {
-		 switch (curAnim.type)
-		 {
-			 case MOTION: applyMotion(curAnim); break;
-			 case LINEAR: applyLinear(curAnim, currentSongOffset); break;
-			 default: break;
-		 }
-	 }
+	vector<size_t> toRemove;
+	for (size_t i = 0; i < anims.size(); i++)
+	{
+		// Set begin time if needed
+		if (anims[i].beginTime < 0LL)
+		{
+			anims[i].beginTime = currentSongOffset;
+		}
+
+		// Defer based on motion type
+		switch (anims[i].type)
+		{
+			case MOTION: applyMotion(anims[i]); break;
+			case LINEAR: {
+				bool keepGoing = applyLinear(anims[i], currentSongOffset);
+				if (!keepGoing) { toRemove.push_back(i); }
+			} break;
+
+			default: break;
+		}
+	}
+
+	for (auto remove: toRemove)
+	{
+		anims.erase(anims.begin() + remove);
+	}
 }
 
 void Animatable::applyMotion(AnimationData &anim)
@@ -71,17 +88,17 @@ void Animatable::applyMotion(AnimationData &anim)
 	}
 }
 
-void Animatable::applyLinear(AnimationData &anim, int64_t currentSongOffset)
+bool Animatable::applyLinear(AnimationData &anim, int64_t currentSongOffset)
 {
-	// Set begin time if needed
-	if (anim.beginTime < 0)
-	{
-		anim.beginTime = currentSongOffset;
-	}
-
 	// Compute 'alpha'
 	int64_t elapsed = currentSongOffset - anim.beginTime;
 	float alpha = elapsed / anim.durationRate;
+	if (alpha >= 1.0)
+	{
+		return false;
+	}
+
+	logger.log("Elapsed:" + to_string(elapsed) + " Duration:" + to_string(anim.durationRate) + " / Alpha is " + to_string(alpha));
 
 	// Do interpolation
 	Vector3 currentValue = Vector3(
@@ -108,4 +125,6 @@ void Animatable::applyLinear(AnimationData &anim, int64_t currentSongOffset)
 			logger.logError("Unknown property in animation");
 			break;
 	}
+
+	return true;
 }

@@ -47,5 +47,5 @@ private:
 	std::vector<AnimationData> anims;
 
 	void applyMotion(AnimationData &anim);
-	void applyLinear(AnimationData &anim, int64_t currentSongOffset);
+	bool applyLinear(AnimationData &anim, int64_t currentSongOffset);
 };
