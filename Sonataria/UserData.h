@@ -13,7 +13,7 @@ class UserData {
 		void clearData();
 		void setUserData(string);
 		
-		bool isValidUser();
+		bool isNewUser();
 		string getDisplayName();
 
 		bool useCustomSpeed();
@@ -31,6 +31,9 @@ class UserData {
 		// Game Settings
 		bool UseCustomSpeed;
 		int Speed;
+
+		// Validity
+		bool NewUser;
 };
 
 extern UserData userData;

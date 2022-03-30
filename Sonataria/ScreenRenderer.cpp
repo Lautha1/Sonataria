@@ -429,13 +429,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 							// TODO: Display a graphic showing that it is attempting to login
 							break;
 						case 1:
-							if (userData.isValidUser()) {
-								// User has a valid profile and already exists
+							if (userData.isNewUser()) {
+								// User has a profile already
 								gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
 							}
 							else {
 								// User doesn't have a profile yet, go to profile creation
-								// TODO: PROFILE CREATION
 								gameState.setGameState(GameState::CurrentState::CREATE_PROFILE);
 							}
 							controllerInput.reset();

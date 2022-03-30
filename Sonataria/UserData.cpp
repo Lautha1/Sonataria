@@ -34,20 +34,38 @@ void UserData::setUserData(string data) {
 
 	json j = json::parse(data);
 
-	// TODO: CHECK TO MAKE SURE NOT NEW USER FIRST
-	// SET NOT VALID USE IF NEW USER
+	// Check to see if new user
+	this->NewUser = j["NewUser"];
 
-	// Set the User Data
-	this->DisplayName = j["DisplayName"];
-	this->CardNumber = j["CardNumber"];
-	this->Title = j["Title"];
-	this->Level = j["Level"];
-	this->EXP = j["EXP"];
-	this->PlayCount = j["PlayCount"];
+	if (this->NewUser) {
+		// New User
 
-	// Set Game Settings
-	this->UseCustomSpeed = j["GameSettings"]["UseCustomSpeed"];
-	this->Speed = j["GameSettings"]["Speed"];
+		// All the data we have for a new user is their card number | Can use defaults for the rest
+		// DISPLAY NAME - Is set in the creation game state when the user enters their name
+		this->CardNumber = j["CardNumber"];
+		this->Title = "Newcomer";
+		this->Level = 1;
+		this->EXP = 0;
+		this->PlayCount = 0;
+
+		// Set Game Settings
+		this->UseCustomSpeed = false;
+		this->Speed = 300;
+	}
+	else {
+		// Existing User
+
+		this->DisplayName = j["DisplayName"];
+		this->CardNumber = j["CardNumber"];
+		this->Title = j["Title"];
+		this->Level = j["Level"];
+		this->EXP = j["EXP"];
+		this->PlayCount = j["PlayCount"];
+
+		// Set Game Settings
+		this->UseCustomSpeed = j["GameSettings"]["UseCustomSpeed"];
+		this->Speed = j["GameSettings"]["Speed"];
+	}
 
 	logger.log("User Data Set.");
 }
@@ -68,18 +86,18 @@ void UserData::clearData() {
 	// Game Settings
 	this->UseCustomSpeed = false;
 	this->Speed = 300;
+
+	// Validity
+	this->NewUser = true;
 }
 
 /**
- * Check to see if there is actually a user set.
+ * Check to see if the data is valid
  * 
  * @return 
  */
-bool UserData::isValidUser() {
-	if (this->DisplayName != "" && this->CardNumber != "") {
-		return true;
-	}
-	return false;
+bool UserData::isNewUser() {
+	return this->NewUser;
 }
 
 string UserData::getDisplayName() {
