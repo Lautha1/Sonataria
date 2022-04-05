@@ -8,10 +8,19 @@ Animatable::~Animatable() {}
 void Animatable::addMotion(PropertyType prop, Vector3 delta, float rate)
 {
 	AnimationData newMotion = {
-		MOTION, prop, delta, Vector3(), rate, -1
+		INTERP_MOTION, prop, delta, Vector3(), rate, -1
 	};
 
 	anims.push_back(newMotion);
+}
+
+void Animatable::addInterpolation(InterpolationType interpType, PropertyType prop,
+	float start, float end, float durationMsecs)
+{
+	addInterpolation(interpType, prop,
+		Vector3(start, 0.0f, 0.0f),
+		Vector3(end, 0.0f, 0.0f),
+		durationMsecs);
 }
 
 void Animatable::addInterpolation(InterpolationType interpType, PropertyType prop,
@@ -35,16 +44,26 @@ void Animatable::update(int64_t currentSongOffset)
 			anims[i].beginTime = currentSongOffset;
 		}
 
-		// Defer based on motion type
-		switch (anims[i].type)
+		if (anims[i].prop > PROP_EXTENDED)
 		{
-			case MOTION: applyMotion(anims[i]); break;
-			case LINEAR: {
-				bool keepGoing = applyLinear(anims[i], currentSongOffset);
-				if (!keepGoing) { toRemove.push_back(i); }
-			} break;
+			if (!applyExtended(anims[i], currentSongOffset))
+			{
+				toRemove.push_back(i);
+			}
+		}
+		else
+		{
+			// Defer based on motion type
+			switch (anims[i].type)
+			{
+				case INTERP_MOTION: applyMotion(anims[i]); break;
+				case INTERP_LINEAR: {
+					bool keepGoing = applyLinear(anims[i], currentSongOffset);
+					if (!keepGoing) { toRemove.push_back(i); }
+				} break;
 
-			default: break;
+				default: break;
+			}
 		}
 	}
 
@@ -58,7 +77,7 @@ void Animatable::applyMotion(AnimationData &anim)
 {
 	switch(anim.prop)
 	{
-		case POSITION:
+		case PROP_POSITION:
 			this->translate(
 				anim.startOrDelta.x * anim.durationRate,
 				anim.startOrDelta.y * anim.durationRate,
@@ -66,7 +85,7 @@ void Animatable::applyMotion(AnimationData &anim)
 			);
 			break;
 
-		case ROTATION:
+		case PROP_ROTATION:
 			this->rotate(
 				anim.startOrDelta.x * anim.durationRate,
 				anim.startOrDelta.y * anim.durationRate,
@@ -74,7 +93,7 @@ void Animatable::applyMotion(AnimationData &anim)
 			);
 			break;
 
-		case SCALE:
+		case PROP_SCALE:
 			this->scale(
 				anim.startOrDelta.x * anim.durationRate,
 				anim.startOrDelta.y * anim.durationRate,
@@ -98,8 +117,6 @@ bool Animatable::applyLinear(AnimationData &anim, int64_t currentSongOffset)
 		return false;
 	}
 
-	logger.log("Elapsed:" + to_string(elapsed) + " Duration:" + to_string(anim.durationRate) + " / Alpha is " + to_string(alpha));
-
 	// Do interpolation
 	Vector3 currentValue = Vector3(
 		anim.startOrDelta.x * (1.0f - alpha) + anim.end.x * alpha,
@@ -109,15 +126,15 @@ bool Animatable::applyLinear(AnimationData &anim, int64_t currentSongOffset)
 
 	switch (anim.prop)
 	{
-		case POSITION:
+		case PROP_POSITION:
 			this->setTranslate(currentValue.x, currentValue.y, currentValue.z);
 			break;
 
-		case ROTATION:
+		case PROP_ROTATION:
 			this->setRotate(currentValue.x, currentValue.y, currentValue.z);
 			break;
 
-		case SCALE:
+		case PROP_SCALE:
 			this->setScale(currentValue.x, currentValue.y, currentValue.z);
 			break;
 

@@ -26,4 +26,6 @@ public:
 
 protected:
 	void init();
+
+	bool applyExtended(AnimationData& anim, int64_t currentSongOffset) override;
 };

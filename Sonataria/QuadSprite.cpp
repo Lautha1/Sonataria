@@ -4,6 +4,8 @@
 
 using namespace std;
 
+#include "Logger.h"
+
 QuadSprite::QuadSprite(const wstring& newName) : OpenGLSprite(newName) {
 	init();
 
@@ -31,6 +33,10 @@ QuadSprite::QuadSprite(const wstring& newName, const QuadVertData* newPoints, in
 
 	// Reinterpret the memory into just an array of floats
 	pointData = reinterpret_cast<float*>(structPoints);
+}
+
+QuadSprite::~QuadSprite() {
+	delete[] pointData;
 }
 
 void QuadSprite::init() {
@@ -89,6 +95,34 @@ void QuadSprite::render(PROJECTION projType) const
 	}
 }
 
-QuadSprite::~QuadSprite() {
-	delete[] pointData;
+bool QuadSprite::applyExtended(AnimationData& anim, int64_t currentSongOffset)
+{
+	if (anim.type != INTERP_LINEAR)
+	{
+		logger.logError("applyExtended: Unsupported type " + to_string(anim.type));
+		return false;
+	}
+
+	// Compute 'alpha'
+	int64_t elapsed = currentSongOffset - anim.beginTime;
+	float alpha = elapsed / anim.durationRate;
+	if (alpha >= 1.0)
+	{
+		return false;
+	}
+
+	switch (anim.prop)
+	{
+		case PROP_OPACITY:
+		{
+			float newOpacity = anim.startOrDelta.x * (1.0f - alpha) + anim.end.x * alpha;
+			setOpacity(max(0.0f, min(1.0f, newOpacity)));
+		} break;
+
+		default:
+			logger.logError("applyExtended: unsupported property " + to_string(anim.prop));
+			return false;
+	}
+
+	return true;
 }

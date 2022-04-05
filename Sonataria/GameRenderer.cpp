@@ -235,16 +235,15 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		// Test animation
 		animatedNote->scale(0.33f, 0.33f, 0.33f);
 		animatedNote->translate(1.33f, 0.0f, 0.0f);
-		animatedNote->addMotion(POSITION, Vector3(-0.01f, 0.0f, 0.0f), 1);
+		animatedNote->addMotion(PROP_POSITION, Vector3(-0.01f, 0.0f, 0.0f), 1);
 
 		lerpingNote->scale(0.33f, 0.33f, 0.33f);
 		lerpingNote->translate(-1.33f, 0.33f, 0.0f);
 		lerpingNote->addInterpolation(
-			LINEAR, POSITION,
-			Vector3(-1.33f, 0.0f, 0.0f),
-			Vector3(1.33f, 0.0f, 0.0f),
-			10000
+			INTERP_LINEAR, PROP_OPACITY,
+			0.1f, 1.0f, 10000
 		);
+		lerpingNote->update(0);
 
 		// INITIALIZE TEXT SHADER
 		if (!textShader.initShader()) {
