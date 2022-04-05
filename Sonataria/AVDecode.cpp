@@ -249,7 +249,7 @@ bool AVDecode::prepareToDecode(const char* src_filename) {
     pkt_time_base = video_dec_ctx->pkt_timebase.num/(double)video_dec_ctx->pkt_timebase.den;
 
     /* dump input information to stderr */
-    av_dump_format(fmt_ctx, 0, src_filename, 0);
+    //av_dump_format(fmt_ctx, 0, src_filename, 0);
 
     if (!video_stream) {
         fprintf(stderr, "Could not find video stream in the input, aborting\n");

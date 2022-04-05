@@ -29,7 +29,7 @@ unsigned int TextureManager::loadTexture(const TextureInfo& tInfo)
 	// Sanity check
 	if (tInfo.texID == 0) { return 0; }
 
-	// Look if the proper teture is already loaded
+	// Look if the proper texture is already loaded
 	if (texIdLookup.count(tInfo.texID) > 0)
 	{
 		if (strcmp(tInfo.filename, texIdLookup[tInfo.texID].filename) == 0)

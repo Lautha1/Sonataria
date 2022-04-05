@@ -9,6 +9,7 @@
 #include <FreeImage.h>
 
 #include "TextureLoader.h"
+#include "Logger.h"
 
 // Initialize static instance to null
 TextureLoader* TextureLoader::m_inst(NULL);
@@ -44,6 +45,8 @@ TextureLoader::~TextureLoader()
 
 bool TextureLoader::LoadTexture(const char* filename, const unsigned int texID, GLenum image_format, GLint internal_format, GLint level, GLint border)
 {
+	logger.log("Loading texture: " + string(filename));
+
 	// image format
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 

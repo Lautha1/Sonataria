@@ -224,6 +224,9 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		// Judgement Sizing
 		noteJudgement->scale(0.2f, .2f * 9.f / 16.f, 1.f);
 		noteJudgement->translate(0.f, .5f, 0.f);
+		noteJudgement->setTextureID(TextureList::Inst()->GetTextureID("Textures/Judgement/temp_Perfect.png"));
+		noteJudgement->setTextureID(TextureList::Inst()->GetTextureID("Textures/Judgement/temp_Near.png"));
+		noteJudgement->setTextureID(TextureList::Inst()->GetTextureID("Textures/Judgement/temp_Miss.png"));
 
 		// Setup scale on the pixelNote sprites so they are in units of pixels
 		wheelPixelNote->scale(1.0f / (.1984f * 2.f), 1.0f / 2.f, 1.0f);
@@ -252,10 +255,10 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// INITIALIZE VIDEO SHADER
-		if (!videoShader.initShader()) {
-			logger.logError(L"Failed to initialize video shader");
-			exit(1);
-		}
+		//if (!videoShader.initShader()) {
+		//	logger.logError(L"Failed to initialize video shader");
+		//	exit(1);
+		//}
 
 		// Initialize videos
 		//if (!testVideo->loadVideo("Songs/+ERABY+E CONNEC+10N/+ERABY+ECONNEC+10N.mp4"))
@@ -455,6 +458,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 		else {
 			// ** INPUT **
+			glUseProgram(spriteShader.getProgram());
 
 			// Check for new inputs
 			if (!controllerInput.inputQueue.empty()) {
@@ -1195,7 +1199,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 				// Wheel slams are taken care of in the input section
 			}
-
+				
 			// ** END INPUT **
 
 			// Render Background
