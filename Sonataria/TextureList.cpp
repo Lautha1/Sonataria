@@ -39,7 +39,10 @@ TextureManager::TextureInfo tempTexList[] = {
 
 	{ "Fonts/HonyaJi-Re.ttf", 14, 0, 0, nullptr },
 
-	{ "Textures/temp_LoginScreen.png", 15, GL_BGR, GL_RGB, nullptr }
+	{ "Textures/temp_LoginScreen.png", 15, GL_BGR, GL_RGB, nullptr },
+
+	// Create Profile
+	{ "Textures/CreateProfile/Ribbon.png", 16, GL_BGR, GL_RGB, nullptr }
 };
 
 // Declare static members of TextureList
