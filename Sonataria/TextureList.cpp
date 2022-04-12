@@ -20,29 +20,41 @@ TextureList* TextureList::Inst()
 
 // Pre-defined, known textures (we insert these into the hash-map right away)
 TextureManager::TextureInfo tempTexList[] = {
+	// TEMPORARY TEXTURES
 	{ "Textures/temp_TitleScreen.png", 1, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_Background.png", 2, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_Track.png", 3, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_Note.png", 4, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_hold_Note.png", 5, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_wheel_Note.png", 6, GL_BGR, GL_RGB, nullptr },
-
 	{ "Textures/temp_SlamLeft.png", 7, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/temp_SlamRight.png", 8, GL_BGRA, GL_RGBA, nullptr },
-
 	{ "Textures/Judgement/temp_Miss.png", 9, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Judgement/temp_Near.png", 10, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Judgement/temp_Perfect.png", 11, GL_BGRA, GL_RGBA, nullptr },
-
 	{ "Textures/MissingJacketArt.png", 12, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/MissingRoundArt.png", 13, GL_BGRA, GL_RGBA, nullptr },
 
-	{ "Fonts/HonyaJi-Re.ttf", 14, 0, 0, nullptr },
+	// General
+	{ "Textures/General/ClosedCurtainLeft.png", 14, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/ClosedCurtainRight.png", 15, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/OpenCurtains.png", 16, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Stage.png", 17, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/StartButton.png", 18, GL_BGRA, GL_RGBA, nullptr },
 
-	{ "Textures/temp_LoginScreen.png", 15, GL_BGR, GL_RGB, nullptr },
+	// Fonts
+	{ "Fonts/HonyaJi-Re.ttf", 19, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 20, 0, 0, nullptr},
+
+	// Login
+	{ "Textures/temp_LoginScreen.png", 21, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/Login/LifeLink.png", 22, GL_BGRA, GL_RGBA, nullptr },
 
 	// Create Profile
-	{ "Textures/CreateProfile/Ribbon.png", 16, GL_BGR, GL_RGB, nullptr }
+	{ "Textures/CreateProfile/Ribbon.png", 23, GL_BGR, GL_RGB, nullptr },
+
+	// Thanks For Playing
+	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 24, GL_BGR, GL_RGB, nullptr }
 };
 
 // Declare static members of TextureList
