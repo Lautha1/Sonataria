@@ -79,6 +79,12 @@ TextureList::TextureList()
 			fontList.push_back(newFont);
 			curInfo.font = newFont;
 		}
+		else if (strstr(curInfo.filename, ".otf") != nullptr)
+		{
+			OpenGLFont* newFont = new OpenGLFont(curInfo.filename, 128, 256UL);
+			fontList.push_back(newFont);
+			curInfo.font = newFont;
+		}
 
 		// Store reference to texture info
 		textureList[hasher(curInfo.filename)] = curInfo;

@@ -30,6 +30,8 @@ Logger::Logger() {
     std::copy(myFont, myFont + (sizeof(myFont) / sizeof(wchar_t)), fontInfo.FaceName);
 
     SetCurrentConsoleFontEx(hConsole, false, &fontInfo);
+
+	cached_content = L"";
 }
 
 /**
@@ -40,42 +42,14 @@ Logger::~Logger() {
 
 }
 
-/**
- * Output a message as a wide string.
- * 
- * @param content the string to output
- */
-void Logger::log(wstring content) {
-    wcout << L"[LOG]  | " << content << endl;
+void Logger::log()
+{
+	wcout << L"[LOG]  | " << cached_content << endl;
+    cached_content = L"";
 }
 
-/**
- * Output a error message as a wide string.
- * 
- * @param content the string to output
- */
-void Logger::logError(wstring content) {
-    wcerr << L"[WARN] | " << content << endl;
-}
-
-/**
- * Output a message as a narrow string.
- *
- * @param content the string to output
- */
-void Logger::log(string content) {
-    wstring wContent;
-    wContent.assign(content.begin(), content.end());
-    wcout << L"[LOG]  | " << wContent << endl;
-}
-
-/**
- * Output a error message as a narrow string.
- *
- * @param content the string to output
- */
-void Logger::logError(string content) {
-    wstring wContent;
-    wContent.assign(content.begin(), content.end());
-    wcerr << L"[WARN] | " << wContent << endl;
+void Logger::logError()
+{
+    wcerr << L"[WARN] | " << cached_content << endl;
+	cached_content = L"";
 }

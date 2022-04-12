@@ -2,6 +2,8 @@
 
 #include "Logger.h"
 
+using namespace std;
+
 Animatable::Animatable() {}
 Animatable::~Animatable() {}
 

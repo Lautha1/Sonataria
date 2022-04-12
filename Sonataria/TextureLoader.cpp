@@ -45,7 +45,7 @@ TextureLoader::~TextureLoader()
 
 bool TextureLoader::LoadTexture(const char* filename, const unsigned int texID, GLenum image_format, GLint internal_format, GLint level, GLint border)
 {
-	logger.log("Loading texture: " + string(filename));
+	logger.log(L"Loading texture: ", std::string(filename));
 
 	// image format
 	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
