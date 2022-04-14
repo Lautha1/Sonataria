@@ -90,8 +90,6 @@ GameRenderer::GameRenderer() {
 	wheelPixelNote = new QuadSprite(L"Wheel Note in Pixel Units");
 	holdPixelNote = new QuadSprite(L"Hold Note in Pixel Units");
 	noteJudgement = new QuadSprite(L"Judgement for Notes");
-	animatedNote = new QuadSprite(L"Texture Animation Test");
-	lerpingNote = new QuadSprite(L"Testing linear interpolation");
 	testVideo = new VideoSprite(L"Test video sprite");
 }
 
@@ -108,8 +106,6 @@ GameRenderer::~GameRenderer() {
 	delete wheelPixelNote;
 	delete holdPixelNote;
 	delete noteJudgement;
-	delete animatedNote;
-	delete lerpingNote;
 	delete testVideo;
 }
 
@@ -180,8 +176,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		wheelPixelNote->initSprite(spriteShader.getProgram());
 		holdPixelNote->initSprite(spriteShader.getProgram());
 		noteJudgement->initSprite(spriteShader.getProgram());
-		animatedNote->initSprite(spriteShader.getProgram());
-		lerpingNote->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
 		background->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Background.png"));
@@ -191,8 +185,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		wheelSlamRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_SlamRight.png"));
 		wheelPixelNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_wheel_Note.png"));
 		holdPixelNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_hold_Note.png"));
-		animatedNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/MissingRoundArt.png"));
-		lerpingNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/MissingJacketArt.png"));
 
 		// SET THE TRANSFORMATIONS
 
@@ -234,19 +226,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 		holdPixelNote->scale(1.0f / (.1984f * 2.f), 1.0f / 2.f, 1.0f);
 		holdPixelNote->scale(0.5773f, 1.0f, 1.0f); // sqrt(3)/3
-
-		// Test animation
-		animatedNote->scale(0.33f, 0.33f, 0.33f);
-		animatedNote->translate(1.33f, 0.0f, 0.0f);
-		animatedNote->addMotion(PROP_POSITION, Vector3(-0.01f, 0.0f, 0.0f), 1);
-
-		lerpingNote->scale(0.33f, 0.33f, 0.33f);
-		lerpingNote->translate(-1.33f, 0.33f, 0.0f);
-		lerpingNote->addInterpolation(
-			INTERP_LINEAR, PROP_OPACITY,
-			0.1f, 1.0f, 10000
-		);
-		lerpingNote->update(0);
 
 		// INITIALIZE TEXT SHADER
 		if (!textShader.initShader()) {
@@ -291,7 +270,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 	speedText->scale(0.75f);
 
 	// Clear Color for Background
-	glClearColor(0.968627f, 0.658823f, 0.721568f, 1.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glViewport(0, 0, 1920, 1080);
 
 	vector<Note> lane1;
@@ -406,10 +385,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 			// Clear the depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
-
-			// Test animation sprite
-			animatedNote->render(PROJECTION::ORTHOGRAPHIC);
-			lerpingNote->render(PROJECTION::ORTHOGRAPHIC);
 
 			// Draw track and track sprites
 			track->render(PROJECTION::PERSPECTIVE);
@@ -1217,13 +1192,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 			// Use the sprite shader
 			glUseProgram(spriteShader.getProgram());
-
-			// Test animation sprite
-			animatedNote->update(currentSongOffset.count());
-			animatedNote->render(PROJECTION::ORTHOGRAPHIC);
-
-			lerpingNote->update(currentSongOffset.count());
-			lerpingNote->render(PROJECTION::ORTHOGRAPHIC);
 
 			// Draw judgement text
 			if (currentSongOffset.count() < clearTime) {

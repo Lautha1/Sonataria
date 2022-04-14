@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "OpenGLFont.h"
+#include "OpenGLText.h"
 #include "QuadSprite.h"
 #include "SpriteShader.h"
 #include "TextShader.h"
@@ -74,7 +75,13 @@ class ScreenRenderer {
 		TextShader textShader;
 
 		QuadSprite* titleScreen;
-		QuadSprite* preloginScreen;
+
+		// General Sprites
+		QuadSprite* Stage;
+		QuadSprite* OpenCurtains;
+
+		// PreLogin Sprites
+		QuadSprite* LifeLinkIcon;
 };
 
 extern ScreenRenderer screenRenderer;

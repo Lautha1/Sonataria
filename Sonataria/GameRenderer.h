@@ -45,9 +45,6 @@ class GameRenderer {
 		QuadSprite* wheelPixelNote;
 		QuadSprite* holdPixelNote;
 
-		QuadSprite* animatedNote;
-		QuadSprite* lerpingNote;
-
 		QuadSprite* noteJudgement;
 
 		VideoSprite* testVideo;

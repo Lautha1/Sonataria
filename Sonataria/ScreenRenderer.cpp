@@ -5,7 +5,6 @@
 #include "GameRenderer.h"
 #include "Logger.h"
 #include "Networking.h"
-#include "OpenGLText.h"
 #include "RFIDCardReader.h"
 #include "ScreenRenderer.h"
 #include "SystemSettings.h"
@@ -116,9 +115,15 @@ ScreenRenderer::ScreenRenderer() {
 	this->isNetworkChecking = false;
 	this->openGLInitialized = false;
 
-	// Setup sprites
+	// SETUP SPRITES
 	titleScreen = new QuadSprite(L"Title Screen");
-	preloginScreen = new QuadSprite(L"Prelogin Screen");
+
+	// General Sprites
+	Stage = new QuadSprite(L"Stage");
+	OpenCurtains = new QuadSprite(L"Open Curtains");
+
+	// PreLogin Sprites
+	LifeLinkIcon = new QuadSprite(L"Life Link Icon");
 
 	std::string dir = "./Songs";
 
@@ -189,9 +194,15 @@ ScreenRenderer::ScreenRenderer() {
  * Default deconstructor.
  */
 ScreenRenderer::~ScreenRenderer() {
-	// delete sprites
+	// DELETE SPRITES
 	delete titleScreen;
-	delete preloginScreen;
+	
+	// General Sprites
+	delete Stage;
+	delete OpenCurtains;
+
+	// PreLogin Sprites
+	delete LifeLinkIcon;
 }
 
 /**
@@ -229,17 +240,34 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// INITIALIZE THE SPRITES
 		titleScreen->initSprite(spriteShader.getProgram());
-		preloginScreen->initSprite(spriteShader.getProgram());
+
+		// General Sprites
+		Stage->initSprite(spriteShader.getProgram());
+		OpenCurtains->initSprite(spriteShader.getProgram());
+
+		// PreLogin Sprites
+		LifeLinkIcon->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
 		titleScreen->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_TitleScreen.png"));
-		preloginScreen->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_LoginScreen.png"));
+
+		// General Sprites
+		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
+		OpenCurtains->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/OpenCurtains.png"));
+
+		// PreLogin Sprites
+		LifeLinkIcon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/LifeLink.png"));
 
 		// SET THE TRANSFORMATIONS
 
-		// Title Screen
 		titleScreen->scale(2.f * (16.f / 9.f), 2.f, 1.f);
-		preloginScreen->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+
+		// General Sprites
+		Stage->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+		OpenCurtains->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+
+		// PreLogin Sprites
+		LifeLinkIcon->scale(2.f * (16.f / 9.f), 2.f, 1.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -250,7 +278,11 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		logger.log(L"OpenGL initialized.");
 	}
 
-	// INITIALIE TEXT
+	// Load Fonts
+	TextureManager::TextureInfo HonyaJi = TextureList::Inst()->GetTextureInfo("Fonts/HonyaJi-Re.ttf");
+	TextureManager::TextureInfo Stayola = TextureList::Inst()->GetTextureInfo("Fonts/Stayola-Regular.otf");
+
+	// INITIALIZE TEXT
 	/* none for now */
 
 	// Clear color for the background
@@ -267,17 +299,16 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	bool updateDownloadStarted = false;
 
 	// Text Objects - FOR STARTUP
-	TextureManager::TextureInfo fontInfo = TextureList::Inst()->GetTextureInfo("Fonts/HonyaJi-Re.ttf");
-	OpenGLText* gameVersion = new OpenGLText(L"Game Version", *fontInfo.font);
-	OpenGLText* startupText = new OpenGLText(L"Startup", *fontInfo.font);
-	OpenGLText* networkText = new OpenGLText(L"Network", *fontInfo.font);
-	OpenGLText* updatesText = new OpenGLText(L"Updates", *fontInfo.font);
+	OpenGLText* gameVersion = new OpenGLText(L"Game Version", *HonyaJi.font);
+	OpenGLText* startupText = new OpenGLText(L"Startup", *HonyaJi.font);
+	OpenGLText* networkText = new OpenGLText(L"Network", *HonyaJi.font);
+	OpenGLText* updatesText = new OpenGLText(L"Updates", *HonyaJi.font);
 
-	OpenGLText* colon1 = new OpenGLText(L"Colon 1", *fontInfo.font);
-	OpenGLText* colon2 = new OpenGLText(L"Colon 1", *fontInfo.font);
+	OpenGLText* colon1 = new OpenGLText(L"Colon 1", *HonyaJi.font);
+	OpenGLText* colon2 = new OpenGLText(L"Colon 1", *HonyaJi.font);
 
-	OpenGLText* networkStatusText = new OpenGLText(L"Network Status", *fontInfo.font);
-	OpenGLText* updatesStatusText = new OpenGLText(L"Updates Status", *fontInfo.font);
+	OpenGLText* networkStatusText = new OpenGLText(L"Network Status", *HonyaJi.font);
+	OpenGLText* updatesStatusText = new OpenGLText(L"Updates Status", *HonyaJi.font);
 
 	gameVersion->initSprite(textShader.getProgram());
 	gameVersion->translate(-3100.f, 900.f, 0.f);
@@ -312,15 +343,15 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	updatesStatusText->scale(0.5f);
 
 	// Text Objects - For Test Menu
-	OpenGLText* testMenuTitle = new OpenGLText(L"Test Menu Title", *fontInfo.font);
-	OpenGLText* testMenuText1 = new OpenGLText(L"Test Menu Text 1", *fontInfo.font);
-	OpenGLText* testMenuText2 = new OpenGLText(L"Test Menu Text 2", *fontInfo.font);
-	OpenGLText* testMenuText3 = new OpenGLText(L"Test Menu Text 3", *fontInfo.font);
-	OpenGLText* testMenuText4 = new OpenGLText(L"Test Menu Text 4", *fontInfo.font);
-	OpenGLText* testMenuText5 = new OpenGLText(L"Test Menu Text 5", *fontInfo.font);
-	OpenGLText* testMenuText6 = new OpenGLText(L"Test Menu Text 6", *fontInfo.font);
-	OpenGLText* testMenuText7 = new OpenGLText(L"Test Menu Text 7", *fontInfo.font);
-	OpenGLText* testMenuText8 = new OpenGLText(L"Test Menu Text 8", *fontInfo.font);
+	OpenGLText* testMenuTitle = new OpenGLText(L"Test Menu Title", *HonyaJi.font);
+	OpenGLText* testMenuText1 = new OpenGLText(L"Test Menu Text 1", *HonyaJi.font);
+	OpenGLText* testMenuText2 = new OpenGLText(L"Test Menu Text 2", *HonyaJi.font);
+	OpenGLText* testMenuText3 = new OpenGLText(L"Test Menu Text 3", *HonyaJi.font);
+	OpenGLText* testMenuText4 = new OpenGLText(L"Test Menu Text 4", *HonyaJi.font);
+	OpenGLText* testMenuText5 = new OpenGLText(L"Test Menu Text 5", *HonyaJi.font);
+	OpenGLText* testMenuText6 = new OpenGLText(L"Test Menu Text 6", *HonyaJi.font);
+	OpenGLText* testMenuText7 = new OpenGLText(L"Test Menu Text 7", *HonyaJi.font);
+	OpenGLText* testMenuText8 = new OpenGLText(L"Test Menu Text 8", *HonyaJi.font);
 
 	testMenuTitle->initSprite(textShader.getProgram());
 	testMenuText1->initSprite(textShader.getProgram());
@@ -389,13 +420,17 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// Use the sprite shader first
 		glUseProgram(spriteShader.getProgram());
 
-		// DRAW BACKGROUNDS
+		// DRAW BACKGROUNDS / STAGE (MAIN SET)
 		{
-			if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
+			if (gameState.getGameState() == GameState::CurrentState::STARTUP) {
+				// Don't render anything background related
+			}
+			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 				titleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
-			else if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
-				preloginScreen->render(PROJECTION::ORTHOGRAPHIC);
+			else {
+				Stage->render(PROJECTION::ORTHOGRAPHIC);
+				OpenCurtains->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -452,7 +487,9 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// DRAW ALL OTHER GRAPHICS
 		{
-			
+			if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+				LifeLinkIcon->render(PROJECTION::ORTHOGRAPHIC);
+			}
 		}
 
 		// Switch over to the text shader

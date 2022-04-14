@@ -47,14 +47,13 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Fonts/Stayola-Regular.otf", 20, 0, 0, nullptr},
 
 	// Login
-	{ "Textures/temp_LoginScreen.png", 21, GL_BGR, GL_RGB, nullptr },
-	{ "Textures/Login/LifeLink.png", 22, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/LifeLink.png", 21, GL_BGRA, GL_RGBA, nullptr },
 
 	// Create Profile
-	{ "Textures/CreateProfile/Ribbon.png", 23, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/CreateProfile/Ribbon.png", 22, GL_BGR, GL_RGB, nullptr },
 
 	// Thanks For Playing
-	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 24, GL_BGR, GL_RGB, nullptr }
+	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 23, GL_BGR, GL_RGB, nullptr }
 };
 
 // Declare static members of TextureList
