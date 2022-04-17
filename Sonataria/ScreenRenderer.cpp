@@ -122,6 +122,10 @@ ScreenRenderer::ScreenRenderer() {
 	Stage = new QuadSprite(L"Stage");
 	OpenCurtains = new QuadSprite(L"Open Curtains");
 
+	// Backgrounds
+	SetMorning = new QuadSprite(L"Set Morning");
+	SetAfternoon = new QuadSprite(L"Set Afternoon");
+
 	// PreLogin Sprites
 	LifeLinkIcon = new QuadSprite(L"Life Link Icon");
 
@@ -201,6 +205,10 @@ ScreenRenderer::~ScreenRenderer() {
 	delete Stage;
 	delete OpenCurtains;
 
+	// Backgrounds
+	delete SetMorning;
+	delete SetAfternoon;
+
 	// PreLogin Sprites
 	delete LifeLinkIcon;
 }
@@ -245,6 +253,10 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Stage->initSprite(spriteShader.getProgram());
 		OpenCurtains->initSprite(spriteShader.getProgram());
 
+		// Backgrounds
+		SetMorning->initSprite(spriteShader.getProgram());
+		SetAfternoon->initSprite(spriteShader.getProgram());
+
 		// PreLogin Sprites
 		LifeLinkIcon->initSprite(spriteShader.getProgram());
 
@@ -255,19 +267,29 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
 		OpenCurtains->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/OpenCurtains.png"));
 
+		// Backgrounds
+		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning-TEMP.jpg"));
+		SetAfternoon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Afternoon-TEMP.jpg"));
+
 		// PreLogin Sprites
 		LifeLinkIcon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/LifeLink.png"));
 
 		// SET THE TRANSFORMATIONS
 
-		titleScreen->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+		float aspect = 16.f / 9.f;
+
+		titleScreen->scale(2.f * aspect, 2.f, 1.f);
 
 		// General Sprites
-		Stage->scale(2.f * (16.f / 9.f), 2.f, 1.f);
-		OpenCurtains->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+		Stage->scale(2.f * aspect, 2.f, 1.f);
+		OpenCurtains->scale(2.f * aspect, 2.f, 1.f);
+
+		// Backgrounds
+		SetMorning->scale(2.f * aspect, 2.f, 1.f);
+		SetAfternoon->scale(2.f * aspect, 2.f, 1.f);
 
 		// PreLogin Sprites
-		LifeLinkIcon->scale(2.f * (16.f / 9.f), 2.f, 1.f);
+		LifeLinkIcon->scale(2.f * aspect, 2.f, 1.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -429,6 +451,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				titleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
 			else {
+				// Render Background
+				if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+					SetMorning->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
+					SetMorning->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
+					SetAfternoon->render(PROJECTION::ORTHOGRAPHIC);
+				}
+
+				// Render Set
 				Stage->render(PROJECTION::ORTHOGRAPHIC);
 				OpenCurtains->render(PROJECTION::ORTHOGRAPHIC);
 			}

@@ -80,6 +80,10 @@ class ScreenRenderer {
 		QuadSprite* Stage;
 		QuadSprite* OpenCurtains;
 
+		// Backgrounds
+		QuadSprite* SetMorning;
+		QuadSprite* SetAfternoon;
+
 		// PreLogin Sprites
 		QuadSprite* LifeLinkIcon;
 };

@@ -32,12 +32,15 @@ class GameRenderer {
 	private:
 		bool openGLInitialized;
 
+		// Shaders
 		SpriteShader spriteShader;
 		TextShader textShader;
 		VideoShader videoShader;
 
+		// Sprites
+		QuadSprite* Audience;
+
 		QuadSprite* track;
-		QuadSprite* background;
 		QuadSprite* laneNote;
 		QuadSprite* wheelSlamLeft;
 		QuadSprite* wheelSlamRight;

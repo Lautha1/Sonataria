@@ -82,8 +82,11 @@ ifstream inputFile;
  */
 GameRenderer::GameRenderer() {
 	this->openGLInitialized = false;
+
+	// Sprites
+	Audience = new QuadSprite(L"Audience");
+
 	track = new QuadSprite(L"Track");
-	background = new QuadSprite(L"Background");
 	laneNote = new QuadSprite(L"Lane Note");
 	wheelSlamLeft = new QuadSprite(L"Wheel Slam Left");
 	wheelSlamRight = new QuadSprite(L"Wheel Slam Right");
@@ -98,7 +101,9 @@ GameRenderer::GameRenderer() {
  * 
  */
 GameRenderer::~GameRenderer() {
-	delete background;
+	// Sprites
+	delete Audience;
+
 	delete track;
 	delete laneNote;
 	delete wheelSlamLeft;
@@ -168,7 +173,10 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// INITIALIZE THE SPRITES
-		background->initSprite(spriteShader.getProgram());
+		
+		// Background
+		Audience->initSprite(spriteShader.getProgram());
+
 		track->initSprite(spriteShader.getProgram());
 		laneNote->initSprite(spriteShader.getProgram());
 		wheelSlamLeft->initSprite(spriteShader.getProgram());
@@ -178,7 +186,10 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		noteJudgement->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
-		background->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Background.png"));
+		
+		// Background
+		Audience->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Audience-TEMP.jpg"));
+
 		track->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Track.png"));
 		laneNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Note.png"));
 		wheelSlamLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_SlamLeft.png"));
@@ -189,7 +200,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		// SET THE TRANSFORMATIONS
 
 		// Background
-		background->scale(2.f * (16.f/9.f), 2.f, 1.f);
+		Audience->scale(2.f * (16.f/9.f), 2.f, 1.f);
 
 		// Track
 		track->scale(1.f, 5.f, 1.f);
@@ -381,7 +392,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			glUseProgram(spriteShader.getProgram());
 
 			// Draw the background
-			background->render(PROJECTION::ORTHOGRAPHIC);
+			Audience->render(PROJECTION::ORTHOGRAPHIC);
 
 			// Clear the depth buffer
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -1179,7 +1190,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 
 			// Render Background
 			glUseProgram(spriteShader.getProgram());
-			background->render(PROJECTION::ORTHOGRAPHIC);
+			Audience->render(PROJECTION::ORTHOGRAPHIC);
 
 			// Draw background video
 			//glUseProgram(videoShader.getProgram());
