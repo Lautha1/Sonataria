@@ -1,4 +1,5 @@
-﻿#include "ControllerInput.h"
+﻿#include <chrono>
+#include "ControllerInput.h"
 #include <filesystem>
 #include <fstream>
 #include "GameState.h"
@@ -121,6 +122,8 @@ ScreenRenderer::ScreenRenderer() {
 	// General Sprites
 	Stage = new QuadSprite(L"Stage");
 	OpenCurtains = new QuadSprite(L"Open Curtains");
+	ClosedCurtainLeft = new QuadSprite(L"Closed Curtain Left");
+	ClosedCurtainRight = new QuadSprite(L"Closed Curtain Right");
 
 	// Backgrounds
 	SetMorning = new QuadSprite(L"Set Morning");
@@ -204,6 +207,8 @@ ScreenRenderer::~ScreenRenderer() {
 	// General Sprites
 	delete Stage;
 	delete OpenCurtains;
+	delete ClosedCurtainLeft;
+	delete ClosedCurtainRight;
 
 	// Backgrounds
 	delete SetMorning;
@@ -252,6 +257,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// General Sprites
 		Stage->initSprite(spriteShader.getProgram());
 		OpenCurtains->initSprite(spriteShader.getProgram());
+		ClosedCurtainLeft->initSprite(spriteShader.getProgram());
+		ClosedCurtainRight->initSprite(spriteShader.getProgram());
 
 		// Backgrounds
 		SetMorning->initSprite(spriteShader.getProgram());
@@ -266,6 +273,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// General Sprites
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
 		OpenCurtains->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/OpenCurtains.png"));
+		ClosedCurtainLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainLeft.png"));
+		ClosedCurtainRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainRight.png"));
 
 		// Backgrounds
 		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning-TEMP.jpg"));
@@ -283,6 +292,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// General Sprites
 		Stage->scale(2.f * aspect, 2.f, 1.f);
 		OpenCurtains->scale(2.f * aspect, 2.f, 1.f);
+		ClosedCurtainLeft->scale(2.f * aspect, 2.f, 1.f);
+		ClosedCurtainRight->scale(2.f * aspect, 2.f, 1.f);
 
 		// Backgrounds
 		SetMorning->scale(2.f * aspect, 2.f, 1.f);
@@ -400,6 +411,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	// Forward declaration of this thread for use in login
 	sf::Thread loginThread(&checkForProfile, loginComplete);
 
+	// Create time variables
+	typedef std::chrono::high_resolution_clock Time;
+	typedef std::chrono::milliseconds ms;
+	typedef std::chrono::duration<float> fsec;
+	auto startTime = Time::now();
+
 	// The rendering loop
 	/*
 		The loop will break either if the ESC key is pressed switching
@@ -407,6 +424,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		the service flag to be set to true
 	*/
 	while (gameWindow->isOpen() && !(gameState.getGameState() == GameState::CurrentState::SHUTDOWN) && !gameState.checkService()) {
+
+		// Set the current time
+		auto currentTime = Time::now();
+		fsec fs = currentTime - startTime;
+		ms currentOffset = std::chrono::duration_cast<ms>(fs);
+		// Use currentOffset.count() to get millisecond value
 
 		// Check if switching to the GAME game state
 		if (gameState.getGameState() == GameState::CurrentState::GAME) {
@@ -993,8 +1016,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 						testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Downloading...", ALIGNMENT::CENTERED);
 						break;
 					case 1:
-						testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Extracting...", ALIGNMENT::CENTERED);
-						break;
+testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Extracting...", ALIGNMENT::CENTERED);
+break;
 					case 2:
 						testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Modifying Startup...", ALIGNMENT::CENTERED);
 						break;
@@ -1014,81 +1037,93 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"GAME WILL REBOOT WHEN COMPLETED!", ALIGNMENT::CENTERED);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
-				if (gameState.results.size() <= 0) {
-					continue;
-				}
+			if (gameState.results.size() <= 0) {
+				continue;
+			}
 
-				// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
-				testMenuTitle->reset();
-				testMenuTitle->translate(0.f, 900.f, 0.f);
-				testMenuTitle->scale(0.5f);
-				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"RESULTS", ALIGNMENT::CENTERED);
+			// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
+			testMenuTitle->reset();
+			testMenuTitle->translate(0.f, 900.f, 0.f);
+			testMenuTitle->scale(0.5f);
+			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"RESULTS", ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 800.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 800.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 700.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 700.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 600.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 600.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 500.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 500.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 400.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 400.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 300.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 300.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 200.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, 200.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, -400.f, 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED);
+			testMenuText1->reset();
+			testMenuText1->translate(0.f, -400.f, 0.f);
+			testMenuText1->scale(0.5f);
+			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
-				// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
-				testMenuTitle->reset();
-				testMenuTitle->translate(0.f, 900.f, 0.f);
-				testMenuTitle->scale(0.5f);
-				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"Final Results", ALIGNMENT::CENTERED);
+			// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
+			testMenuTitle->reset();
+			testMenuTitle->translate(0.f, 900.f, 0.f);
+			testMenuTitle->scale(0.5f);
+			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"Final Results", ALIGNMENT::CENTERED);
 
-				for (size_t i = 0; i < gameState.results.size(); i++) {
-					testMenuText1->reset();
-					testMenuText1->translate(0.f, 800.f - ((float)i * 400.f), 0.f);
-					testMenuText1->scale(0.4f);
-					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+			for (size_t i = 0; i < gameState.results.size(); i++) {
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 800.f - ((float)i * 400.f), 0.f);
+				testMenuText1->scale(0.4f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
 
-					testMenuText1->reset();
-					testMenuText1->translate(0.f, 600.f - ((float)i * 400.f), 0.f);
-					testMenuText1->scale(0.5f);
-					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
-				}
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 600.f - ((float)i * 400.f), 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+			}
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
-				// TODO: ACTUALLY MAKE THIS SCREEN LOOK NICE
-				testMenuTitle->reset();
-				testMenuTitle->translate(0.f, 900.f, 0.f);
-				testMenuTitle->scale(0.5f);
-				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, userData.getDisplayName(), ALIGNMENT::CENTERED);
+			// TODO: ACTUALLY MAKE THIS SCREEN LOOK NICE
+			testMenuTitle->reset();
+			testMenuTitle->translate(0.f, 900.f, 0.f);
+			testMenuTitle->scale(0.5f);
+			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, userData.getDisplayName(), ALIGNMENT::CENTERED);
+			}
+		}
+
+		// Closed Curtains For Transitions
+		glUseProgram(spriteShader.getProgram());
+		{
+			if (gameState.getGameState() != GameState::CurrentState::STARTUP) {
+				ClosedCurtainLeft->update(currentOffset.count());
+				ClosedCurtainLeft->render(PROJECTION::ORTHOGRAPHIC);
+
+				ClosedCurtainRight->update(currentOffset.count());
+				ClosedCurtainRight->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -1563,4 +1598,14 @@ void checkForProfile(int& loginComplete) {
 	
 	// Clear the card out of the RFID Reader
 	RFIDCardReader::getCardReader()->clearLastCardData();
+}
+
+void ScreenRenderer::ToggleCurtains(bool open) {
+	if (open) {
+		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(-2.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(2.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+	} else {
+		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(-2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+	}
 }

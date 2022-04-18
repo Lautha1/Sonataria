@@ -1,6 +1,7 @@
 #include "GameState.h"
 #include <iostream>
 #include "RFIDCardReader.h"
+#include "ScreenRenderer.h"
 #include "UserData.h"
 
 GameState gameState;
@@ -17,6 +18,9 @@ GameState::GameState() {
 	this->servicePressed = false;
 	this->difficulty = 0;
 	this->speed = 0;
+
+	// Value in Milliseconds
+	this->CurtainTransitionTime = 2500.f;
 }
 
 /**
@@ -43,6 +47,7 @@ GameState::CurrentState GameState::getGameState() {
  */
 void GameState::setGameState(GameState::CurrentState newState) {
 	this->onStateUnload(this->state);
+	// DELAY THIS
 	this->state = newState;
 	this->onStateLoad(newState);
 }
@@ -53,6 +58,10 @@ void GameState::setGameState(GameState::CurrentState newState) {
  * @param stateLoaded the state being unloaded
  */
 void GameState::onStateUnload(GameState::CurrentState stateUnloaded) {
+	// Close Curtains
+	screenRenderer.ToggleCurtains(false);
+
+	// Handle Any Between Scene Items
 	switch (stateUnloaded) {
 		default:
 			//Do Nothing
@@ -66,7 +75,12 @@ void GameState::onStateUnload(GameState::CurrentState stateUnloaded) {
  * @param stateLoaded the state being loaded
  */
 void GameState::onStateLoad(GameState::CurrentState stateLoaded) {
+	// Open Curtains
+	screenRenderer.ToggleCurtains(true);
+
+	// Handle Any Scene Load Items
 	switch (stateLoaded) {
+		default:
 		case GameState::CurrentState::TITLE_SCREEN:
 			resetResults();
 			userData.clearData();

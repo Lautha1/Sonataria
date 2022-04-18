@@ -44,6 +44,8 @@ class GameState {
 		OnlineState getOnlineState();
 		string getOnlineStateStr();
 
+		float CurtainTransitionTime;
+
 	private:
 		CurrentState state;
 		OnlineState onlineState;

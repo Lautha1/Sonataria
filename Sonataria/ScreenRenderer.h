@@ -52,6 +52,8 @@ class ScreenRenderer {
 		void reset();
 		bool isNetworkChecking;
 
+		void ToggleCurtains(bool);
+
 	private:
 		int testMenuPos;
 		int testMenuTotalOptions;
@@ -79,6 +81,8 @@ class ScreenRenderer {
 		// General Sprites
 		QuadSprite* Stage;
 		QuadSprite* OpenCurtains;
+		QuadSprite* ClosedCurtainLeft;
+		QuadSprite* ClosedCurtainRight;
 
 		// Backgrounds
 		QuadSprite* SetMorning;
