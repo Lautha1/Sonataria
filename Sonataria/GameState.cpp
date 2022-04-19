@@ -1,10 +1,15 @@
+#include <chrono>
 #include "GameState.h"
 #include <iostream>
 #include "RFIDCardReader.h"
 #include "ScreenRenderer.h"
+#include <thread>
 #include "UserData.h"
 
 GameState gameState;
+
+// Forward Declarations
+void CurtainDelay(int);
 
 /**
  * Default constructor.
@@ -20,16 +25,14 @@ GameState::GameState() {
 	this->speed = 0;
 
 	// Value in Milliseconds
-	this->CurtainTransitionTime = 2500.f;
+	this->CurtainTransitionTime = 2000;
 }
 
 /**
  * Default deconstructor.
  * 
  */
-GameState::~GameState() {
-
-}
+GameState::~GameState() {}
 
 /**
  * Get the current gamestate the game is in.
@@ -46,10 +49,32 @@ GameState::CurrentState GameState::getGameState() {
  * @param newState the state to set the game state to
  */
 void GameState::setGameState(GameState::CurrentState newState) {
+	// Close Curtains
+	if (!(this->state == GameState::CurrentState::STARTUP) && !(newState == GameState::CurrentState::SHUTDOWN)) {
+		screenRenderer.ToggleCurtains(false);
+	}
+
+	// Unload the State
 	this->onStateUnload(this->state);
-	// DELAY THIS
+
+	// Artificial Delay to allow curtains to close for transition
+	std::thread delay(CurtainDelay, this->CurtainTransitionTime);
+	delay.join();
+
+	// Switch the State
 	this->state = newState;
+
+	// Handle loading the state
 	this->onStateLoad(newState);
+
+	// Open Curtains
+	if (!(newState == GameState::CurrentState::SHUTDOWN)) {
+		screenRenderer.ToggleCurtains(true);
+	}
+}
+
+void CurtainDelay(int mSec) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(mSec + 1000));
 }
 
 /**
@@ -58,9 +83,6 @@ void GameState::setGameState(GameState::CurrentState newState) {
  * @param stateLoaded the state being unloaded
  */
 void GameState::onStateUnload(GameState::CurrentState stateUnloaded) {
-	// Close Curtains
-	screenRenderer.ToggleCurtains(false);
-
 	// Handle Any Between Scene Items
 	switch (stateUnloaded) {
 		default:
@@ -75,9 +97,6 @@ void GameState::onStateUnload(GameState::CurrentState stateUnloaded) {
  * @param stateLoaded the state being loaded
  */
 void GameState::onStateLoad(GameState::CurrentState stateLoaded) {
-	// Open Curtains
-	screenRenderer.ToggleCurtains(true);
-
 	// Handle Any Scene Load Items
 	switch (stateLoaded) {
 		default:
