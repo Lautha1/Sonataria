@@ -1,17 +1,32 @@
 #include "VideoSprite.h"
 
+#include <string>
+#include "Logger.h"
 #include "AVDecode.h"
+using namespace std;
 
-VideoSprite::VideoSprite(const std::wstring& newName) : QuadSprite(newName)
+VideoSprite::VideoSprite(const std::wstring& newName, bool enableLoop) : QuadSprite(newName)
 {
 	myDecoder = new AVDecode();
 	videoDone = true; // Until the video is loaded, say it is done
+    this->enableLoop = enableLoop;
+    loopOffset = startOffset = 0.0f;
 }
 
 VideoSprite::~VideoSprite()
 {
     delete myDecoder;
     glDeleteTextures(3, textures);
+}
+
+void VideoSprite::setStartTimeInSeconds(double startTime)
+{
+	startOffset = startTime;
+}
+
+void VideoSprite::enableLooping(bool newEnableLoop)
+{
+    enableLoop = newEnableLoop;
 }
 
 bool VideoSprite::loadVideo(const char* videoFilename)
@@ -53,10 +68,22 @@ bool VideoSprite::loadVideo(const char* videoFilename)
 
 void VideoSprite::update(double elapsedTimeSec)
 {
-    if (!videoDone && elapsedTimeSec >= curFrameTimestampSec) {
-        if ((curFrameTimestampSec = myDecoder->decodeFrame()) < 0) {
-            myDecoder->closeDecoder();
-            videoDone = true;
+    if (!videoDone && (elapsedTimeSec - loopOffset) >= curFrameTimestampSec + startOffset) {
+        // Skip a frame after rewinding to avoid timestamp issue
+        if (curFrameTimestampSec <= 0) { myDecoder->decodeFrame(); }
+
+        // Decode next frame
+    	if ((curFrameTimestampSec = myDecoder->decodeFrame()) < 0) {
+            if (enableLoop)
+            {
+	            myDecoder->rewind();
+                loopOffset = elapsedTimeSec;
+            }
+            else
+            {
+	            myDecoder->closeDecoder();
+	            videoDone = true;
+            }
         }
     }
 }

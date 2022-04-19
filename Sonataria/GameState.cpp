@@ -25,7 +25,7 @@ GameState::GameState() {
 	this->speed = 0;
 
 	// Value in Milliseconds
-	this->CurtainTransitionTime = 2000;
+	this->CurtainTransitionTime = 500;
 }
 
 /**

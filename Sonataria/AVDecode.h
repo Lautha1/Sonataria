@@ -21,6 +21,7 @@ public:
 	void closeDecoder();
 
 	void setTextureIDs(GLuint yTexID = 0, GLuint uTexID = 0, GLuint vTexID = 0);
+	int rewind();
 
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
@@ -42,8 +43,10 @@ protected:
 	AVFrame* frame;
 	AVPacket* pkt;
 	int video_frame_count;
-	double pkt_time_base;
-	double curFrameTimestampMsec;
+	double pkt_time_base, stream_time_base;
+
+	int frameRateNum, frameRateDen;
+	double msecPerFrame, curFrameTimestampSecs;
 
 	GLuint textureIDs[3];
 

@@ -251,13 +251,14 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		//}
 
 		// Initialize videos
-		//if (!testVideo->loadVideo("Songs/+ERABY+E CONNEC+10N/+ERABY+ECONNEC+10N.mp4"))
+		//if (!testVideo->loadVideo("VideoFX/5secondTimer.mp4"))
 		//{
-		//	logger.logError("Failed to load video 'Songs/+ERABY+E CONNEC+10N/+ERABY+ECONNEC+10N.mp4'");
+		//	logger.logError("Failed to load video 'VideoFX/5secondTimer.mp4'");
 		//}
 
 		// Link video sprite and shader
 		//testVideo->initSprite(videoShader.getProgram());
+		//testVideo->enableLooping(true);
 
 		// Load first frame
 		//testVideo->scale(2.f * (16.f / 9.f), -2.f, 1.f);

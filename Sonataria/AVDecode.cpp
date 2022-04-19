@@ -4,11 +4,42 @@
  */
 
 #include "AVDecode.h"
+#include "Logger.h"
+using namespace std;
 
 extern "C" {
 #include <libavutil/imgutils.h>
 #include <libavutil/timestamp.h>
 }
+
+typedef struct MovieStream {
+	AVStream *st;
+	AVCodecContext *codec_ctx;
+	int64_t discontinuity_threshold;
+	int64_t last_pts;
+} MovieStream;
+
+typedef struct MovieContext {
+	/* common A/V fields */
+	const AVClass *avclass;
+	int64_t seek_point;   ///< seekpoint in microseconds
+	double seek_point_d;
+	char *format_name;
+	char *file_name;
+	char *stream_specs; /**< user-provided list of streams, separated by + */
+	int stream_index; /**< for compatibility */
+	int loop_count;
+	int64_t discontinuity_threshold;
+	int64_t ts_offset;
+	int dec_threads;
+
+	AVFormatContext *format_ctx;
+
+	int max_stream_index; /**< max stream # actually used for output */
+	MovieStream *st; /**< array of all streams, one per output */
+	int *out_index; /**< stream number -> output number map, or -1 */
+	AVDictionary *format_opts;
+} MovieContext;
 
 AVDecode::AVDecode()
 {
@@ -28,6 +59,7 @@ AVDecode::AVDecode()
     frame = NULL;
     pkt = NULL;
     video_frame_count = 0;
+    curFrameTimestampSecs = 0.0;
 
     // Initialize texture IDs to undefined
     setTextureIDs();
@@ -125,6 +157,7 @@ int AVDecode::decode_packet(AVCodecContext* dec, const AVPacket* pkt)
 
         // write the frame data to output file
         if (dec->codec->type == AVMEDIA_TYPE_VIDEO) {
+            curFrameTimestampSecs = frame->best_effort_timestamp * stream_time_base;
             send_frame_to_GPU(frame);
             // ret = output_video_frame(frame);
         }
@@ -134,6 +167,17 @@ int AVDecode::decode_packet(AVCodecContext* dec, const AVPacket* pkt)
             return ret;
     }
 
+    return 0;
+}
+
+int AVDecode::rewind()
+{
+    int ret = av_seek_frame(fmt_ctx, video_stream_idx, 0, AVSEEK_FLAG_BACKWARD);
+    if (ret < 0)
+	{
+        fprintf(stderr, "Could not rewind movie\n");
+        return ret;
+	}
     return 0;
 }
 
@@ -232,6 +276,16 @@ bool AVDecode::prepareToDecode(const char* src_filename) {
     if (open_codec_context(src_filename, &video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
         video_stream = fmt_ctx->streams[video_stream_idx];
 
+        /* compute frame rate */
+	    frameRateNum = video_dec_ctx->pkt_timebase.num;
+	    frameRateDen = video_dec_ctx->pkt_timebase.den;
+	    msecPerFrame = frameRateDen/(double)frameRateNum * 1000.0f;
+        logger.log("Millisecs per frame ", to_string(msecPerFrame));
+
+	    /* Compute time base (in seconds) for stream */
+	    stream_time_base = video_stream->time_base.num / (double)video_stream->time_base.den;
+        logger.log("Stream time base ", to_string(stream_time_base));
+
         /* allocate image where the decoded image will be put */
         width = video_dec_ctx->width;
         height = video_dec_ctx->height;
@@ -249,7 +303,7 @@ bool AVDecode::prepareToDecode(const char* src_filename) {
     pkt_time_base = video_dec_ctx->pkt_timebase.num/(double)video_dec_ctx->pkt_timebase.den;
 
     /* dump input information to stderr */
-    //av_dump_format(fmt_ctx, 0, src_filename, 0);
+    // av_dump_format(fmt_ctx, 0, src_filename, 0);
 
     if (!video_stream) {
         fprintf(stderr, "Could not find video stream in the input, aborting\n");
@@ -275,11 +329,10 @@ double AVDecode::decodeFrame() {
     /* read frames from the file */
     while (av_read_frame(fmt_ctx, pkt) >= 0) {
         if (pkt->stream_index == video_stream_idx) {
-            curFrameTimestampMsec = pkt->pts * pkt_time_base;
             int ret = decode_packet(video_dec_ctx, pkt);
             av_packet_unref(pkt);
             if (ret < 0) { return -1.0; }
-            return curFrameTimestampMsec;
+			return curFrameTimestampSecs;
         }
 
         // Not a video packet so get another one
