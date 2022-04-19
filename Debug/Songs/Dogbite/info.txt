@@ -1,8 +1,0 @@
-songid-5
-title-Dogbite
-author-t+pazolite
-bpm-195
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-Dogbite.flac

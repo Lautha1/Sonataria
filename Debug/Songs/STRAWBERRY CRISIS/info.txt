@@ -1,8 +1,0 @@
-songid-25
-title-STRAWBERRY CRISIS
-author-Ryuko Pegasasu
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-STRAWBERRYCRISIS.wav

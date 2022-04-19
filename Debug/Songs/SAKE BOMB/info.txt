@@ -1,8 +1,0 @@
-songid-17
-title-SAKE BOMB
-author-Ryuko Pegasasu
-bpm-143
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-SAKEBOMB.flac

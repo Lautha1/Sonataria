@@ -1,4 +1,7 @@
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+
+#include <nlohmann/json.hpp>
+
 #include "Song.h"
 #include <fstream>
 #include <iostream>
@@ -6,6 +9,10 @@
 #include "Logger.h"
 #include <codecvt>
 #include <locale>
+
+#include <windows.h>
+
+using json = nlohmann::json;
 
 // Forward Declaration
 void tokenize(std::wstring const& str, const char delim, std::vector<std::wstring>& out);
@@ -42,20 +49,18 @@ Song::~Song() {
  */
 Song::Song(string path) {
 	// Set the path to the file
-	this->path = eraseAllSubStr(path, "info.txt");
+	this->path = eraseAllSubStr(path, "info.json");
 
-	// Create some holder variables
-	vector<wstring> input;
-	wstring line;
-
-	// Read from the text file into the vector
+	// Read in the JSON Files
 	wifstream inStream(path);
+	wstring line;
+	wstring fullFileData;
 
 	inStream.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 
 	if (inStream.is_open()) {
 		while (getline(inStream, line)) {
-			input.push_back(line);
+			fullFileData += line;
 		}
 		inStream.close();
 	}
@@ -63,48 +68,65 @@ Song::Song(string path) {
 		logger.logError(L"Error opening file!");
 	}
 
-	// Loop for the amount of lines in that vector
-	for (size_t i = 0; i < input.size(); i++) {
-		const char delim = '-';
+	json j;
+	try
+	{
+		j = json::parse(fullFileData, nullptr, false);
+	}
+	catch (json::parse_error& ex)
+	{
+		std::cerr << "Song path" << path << std::endl;
+		std::cerr << "parse error at byte " << ex.byte << std::endl;
+	}
 
-		// Break the line into the parts based on the delim char
-		std::vector<std::wstring> out;
-		tokenize(input[i], delim, out);
+	// Song ID
+	this->songID = j["songId"];
 
-		// Based on the type of data switch to what to set
-		if (out[0] == L"songid") {
-			this->songID = stoi(out[1]);
-		}
-		else if (out[0] == L"title") {
-			this->title = out[1];
-		}
-		else if (out[0] == L"author") {
-			this->author = out[1];
-		}
-		else if (out[0] == L"bpm") {
-			this->bpm = ws2s(out[1]);
-		}
-		else if (out[0] == L"jacketArt") {
-			this->jacketArt = ws2s(out[1]);
-		}
-		else if (out[0] == L"audioFile") {
-			this->audioFile = ws2s(out[1]);
-		}
-		else if (out[0] == L"roundArt") {
-			this->roundArt = ws2s(out[1]);
-		}
-		else if (out[0] == L"diffs") {
-			const char delim2 = '/';
+	// Title
+	std::string content = j["title"];
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+	this->title = myconv.from_bytes(content);
+	
+	// Author
+	content = j["author"];
+	this->author = myconv.from_bytes(content);
 
-			std::vector<std::wstring> out2;
-			tokenize(out[1], delim2, out2);
+	// BPM
+	this->bpm = to_string(j["bpm"]);
 
-			for (size_t j = 0; j < out2.size(); j++) {
-				string diff = ws2s(out2[j]);
-				Chart tmp(stoi(diff));
-				this->charts.push_back(tmp);
-			}
-		}
+	// Jacket Art
+	this->jacketArt = j["jacketArt"];
+
+	// Round Art
+	this->roundArt = j["roundArt"];
+
+	// Audio File
+	this->audioFile = j["audioFile"];
+
+	// Difficulties
+	
+	// Easy
+	if (j["diffs"]["easyDiff"] > 0) {
+		Chart tmp(j["diffs"]["easyDiff"]);
+		this->charts.push_back(tmp);
+	}
+
+	// Medium
+	if (j["diffs"]["mediumDiff"] > 0) {
+		Chart tmp(j["diffs"]["mediumDiff"]);
+		this->charts.push_back(tmp);
+	}
+
+	// Hard
+	if (j["diffs"]["hardDiff"] > 0) {
+		Chart tmp(j["diffs"]["hardDiff"]);
+		this->charts.push_back(tmp);
+	}
+
+	// Extreme
+	if (j["diffs"]["extremeDiff"] > 0) {
+		Chart tmp(j["diffs"]["extremeDiff"]);
+		this->charts.push_back(tmp);
 	}
 
 	// Set this is now a valid song
@@ -266,4 +288,11 @@ bool Song::isSongValid() {
  */
 string Song::getPath() {
 	return this->path;
+}
+
+// encoding function
+std::string to_utf8(std::wstring& wide_string)
+{
+	static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	return utf8_conv.to_bytes(wide_string);
 }

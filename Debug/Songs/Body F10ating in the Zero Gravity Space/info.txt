@@ -1,8 +1,0 @@
-songid-30
-title-Body F10ating in the Zero Gravity Space
-author-Camellia
-bpm-170
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-BodyF10atingintheZeroGravitySpace.flac

@@ -1,8 +1,0 @@
-songid-34
-title-Fly Wit Me
-author-Camellia
-bpm-174
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-FlyWitMe.flac

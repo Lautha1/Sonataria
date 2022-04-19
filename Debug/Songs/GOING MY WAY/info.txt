@@ -1,8 +1,0 @@
-songid-22
-title-GOING MY WAY
-author-DJ Timotei
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-GOINGMYWAY.wav

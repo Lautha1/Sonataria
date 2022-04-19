@@ -140,10 +140,10 @@ ScreenRenderer::ScreenRenderer() {
 	for (auto& item : filesystem::recursive_directory_iterator(dir)) {
 
 		if (!filesystem::is_regular_file(item.path())
-			|| item.path().extension() != ".txt")
+			|| item.path().extension() != ".json")
 			continue;
 
-		if (item.path().filename() != "info.txt") {
+		if (item.path().filename() != "info.json") {
 			continue;
 		}
 
@@ -1602,10 +1602,10 @@ void checkForProfile(int& loginComplete) {
 
 void ScreenRenderer::ToggleCurtains(bool open) {
 	if (open) {
-		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(-2.f, 0.f, 0.f), gameState.CurtainTransitionTime);
-		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(2.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(-2.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
+		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(0.f, 0.f, 0.f), Vector3(2.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
 	} else {
-		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(-2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), gameState.CurtainTransitionTime);
-		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), gameState.CurtainTransitionTime);
+		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(-2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
+		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
 	}
 }

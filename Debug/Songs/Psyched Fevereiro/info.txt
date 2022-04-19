@@ -1,8 +1,0 @@
-songid-4
-title-Psyched Fevereiro
-author-t+pazolite
-bpm-150
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-PsychedFevereiro.flac

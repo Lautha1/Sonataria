@@ -1,0 +1,15 @@
+{
+    "songId": 23,
+	"title": "Within Your Dream",
+	"author": "Chickpea Sashimi",
+	"bpm": 155,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "WithinYourDream.wav"
+}

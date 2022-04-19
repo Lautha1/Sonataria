@@ -1,8 +1,0 @@
-songid-3
-title-Chartreuse Green
-author-t+pazolite
-bpm-180
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-ChartreuseGreen.flac

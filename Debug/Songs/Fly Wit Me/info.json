@@ -1,0 +1,15 @@
+{
+    "songId": 34,
+	"title": "Fly Wit Me",
+	"author": "Camellia",
+	"bpm": 174,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "FlyWitMe.flac"
+}

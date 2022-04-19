@@ -1,0 +1,15 @@
+{
+    "songId": 28,
+	"title": "SCARLET DEVIL NIGHT",
+	"author": "Ryuko Pegasasu",
+	"bpm": 156,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "SCARLETDEVILNIGHT.wav"
+}

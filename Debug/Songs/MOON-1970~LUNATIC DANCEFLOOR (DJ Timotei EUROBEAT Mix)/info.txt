@@ -1,8 +1,0 @@
-songid-13
-title-MOON 1970~LUNATIC DANCEFLOOR (DJ Timotei EUROBEAT Mix)
-author-Violet Delta
-bpm-149
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-MOON1970~LUNATIC DANCEFLOOR (DJ Timotei EUROBEAT Mix).flac

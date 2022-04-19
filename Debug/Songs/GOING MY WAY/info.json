@@ -1,0 +1,15 @@
+{
+    "songId": 22,
+	"title": "GOING MY WAY",
+	"author": "DJ Timotei",
+	"bpm": 160,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "GOINGMYWAY.wav"
+}

@@ -1,8 +1,0 @@
-songid-9
-title-Confession
-author-TTL
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-Confession.flac

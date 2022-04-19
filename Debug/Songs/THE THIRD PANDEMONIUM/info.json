@@ -1,0 +1,15 @@
+{
+    "songId": 11,
+	"title": "The Third Pandemonium",
+	"author": "Ryuko Pegasasu",
+	"bpm": 155,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "THETHIRDPANDEMONIUM.flac"
+}

@@ -1,8 +1,0 @@
-songid-12
-title-君の魂
-author-DJ Timotei
-bpm-154
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-YourSoul.flac

@@ -1,0 +1,15 @@
+{
+    "songId": 5,
+	"title": "Dogbite",
+	"author": "t+pazolite",
+	"bpm": 195,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "Dogbite.flac"
+}

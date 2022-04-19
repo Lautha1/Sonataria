@@ -1,8 +1,0 @@
-songid-7
-title-New Mission 02
-author-DJ Timotei
-bpm-130
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-NEWMISSION02.flac

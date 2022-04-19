@@ -1,8 +1,0 @@
-songid-21
-title-Bloody Red
-author-DJ Timotei
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-BloodyRed.wav

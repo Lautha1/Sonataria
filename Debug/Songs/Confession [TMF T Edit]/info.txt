@@ -1,8 +1,0 @@
-songid-19
-title-Confession [TMF T Edit]
-author-TMFTake
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-Confession[TMFTEdit].flac

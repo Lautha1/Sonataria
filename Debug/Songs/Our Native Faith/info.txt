@@ -1,8 +1,0 @@
-songid-24
-title-Our Native Faith
-author-Impedance Eurobeat
-bpm-162
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-OurNativeFaith.wav

@@ -1,8 +1,0 @@
-songid-37
-title-M1LLI0N PP
-author-Camellia
-bpm-234
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-M1LLI0NPP.flac

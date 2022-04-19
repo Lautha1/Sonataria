@@ -1,0 +1,15 @@
+{
+    "songId": 35,
+	"title": "+ERABY+E CONNEC+10N",
+	"author": "Camellia",
+	"bpm": 230,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"roundArt": "round.png",
+	"audioFile": "+ERABY+ECONNEC+10N.flac"
+}

@@ -1,8 +1,0 @@
-songid-27
-title-Forgotten
-author-DJ Timotei
-bpm-157
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-Forgotten.wav

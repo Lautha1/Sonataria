@@ -1,8 +1,0 @@
-songid-8
-title-ETERNAL FLAMES
-author-DJ Timotei
-bpm-160
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-ETERNALFLAMES.flac

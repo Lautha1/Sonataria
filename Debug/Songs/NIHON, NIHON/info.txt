@@ -1,8 +1,0 @@
-songid-26
-title-NIHON, NIHON
-author-DJ Timotei
-bpm-154
-diffs-1
-jacketArt-jacket.png
-roundArt-round.png
-audioFile-NIHONNIHON.wav
