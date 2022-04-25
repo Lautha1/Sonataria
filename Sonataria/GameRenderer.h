@@ -11,13 +11,11 @@ using namespace std;
 
 #include "SpriteShader.h"
 #include "TextShader.h"
-#include "VideoShader.h"
 
 #include "Note.h"
 #include "WheelNote.h"
 
 class QuadSprite;
-class VideoSprite;
 
 enum JUDGEMENT {
 	PERFECT_HIT,
@@ -35,7 +33,6 @@ class GameRenderer {
 		// Shaders
 		SpriteShader spriteShader;
 		TextShader textShader;
-		VideoShader videoShader;
 
 		// Sprites
 		QuadSprite* Audience;
@@ -49,8 +46,6 @@ class GameRenderer {
 		QuadSprite* holdPixelNote;
 
 		QuadSprite* noteJudgement;
-
-		VideoSprite* testVideo;
 
 	public:
 		GameRenderer();

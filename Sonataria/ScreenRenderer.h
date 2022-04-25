@@ -15,6 +15,8 @@
 #include "QuadSprite.h"
 #include "SpriteShader.h"
 #include "TextShader.h"
+#include "VideoShader.h"
+#include "VideoSprite.h"
 
 /**
  * Handles all rendering except the game screen
@@ -75,8 +77,7 @@ class ScreenRenderer {
 
 		SpriteShader spriteShader;
 		TextShader textShader;
-
-		QuadSprite* titleScreen;
+		VideoShader videoShader;
 
 		// General Sprites
 		QuadSprite* Stage;
@@ -85,6 +86,7 @@ class ScreenRenderer {
 		QuadSprite* ClosedCurtainRight;
 
 		// Backgrounds
+		VideoSprite* AttractTitleScreen;
 		QuadSprite* SetMorning;
 		QuadSprite* SetAfternoon;
 

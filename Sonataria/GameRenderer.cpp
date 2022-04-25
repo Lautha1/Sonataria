@@ -93,7 +93,6 @@ GameRenderer::GameRenderer() {
 	wheelPixelNote = new QuadSprite(L"Wheel Note in Pixel Units");
 	holdPixelNote = new QuadSprite(L"Hold Note in Pixel Units");
 	noteJudgement = new QuadSprite(L"Judgement for Notes");
-	testVideo = new VideoSprite(L"Test video sprite");
 }
 
 /**
@@ -111,7 +110,6 @@ GameRenderer::~GameRenderer() {
 	delete wheelPixelNote;
 	delete holdPixelNote;
 	delete noteJudgement;
-	delete testVideo;
 }
 
 /**
@@ -243,26 +241,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			logger.logError(L"Failed to initialize text shader");
 			exit(1);
 		}
-
-		// INITIALIZE VIDEO SHADER
-		//if (!videoShader.initShader()) {
-		//	logger.logError(L"Failed to initialize video shader");
-		//	exit(1);
-		//}
-
-		// Initialize videos
-		//if (!testVideo->loadVideo("VideoFX/5secondTimer.mp4"))
-		//{
-		//	logger.logError("Failed to load video 'VideoFX/5secondTimer.mp4'");
-		//}
-
-		// Link video sprite and shader
-		//testVideo->initSprite(videoShader.getProgram());
-		//testVideo->enableLooping(true);
-
-		// Load first frame
-		//testVideo->scale(2.f * (16.f / 9.f), -2.f, 1.f);
-		//testVideo->update(0);
 	}
 
 	// INITIALIZE TEXT
@@ -433,9 +411,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		fsec fs = currentSongPosition - songStartTime;
 		ms currentSongOffset = std::chrono::duration_cast<ms>(fs);
 		// Use currentSongOffset.count() to get millisecond value
-
-		// Allow video to update
-		//testVideo->update((double)fs.count());
 
 		// If the service button was pressed, stop the song
 		if (gameState.checkService() || gameState.getGameState() == GameState::CurrentState::SHUTDOWN) {
@@ -1192,10 +1167,6 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 			// Render Background
 			glUseProgram(spriteShader.getProgram());
 			Audience->render(PROJECTION::ORTHOGRAPHIC);
-
-			// Draw background video
-			//glUseProgram(videoShader.getProgram());
-			//testVideo->render(PROJECTION::ORTHOGRAPHIC);
 
 			// ** MAKE SURE TO MIND ORDER IF YOU REDRAW ANYTHING **
 

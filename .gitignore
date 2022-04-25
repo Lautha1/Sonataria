@@ -20,11 +20,13 @@ bld/**/*.*
 ![Dd]ebug/Settings/**/*.*
 ![Dd]ebug/Textures/**/*.*
 ![Dd]ebug/Songs/**/*.*
+![Dd]ebug/Videos/**/*.*
 
 ![Rr]elease/Fonts/**/*.*
 ![Rr]elease/Settings/**/*.*
 ![Rr]elease/Textures/**/*.*
 ![Rr]elease/Songs/**/*.*
+![Rr]elease/Videos/**/*.*
 
 # Whitelist the glew Release folders
 !dependencies/glew-2.1.0/bin/Release/**/*.*
@@ -41,6 +43,10 @@ bld/**/*.*
 # Still include Music in the MusicFX folder
 ![Dd]ebug/MusicFX/**/*.*
 ![Rr]elease/MusicFX/**/*.*
+
+# Still include Videos in the Videos folder
+![Dd]ebug/Videos/**/*.*
+![Rr]elease/Videos/**/*.*
 
 # Don't track documentation from Dependencies
 dependencies/SFML/SFML-2.5.1/doc/

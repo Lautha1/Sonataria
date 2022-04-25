@@ -117,8 +117,7 @@ ScreenRenderer::ScreenRenderer() {
 	this->openGLInitialized = false;
 
 	// SETUP SPRITES
-	titleScreen = new QuadSprite(L"Title Screen");
-
+	
 	// General Sprites
 	Stage = new QuadSprite(L"Stage");
 	OpenCurtains = new QuadSprite(L"Open Curtains");
@@ -126,6 +125,7 @@ ScreenRenderer::ScreenRenderer() {
 	ClosedCurtainRight = new QuadSprite(L"Closed Curtain Right");
 
 	// Backgrounds
+	AttractTitleScreen = new VideoSprite(L"Attract Title Screen Video");
 	SetMorning = new QuadSprite(L"Set Morning");
 	SetAfternoon = new QuadSprite(L"Set Afternoon");
 
@@ -202,7 +202,6 @@ ScreenRenderer::ScreenRenderer() {
  */
 ScreenRenderer::~ScreenRenderer() {
 	// DELETE SPRITES
-	delete titleScreen;
 	
 	// General Sprites
 	delete Stage;
@@ -211,6 +210,7 @@ ScreenRenderer::~ScreenRenderer() {
 	delete ClosedCurtainRight;
 
 	// Backgrounds
+	delete AttractTitleScreen;
 	delete SetMorning;
 	delete SetAfternoon;
 
@@ -248,11 +248,10 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		logger.log(L"Initializing sprite shader.");
 		if (!spriteShader.initShader()) {
 			logger.logError(L"Failed to initialize sprite shader.");
-			exit(-1);
+			exit(1);
 		}
 
 		// INITIALIZE THE SPRITES
-		titleScreen->initSprite(spriteShader.getProgram());
 
 		// General Sprites
 		Stage->initSprite(spriteShader.getProgram());
@@ -268,7 +267,6 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		LifeLinkIcon->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
-		titleScreen->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_TitleScreen.png"));
 
 		// General Sprites
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
@@ -287,8 +285,6 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		float aspect = 16.f / 9.f;
 
-		titleScreen->scale(2.f * aspect, 2.f, 1.f);
-
 		// General Sprites
 		Stage->scale(2.f * aspect, 2.f, 1.f);
 		OpenCurtains->scale(2.f * aspect, 2.f, 1.f);
@@ -306,7 +302,28 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		logger.log(L"Initializing text shader.");
 		if (!textShader.initShader()) {
 			logger.logError(L"Failed to initialize text shader.");
+			exit(1);
 		}
+
+		// INITIALIZE VIDEO SHADER
+		if (!videoShader.initShader()) {
+			logger.logError("Failed to initialize video shader.");
+			exit(1);
+		}
+
+		// Initialize Videos
+		if (!AttractTitleScreen->loadVideo("Videos/temp_AttractTitleScreen.mp4")) {
+			logger.logError("Failed to load video: Videos/temp_AttractTitleScreen.mp4");
+			exit(1);
+		}
+
+		// Link video sprite and shader
+		AttractTitleScreen->initSprite(videoShader.getProgram());
+		AttractTitleScreen->enableLooping(true);
+
+		// Load the first frame
+		AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
+		AttractTitleScreen->update(0);
 
 		logger.log(L"OpenGL initialized.");
 	}
@@ -471,7 +488,14 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				// Don't render anything background related when in a service state
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
-				titleScreen->render(PROJECTION::ORTHOGRAPHIC);
+				// Swap to the video shader program
+				glUseProgram(videoShader.getProgram());
+
+				// Update the current frame
+				AttractTitleScreen->update((double)fs.count());
+
+				// Render that frame
+				AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
 			else {
 				// Render Background
@@ -490,6 +514,9 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				OpenCurtains->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
+
+		// Set the sprite shader back in case the video shader was being used
+		glUseProgram(spriteShader.getProgram());
 
 		// Check if RFID Card read during Login
 		if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
