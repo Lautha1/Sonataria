@@ -467,8 +467,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// DRAW BACKGROUNDS / STAGE (MAIN SET)
 		{
-			if (gameState.getGameState() == GameState::CurrentState::STARTUP) {
-				// Don't render anything background related
+			if (gameState.isInServiceGameState()) {
+				// Don't render anything background related when in a service state
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 				titleScreen->render(PROJECTION::ORTHOGRAPHIC);

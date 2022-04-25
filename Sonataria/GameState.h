@@ -45,17 +45,26 @@ class GameState {
 		string getOnlineStateStr();
 
 		int CurtainTransitionTime;
+		bool isTransitioning;
+		bool isInServiceGameState();
+		bool isInServiceGameState(CurrentState);
+
+		void onStateUnload(CurrentState);
+		void onStateLoad(CurrentState);
+
+		CurrentState state;
 
 	private:
-		CurrentState state;
 		OnlineState onlineState;
 		int err_code;
 		bool servicePressed;
 		Song currentlyPlaying;
 		int difficulty;
 		int speed;
-		void onStateUnload(CurrentState);
-		void onStateLoad(CurrentState);
+		vector<CurrentState> serviceStates{ 
+			CurrentState::STARTUP, CurrentState::SHUTDOWN, CurrentState::ERROR_CODE, CurrentState::TEST_MENU_MAIN, 
+			CurrentState::UPDATES, CurrentState::TEST_MENU_IOCHECK, CurrentState::TEST_MENU_INPUTCHECK, 
+			CurrentState::TEST_MENU_SYSINFO, CurrentState::TEST_MENU_SOUNDOPTIONS, CurrentState::TEST_MENU_NETWORKING };
 };
 
 extern GameState gameState;

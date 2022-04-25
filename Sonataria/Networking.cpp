@@ -29,7 +29,7 @@ const int PORT = 57015;
  */
 Networking::Networking() {
 	// Set the version of the game
-	this->version = "20220418-J-01";
+	this->version = "20220424-J-01";
 
 	// Set the information for connecting to the server
 	this->ServerAddress = "http://127.0.0.1:3000";

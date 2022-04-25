@@ -9,7 +9,8 @@
 GameState gameState;
 
 // Forward Declarations
-void CurtainDelay(int);
+void CurtainDelay(int, bool);
+void GameStateChangeThread(GameState::CurrentState, GameState::CurrentState);
 
 /**
  * Default constructor.
@@ -25,7 +26,8 @@ GameState::GameState() {
 	this->speed = 0;
 
 	// Value in Milliseconds
-	this->CurtainTransitionTime = 500;
+	this->CurtainTransitionTime = 1500;
+	this->isTransitioning = false;
 }
 
 /**
@@ -49,32 +51,65 @@ GameState::CurrentState GameState::getGameState() {
  * @param newState the state to set the game state to
  */
 void GameState::setGameState(GameState::CurrentState newState) {
+	// Prevent "T" presses while swapping game states
+	this->isTransitioning = true;
+
+	// Launch a thread to prevent blocking
+	thread changeState;
+	changeState = std::thread(GameStateChangeThread, this->state, newState);
+	changeState.detach();
+
+	// We don't unlock the "T" key here
+	// It is unlocked in the launched thread so that it ensures the game state finished swapping
+}
+
+void GameStateChangeThread(GameState::CurrentState oldState, GameState::CurrentState newState) {
 	// Close Curtains
-	if (!(this->state == GameState::CurrentState::STARTUP) && !(newState == GameState::CurrentState::SHUTDOWN)) {
+	thread delay;
+	if (!gameState.isInServiceGameState() && !gameState.isInServiceGameState(newState)) {
+		// Begin Animation
 		screenRenderer.ToggleCurtains(false);
+
+		// Only add the delay if we actually transition
+		delay = std::thread(CurtainDelay, gameState.CurtainTransitionTime, true);
+
+		// Wait for it to finish
+		delay.join();
 	}
 
 	// Unload the State
-	this->onStateUnload(this->state);
-
-	// Artificial Delay to allow curtains to close for transition
-	std::thread delay(CurtainDelay, this->CurtainTransitionTime);
-	delay.join();
+	gameState.onStateUnload(oldState);
 
 	// Switch the State
-	this->state = newState;
+	gameState.state = newState;
 
 	// Handle loading the state
-	this->onStateLoad(newState);
+	gameState.onStateLoad(newState);
 
 	// Open Curtains
-	if (!(newState == GameState::CurrentState::SHUTDOWN)) {
+	if (!gameState.isInServiceGameState() && !gameState.isInServiceGameState(newState)) {
+		// Begin Animation
 		screenRenderer.ToggleCurtains(true);
+
+		// Add the delay again to make sure the transition ends
+		delay = std::thread(CurtainDelay, gameState.CurtainTransitionTime, false);
+
+		// Wait for it to finish
+		delay.join();
 	}
+
+	// Allow "T" presses again
+	gameState.isTransitioning = false;
 }
 
-void CurtainDelay(int mSec) {
-	std::this_thread::sleep_for(std::chrono::milliseconds(mSec + 1000));
+void CurtainDelay(int mSec, bool addExtraDelay) {
+	int totalTime = mSec;
+
+	// Add extra time on the curtain close before reopening
+	if (addExtraDelay) { totalTime += 1000; }
+
+	// Sleep the thread
+	std::this_thread::sleep_for(std::chrono::milliseconds(totalTime));
 }
 
 /**
@@ -234,4 +269,24 @@ string GameState::getOnlineStateStr() {
 		default:
 			return "";
 	}
+}
+
+// Check if the current game state is one of the service states
+bool GameState::isInServiceGameState() {
+	for (size_t i = 0; i < this->serviceStates.size(); i++) {
+		if (this->state == this->serviceStates[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Check if a specific game state is one of the service states
+bool GameState::isInServiceGameState(CurrentState stateToCheck) {
+	for (size_t i = 0; i < this->serviceStates.size(); i++) {
+		if (stateToCheck == this->serviceStates[i]) {
+			return true;
+		}
+	}
+	return false;
 }

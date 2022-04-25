@@ -206,8 +206,10 @@ int main(int argc, char** argv) {
 				 else if(evnt.key.code == sf::Keyboard::T) {
 					 controllerInput.setKeyState(6, true);
 					 PacSetLEDState(0, 3, true);
-					 if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {
-						 switch (screenRenderer.getTestMenuPos()) {
+					 // Only do actions if the game isn't doing the curtain transition effect
+					 if (!gameState.isTransitioning) {
+						 if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {
+							 switch (screenRenderer.getTestMenuPos()) {
 							 case 0:
 								 gameState.setGameState(GameState::CurrentState::TEST_MENU_IOCHECK);
 								 screenRenderer.testMenuReset();
@@ -228,10 +230,10 @@ int main(int argc, char** argv) {
 								 gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
 								 screenRenderer.testMenuReset();
 								 break;
+							 }
 						 }
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_IOCHECK) {
-						 switch (screenRenderer.getTestMenuIOCheckPos()) {
+						 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_IOCHECK) {
+							 switch (screenRenderer.getTestMenuIOCheckPos()) {
 							 case 0:
 								 gameState.setGameState(GameState::CurrentState::TEST_MENU_INPUTCHECK);
 								 screenRenderer.testMenuReset();
@@ -240,18 +242,18 @@ int main(int argc, char** argv) {
 								 gameState.setGameState(GameState::CurrentState::TEST_MENU_MAIN);
 								 screenRenderer.testMenuReset();
 								 break;
+							 }
 						 }
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_INPUTCHECK) {
-						 gameState.setGameState(GameState::CurrentState::TEST_MENU_IOCHECK);
-						 screenRenderer.testMenuReset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SYSINFO) {
-						 gameState.setGameState(GameState::CurrentState::TEST_MENU_MAIN);
-						 screenRenderer.testMenuReset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SOUNDOPTIONS) {
-						 switch (screenRenderer.getTestMenuSoundOptionsPos()) {
+						 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_INPUTCHECK) {
+							 gameState.setGameState(GameState::CurrentState::TEST_MENU_IOCHECK);
+							 screenRenderer.testMenuReset();
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SYSINFO) {
+							 gameState.setGameState(GameState::CurrentState::TEST_MENU_MAIN);
+							 screenRenderer.testMenuReset();
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_SOUNDOPTIONS) {
+							 switch (screenRenderer.getTestMenuSoundOptionsPos()) {
 							 case 0: // System Volume
 								 if (screenRenderer.getTestMenuSoundOptionsSelected()) {
 									 screenRenderer.setTestMenuSoundOptionsSelected(false);
@@ -264,26 +266,26 @@ int main(int argc, char** argv) {
 								 gameState.setGameState(GameState::CurrentState::TEST_MENU_MAIN);
 								 screenRenderer.testMenuReset();
 								 break;
+							 }
 						 }
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_NETWORKING) {
-						 int status = 0;
-						 switch (screenRenderer.getTestMenuNetworkingPos()) {
+						 else if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_NETWORKING) {
+							 int status = 0;
+							 switch (screenRenderer.getTestMenuNetworkingPos()) {
 							 case 0: // Network check
 								 logger.log(L"Testing Network...");
 								 screenRenderer.isNetworkChecking = true;
 								 status = network.checkConnection();
 
 								 switch (status) {
-									 case 1:
-										 gameState.setOnlineState(GameState::OnlineState::ONLINE);
-										 break;
-									 case 2:
-										 gameState.setOnlineState(GameState::OnlineState::OFFLINE);
-										 break;
-									 case 3:
-										 gameState.setOnlineState(GameState::OnlineState::MAINTENENCE);
-										 break;
+								 case 1:
+									 gameState.setOnlineState(GameState::OnlineState::ONLINE);
+									 break;
+								 case 2:
+									 gameState.setOnlineState(GameState::OnlineState::OFFLINE);
+									 break;
+								 case 3:
+									 gameState.setOnlineState(GameState::OnlineState::MAINTENENCE);
+									 break;
 								 }
 								 screenRenderer.isNetworkChecking = false;
 								 logger.log(L"Network Test Finished.");
@@ -292,42 +294,43 @@ int main(int argc, char** argv) {
 								 gameState.setGameState(GameState::CurrentState::TEST_MENU_MAIN);
 								 screenRenderer.testMenuReset();
 								 break;
+							 }
 						 }
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
-						 RFIDCardReader::getCardReader()->clearLastCardData();
-						 gameState.setGameState(GameState::CurrentState::PRELOGIN);
-						 controllerInput.reset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
-						 // TODO: go to tutorial and such...
-						 gameState.setGameState(GameState::CurrentState::SONG_SELECT);
-						 controllerInput.reset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
-						 if (screenRenderer.isCurrentSongValidToPlay()) {
-							 gameState.setSongPlaying(screenRenderer.currentPageSongs[screenRenderer.getSongSelectHoverOver()], screenRenderer.currentPageSongs[screenRenderer.getSongSelectHoverOver()].getDifficultyNumber(screenRenderer.getDifficultyHoverOver()));
-							 gameState.setGameState(GameState::CurrentState::GAME);
+						 else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
+							 RFIDCardReader::getCardReader()->clearLastCardData();
+							 gameState.setGameState(GameState::CurrentState::PRELOGIN);
+							 controllerInput.reset();
 						 }
-						 else {
-							 // TODO: Play the invalid selection sound effect
-						 }
-						 controllerInput.reset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
-						 if (gameState.results.size() >= 2) {
-							 // TODO: Check for EX Track then go to final results or ex track
-							 gameState.setGameState(GameState::CurrentState::FINAL_RESULTS);
-						 }
-						 else {
+						 else if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+							 // TODO: go to tutorial and such...
 							 gameState.setGameState(GameState::CurrentState::SONG_SELECT);
+							 controllerInput.reset();
 						 }
-						 controllerInput.reset();
-					 }
-					 else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
-						 gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
-						 // Clear the saved data at the end of the credit regardless of whether or not they are carded in
-						 userData.clearData();
+						 else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
+							 if (screenRenderer.isCurrentSongValidToPlay()) {
+								 gameState.setSongPlaying(screenRenderer.currentPageSongs[screenRenderer.getSongSelectHoverOver()], screenRenderer.currentPageSongs[screenRenderer.getSongSelectHoverOver()].getDifficultyNumber(screenRenderer.getDifficultyHoverOver()));
+								 gameState.setGameState(GameState::CurrentState::GAME);
+							 }
+							 else {
+								 // TODO: Play the invalid selection sound effect
+							 }
+							 controllerInput.reset();
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
+							 if (gameState.results.size() >= 2) {
+								 // TODO: Check for EX Track then go to final results or ex track
+								 gameState.setGameState(GameState::CurrentState::FINAL_RESULTS);
+							 }
+							 else {
+								 gameState.setGameState(GameState::CurrentState::SONG_SELECT);
+							 }
+							 controllerInput.reset();
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
+							 gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
+							 // Clear the saved data at the end of the credit regardless of whether or not they are carded in
+							 userData.clearData();
+						 }
 					 }
 				 }
 				 else if(evnt.key.code == sf::Keyboard::Escape) {
