@@ -277,8 +277,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		ClosedCurtainRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainRight.png"));
 
 		// Backgrounds
-		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning-TEMP.jpg"));
-		SetAfternoon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Afternoon-TEMP.jpg"));
+		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning.png"));
+		SetAfternoon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Afternoon.png"));
 
 		// PreLogin Sprites
 		LifeLinkIcon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/LifeLink.png"));

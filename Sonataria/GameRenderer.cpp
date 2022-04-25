@@ -188,7 +188,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		// INITIALIZE THE TEXTURES
 		
 		// Background
-		Audience->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Audience-TEMP.jpg"));
+		Audience->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Audience.png"));
 
 		track->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Track.png"));
 		laneNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Note.png"));

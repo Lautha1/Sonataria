@@ -32,12 +32,12 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Judgement/temp_Near.png", 9, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Judgement/temp_Perfect.png", 10, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/MissingJacketArt.png", 11, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/MissingRoundArt.png", 12, GL_BGRA, GL_RGBA, nullptr },
 
 	// Backgrounds
-	{ "Textures/Backgrounds/Set-Morning-TEMP.jpg", 13, GL_BGR, GL_RGB, nullptr },
-	{ "Textures/Backgrounds/Set-Afternoon-TEMP.jpg", 14, GL_BGR, GL_RGB, nullptr },
-	{ "Textures/Backgrounds/Audience-TEMP.jpg", 15, GL_BGR, GL_RGB, nullptr},
+	{ "Textures/Backgrounds/Set-Morning.png", 13, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/Backgrounds/Set-Afternoon.png", 14, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/Backgrounds/Set-Evening.png", 15, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/Backgrounds/Audience.png", 15, GL_BGR, GL_RGB, nullptr},
 
 	// General
 	{ "Textures/General/ClosedCurtainLeft.png", 16, GL_BGRA, GL_RGBA, nullptr },
@@ -45,19 +45,53 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/General/OpenCurtains.png", 18, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/General/Stage.png", 19, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/General/StartButton.png", 20, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Wheel.png", 20, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Back.png", 21, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/No.png", 22, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Yes.png", 23, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/CurvySymbol.png", 24, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Frame.png", 25, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Rope.png", 25, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Spotlights/Spotlight-Left.png", 25, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Spotlights/Spotlight-Right.png", 25, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Brackets/LeftBracket.png", 25, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/General/Brackets/RightBracket.png", 25, GL_BGRA, GL_RGBA, nullptr },
 
 	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 21, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 22, 0, 0, nullptr},
+	{ "Fonts/HonyaJi-Re.ttf", 26, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 27, 0, 0, nullptr},
 
 	// Login
-	{ "Textures/Login/LifeLink.png", 23, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/LifeLink.png", 28, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/PosterA.png", 28, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/PosterB.png", 28, GL_BGRA, GL_RGBA, nullptr },
 
 	// Create Profile
-	{ "Textures/CreateProfile/Ribbon.png", 24, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/CreateProfile/Ribbon.png", 29, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/CreateProfile/RibbonBox.png", 29, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/1.png", 30, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/2.png", 31, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/3.png", 32, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/4.png", 33, GL_BGRA, GL_RGBA, nullptr },
+
+	// Other Menuing Items
+	{ "Textures/Difficulties/Easy.png", 33, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Medium.png", 33, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Hard.png", 33, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Extreme.png", 33, GL_BGRA, GL_RGBA, nullptr },
 
 	// Thanks For Playing
-	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 25, GL_BGR, GL_RGB, nullptr }
+	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 34, GL_BGR, GL_RGB, nullptr },
+
+	// Game
+	{ "Textures/Game/Grades/S.png", 35, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/A+.png", 36, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/A.png", 37, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/B.png", 38, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/C.png", 39, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/D.png", 40, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Bar.png", 41, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Scrubber.png", 42, GL_BGRA, GL_RGBA, nullptr }
 };
 
 // Declare static members of TextureList
