@@ -84,6 +84,12 @@ class ScreenRenderer {
 		QuadSprite* OpenCurtains;
 		QuadSprite* ClosedCurtainLeft;
 		QuadSprite* ClosedCurtainRight;
+		QuadSprite* SpotlightLeft;
+		QuadSprite* SpotlightRight;
+		QuadSprite* CurvySymbol;
+
+		// UI Elements
+		QuadSprite* Frame;
 
 		// Backgrounds
 		VideoSprite* AttractTitleScreen;

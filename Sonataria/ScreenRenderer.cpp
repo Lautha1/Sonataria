@@ -55,6 +55,9 @@ int updateCheckStatus = -2;
 */
 int updateDownloadStatus = -1;
 
+// Screen Size Ratio;
+const float aspect = 16.f / 9.f;
+
 // Forward declarations
 void execStartupChecks();
 void execDownloadUpdate();
@@ -123,6 +126,12 @@ ScreenRenderer::ScreenRenderer() {
 	OpenCurtains = new QuadSprite(L"Open Curtains");
 	ClosedCurtainLeft = new QuadSprite(L"Closed Curtain Left");
 	ClosedCurtainRight = new QuadSprite(L"Closed Curtain Right");
+	SpotlightLeft = new QuadSprite(L"Spotlight Left");
+	SpotlightRight = new QuadSprite(L"Spotlight Right");
+	CurvySymbol = new QuadSprite(L"Curvy Symbol");
+
+	// UI Elements
+	Frame = new QuadSprite(L"Frame");
 
 	// Backgrounds
 	AttractTitleScreen = new VideoSprite(L"Attract Title Screen Video");
@@ -208,6 +217,12 @@ ScreenRenderer::~ScreenRenderer() {
 	delete OpenCurtains;
 	delete ClosedCurtainLeft;
 	delete ClosedCurtainRight;
+	delete SpotlightLeft;
+	delete SpotlightRight;
+	delete CurvySymbol;
+
+	// UI Elements
+	delete Frame;
 
 	// Backgrounds
 	delete AttractTitleScreen;
@@ -258,6 +273,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		OpenCurtains->initSprite(spriteShader.getProgram());
 		ClosedCurtainLeft->initSprite(spriteShader.getProgram());
 		ClosedCurtainRight->initSprite(spriteShader.getProgram());
+		SpotlightLeft->initSprite(spriteShader.getProgram());
+		SpotlightRight->initSprite(spriteShader.getProgram());
+		CurvySymbol->initSprite(spriteShader.getProgram());
+
+		// UI Elements
+		Frame->initSprite(spriteShader.getProgram());
 
 		// Backgrounds
 		SetMorning->initSprite(spriteShader.getProgram());
@@ -273,6 +294,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		OpenCurtains->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/OpenCurtains.png"));
 		ClosedCurtainLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainLeft.png"));
 		ClosedCurtainRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainRight.png"));
+		SpotlightLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Spotlights/Spotlight-Left.png"));
+		SpotlightRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Spotlights/Spotlight-Right.png"));
+		CurvySymbol->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/CurvySymbol.png"));
+
+		// UI Elements
+		Frame->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Frame.png"));
 
 		// Backgrounds
 		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning.png"));
@@ -283,20 +310,23 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// SET THE TRANSFORMATIONS
 
-		float aspect = 16.f / 9.f;
-
 		// General Sprites
 		Stage->scale(2.f * aspect, 2.f, 1.f);
 		OpenCurtains->scale(2.f * aspect, 2.f, 1.f);
 		ClosedCurtainLeft->scale(2.f * aspect, 2.f, 1.f);
 		ClosedCurtainRight->scale(2.f * aspect, 2.f, 1.f);
+		SpotlightLeft->scale(2.f * aspect, 2.f, 1.f);
+		SpotlightRight->scale(2.f * aspect, 2.f, 1.f);
+		CurvySymbol->scale(.4f * aspect, .4f, 1.f);
+		CurvySymbol->translate(0.f, -0.1f, 0.f);
 
 		// Backgrounds
 		SetMorning->scale(2.f * aspect, 2.f, 1.f);
 		SetAfternoon->scale(2.f * aspect, 2.f, 1.f);
 
 		// PreLogin Sprites
-		LifeLinkIcon->scale(2.f * aspect, 2.f, 1.f);
+		LifeLinkIcon->scale(.35f * aspect, .35f, 1.f);
+		LifeLinkIcon->translate(.75f, -0.1f, 0.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -512,6 +542,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				// Render Set
 				Stage->render(PROJECTION::ORTHOGRAPHIC);
 				OpenCurtains->render(PROJECTION::ORTHOGRAPHIC);
+				SpotlightLeft->render(PROJECTION::ORTHOGRAPHIC);
+				SpotlightRight->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -572,7 +604,17 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// DRAW ALL OTHER GRAPHICS
 		{
 			if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+				Frame->reset();
+				Frame->scale(.6f * aspect, .6f, 1.f);
+				Frame->translate(-.75f, 0.f, 0.f);
+				Frame->render(PROJECTION::ORTHOGRAPHIC);
+
+				Frame->translate(1.5f, 0.f, 0.f);
+				Frame->render(PROJECTION::ORTHOGRAPHIC);
+
 				LifeLinkIcon->render(PROJECTION::ORTHOGRAPHIC);
+
+				CurvySymbol->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
