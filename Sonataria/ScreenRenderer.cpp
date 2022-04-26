@@ -288,6 +288,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		LifeLinkIcon->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
+		TextureList::Inst()->PreloadTextures();
 
 		// General Sprites
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));

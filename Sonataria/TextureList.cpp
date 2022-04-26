@@ -1,3 +1,5 @@
+#include <filesystem>
+#include "Logger.h"
 #include "TextureList.h"
 
 using namespace std;
@@ -36,7 +38,7 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Backgrounds/Set-Morning.png", 11, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Backgrounds/Set-Afternoon.png", 12, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Backgrounds/Set-Evening.png", 13, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Backgrounds/Audience.png", 14, GL_BGR, GL_RGB, nullptr},
+	{ "Textures/Backgrounds/Audience.png", 14, GL_BGRA, GL_RGB, nullptr},
 
 	// General
 	{ "Textures/General/ClosedCurtainLeft.png", 15, GL_BGRA, GL_RGBA, nullptr },
@@ -56,41 +58,41 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/General/Brackets/LeftBracket.png", 29, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/General/Brackets/RightBracket.png", 30, GL_BGRA, GL_RGBA, nullptr },
 
-	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 31, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 32, 0, 0, nullptr},
-
 	// Login
-	{ "Textures/Login/LifeLink.png", 33, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Login/PosterA.png", 34, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Login/PosterB.png", 35, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/LifeLink.png", 31, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/PosterA.png", 32, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Login/PosterB.png", 33, GL_BGRA, GL_RGBA, nullptr },
 
 	// Create Profile
-	{ "Textures/CreateProfile/Ribbon.png", 36, GL_BGR, GL_RGB, nullptr },
-	{ "Textures/CreateProfile/RibbonBox.png", 37, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/CreateProfile/1.png", 38, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/CreateProfile/2.png", 39, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/CreateProfile/3.png", 40, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/CreateProfile/4.png", 41, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/Ribbon.png", 34, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/CreateProfile/RibbonBox.png", 35, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/1.png", 36, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/2.png", 37, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/3.png", 38, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/CreateProfile/4.png", 39, GL_BGRA, GL_RGBA, nullptr },
 
 	// Other Menuing Items
-	{ "Textures/Difficulties/Easy.png", 42, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Difficulties/Medium.png", 43, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Difficulties/Hard.png", 44, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Difficulties/Extreme.png", 45, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Easy.png", 40, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Medium.png", 41, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Hard.png", 42, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Difficulties/Extreme.png", 43, GL_BGRA, GL_RGBA, nullptr },
 
 	// Thanks For Playing
-	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 46, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 44, GL_BGR, GL_RGB, nullptr },
 
 	// Game
-	{ "Textures/Game/Grades/S.png", 47, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Grades/A+.png", 48, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Grades/A.png", 49, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Grades/B.png", 50, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Grades/C.png", 51, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Grades/D.png", 52, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Bar.png", 53, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Game/Scrubber.png", 54, GL_BGRA, GL_RGBA, nullptr }
+	{ "Textures/Game/Grades/S.png", 45, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/A+.png", 46, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/A.png", 47, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/B.png", 48, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/C.png", 49, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Grades/D.png", 50, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Bar.png", 51, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Scrubber.png", 52, GL_BGRA, GL_RGBA, nullptr },
+
+	// Fonts
+	{ "Fonts/HonyaJi-Re.ttf", 53, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 54, 0, 0, nullptr}
 };
 
 // Declare static members of TextureList
@@ -131,6 +133,37 @@ TextureList::TextureList()
 }
 
 TextureList::~TextureList() {}
+
+void TextureList::PreloadTextures() {
+	logger.log("Preloading textures...");
+
+	// Find all Jacket Arts First
+	LoadJacketArts();
+
+	// Preload texture ids
+	for (auto& [key, value] : textureList) {
+		GetTextureID(value.filename);
+	}
+
+	logger.log("Preloaded textures.");
+}
+
+void TextureList::LoadJacketArts() {
+	std::string dir = "./Songs";
+
+	for (auto& item : filesystem::recursive_directory_iterator(dir)) {
+
+		if (!filesystem::is_regular_file(item.path())
+			|| item.path().extension() != ".png")
+			continue;
+
+		string path = item.path().string().substr(2, string::npos);
+
+		replace(path.begin(), path.end(), '\\', '/');
+
+		AddTextureInfo(path, GL_BGRA, GL_RGBA);
+	}
+}
 
 TextureManager::TextureInfo TextureList::FindTextureInfo(const string& filename)
 {

@@ -17,8 +17,12 @@ public:
 	unsigned int GetTextureID(const std::string& filename, GLenum fileFormat = GL_BGR, GLint internalFormat = GL_RGB);
 	TextureManager::TextureInfo GetTextureInfo(const std::string& filename, GLenum fileFormat = GL_BGR, GLint internalFormat = GL_RGB);
 
+	void PreloadTextures();
+
 protected:
 	TextureList();
+
+	void LoadJacketArts();
 
 	// List of all texture info
 	static std::unordered_map<std::size_t, TextureManager::TextureInfo> textureList;
