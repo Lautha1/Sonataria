@@ -8,6 +8,7 @@
 #include "Networking.h"
 #include "RFIDCardReader.h"
 #include "ScreenRenderer.h"
+#include "SoundEffects.h"
 #include "SystemSettings.h"
 #include <tchar.h>
 #include "TextureList.h"
@@ -579,55 +580,64 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// Set the sprite shader back in case the video shader was being used
 		glUseProgram(spriteShader.getProgram());
 
-		// Check if RFID Card read during Login
-		if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
-			if (!timerRunning) {
-				// Timer hasn't been started yet
-				// TODO: START THE 30 SECOND TIMER
+		// Start Timers for scenes
+		{
+			if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+				if (!timerRunning) {
+					// Timer hasn't been started yet
+					// TODO: START THE 30 SECOND TIMER
 
-				// Set timer to running
-				timerRunning = true;
-			}
-			else {
-				// Timer is started
-				// TODO: CHECK IF 0 AND GO BACK TO TITLE SCREEN
-			}
-
-			// TODO: add a check to only allow for the RFID check if we are online
-			// GameState should store this
-			//if (network.networkStatus == 1) {
-				if (RFIDCardReader::getCardReader()->getLastCardData() != "") {
-					switch (loginComplete) {
-						case -1:
-							// Launch a thread to attempt getting the profile data
-							loginThread.launch();
-
-							// Set variable so we know it is checking
-							loginComplete = 0;
-							break;
-						case 0:
-							// TODO: Display a graphic showing that it is attempting to login
-							break;
-						case 1:
-							if (userData.isNewUser()) {
-								// User has a profile already
-								gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
-							}
-							else {
-								// User doesn't have a profile yet, go to profile creation
-								gameState.setGameState(GameState::CurrentState::CREATE_PROFILE);
-							}
-							controllerInput.reset();
-							timerRunning = false;
-							break;
-						case 2:
-							// Can't login as we were unable to connect or some other error occurred
-							// TODO: SHOW ERROR AND ERROR NOISE
-							break;
-					}
+					// Set timer to running
+					timerRunning = true;
 				}
-			//}
-			// TODO: ELSE BLOCK: DRAW GRAPHICS FOR IF SERVER IS OFFLINE OR ON MAINT FOR PRELOGIN
+				else {
+					// Timer is started
+					// TODO: CHECK IF 0 AND GO BACK TO TITLE SCREEN
+				}
+			}
+		}
+
+		// Check for card tapped on Title or Prelogin states
+		if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN || gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
+			if (RFIDCardReader::getCardReader()->getLastCardData() != "") {
+				// If card tapped on the title screen, move to the prelogin screen
+				if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
+					gameState.setGameState(GameState::CurrentState::PRELOGIN);
+				}
+
+				// Check the state of the login
+				switch (loginComplete) {
+					case -1:
+						// Play sound effect for card tapped
+						soundEffects.playSoundEffect(SoundEffects::Effects::FX_CardTap);
+
+						// Launch a thread to attempt getting the profile data
+						loginThread.launch();
+
+						// Set variable so we know it is checking
+						loginComplete = 0;
+						break;
+					case 0:
+						// Attempting to login
+						break;
+					case 1:
+						if (userData.isNewUser()) {
+							// User has a profile already
+							gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
+						}
+						else {
+							// User doesn't have a profile yet, go to profile creation
+							gameState.setGameState(GameState::CurrentState::CREATE_PROFILE);
+						}
+						controllerInput.reset();
+						timerRunning = false;
+						break;
+					case 2:
+						// Can't login as we were unable to connect or some other error occurred
+						// TODO: SHOW ERROR AND ERROR NOISE
+						break;
+				}
+			}
 		}
 
 		// DRAW ALL OTHER GRAPHICS

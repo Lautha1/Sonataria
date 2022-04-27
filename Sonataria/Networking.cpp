@@ -61,19 +61,25 @@ bool Networking::GetProfileData(string cardID) {
 		logger.log("Attempting to retrieve profile data... [" + URL + "]");
 
 		// Set a GET Request
-		const auto response = request.send("GET", "", {}, std::chrono::seconds(5));
+		try {
+			const auto response = request.send("GET", "", {}, std::chrono::seconds(5));
 
-		if (response.status.code == http::Status::Ok) {
-			// Store the response into data
-			string data = string{ response.body.begin(), response.body.end() };
+			if (response.status.code == http::Status::Ok) {
+				// Store the response into data
+				string data = string{ response.body.begin(), response.body.end() };
 
-			// Set the user settings
-			userData.setUserData(data);
+				// Set the user settings
+				userData.setUserData(data);
 
-			return true;
+				return true;
+			}
+			else {
+				logger.logError("Invalid HTTP Status Code: " + to_string(response.status.code));
+				return false;
+			}
 		}
-		else {
-			logger.logError("Invalid HTTP Status Code: " + to_string(response.status.code));
+		catch (const std::exception& e) {
+			logger.logError("Failed to contact server.");
 			return false;
 		}
 	}

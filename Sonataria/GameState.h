@@ -52,6 +52,8 @@ class GameState {
 		void onStateUnload(CurrentState);
 		void onStateLoad(CurrentState);
 
+		void DoneSwitchingStates();
+
 		CurrentState state;
 
 	private:
@@ -65,6 +67,8 @@ class GameState {
 			CurrentState::STARTUP, CurrentState::SHUTDOWN, CurrentState::ERROR_CODE, CurrentState::TEST_MENU_MAIN, 
 			CurrentState::UPDATES, CurrentState::TEST_MENU_IOCHECK, CurrentState::TEST_MENU_INPUTCHECK, 
 			CurrentState::TEST_MENU_SYSINFO, CurrentState::TEST_MENU_SOUNDOPTIONS, CurrentState::TEST_MENU_NETWORKING };
+
+		bool isSwitchingStates;
 };
 
 extern GameState gameState;

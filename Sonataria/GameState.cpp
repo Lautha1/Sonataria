@@ -1,6 +1,7 @@
 #include <chrono>
 #include "GameState.h"
 #include <iostream>
+#include "Logger.h"
 #include "RFIDCardReader.h"
 #include "ScreenRenderer.h"
 #include <thread>
@@ -28,6 +29,8 @@ GameState::GameState() {
 	// Value in Milliseconds
 	this->CurtainTransitionTime = 1500;
 	this->isTransitioning = false;
+
+	this->isSwitchingStates = false;
 }
 
 /**
@@ -51,16 +54,30 @@ GameState::CurrentState GameState::getGameState() {
  * @param newState the state to set the game state to
  */
 void GameState::setGameState(GameState::CurrentState newState) {
+	if (this->isSwitchingStates) { return; }
+
+	// Don't allow another swap state while currently switching states
+	this->isSwitchingStates = true;
+
 	// Prevent "T" presses while swapping game states
 	this->isTransitioning = true;
 
 	// Launch a thread to prevent blocking
 	thread changeState;
-	changeState = std::thread(GameStateChangeThread, this->state, newState);
-	changeState.detach();
+	try {
+		changeState = std::thread(GameStateChangeThread, this->state, newState);
+		changeState.detach();
+	}
+	catch (exception e) {
+		logger.logError(e.what());
+	}
 
 	// We don't unlock the "T" key here
 	// It is unlocked in the launched thread so that it ensures the game state finished swapping
+}
+
+void GameState::DoneSwitchingStates() {
+	this->isSwitchingStates = false;
 }
 
 void GameStateChangeThread(GameState::CurrentState oldState, GameState::CurrentState newState) {
@@ -100,6 +117,7 @@ void GameStateChangeThread(GameState::CurrentState oldState, GameState::CurrentS
 
 	// Allow "T" presses again
 	gameState.isTransitioning = false;
+	gameState.DoneSwitchingStates();
 }
 
 void CurtainDelay(int mSec, bool addExtraDelay) {

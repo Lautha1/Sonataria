@@ -221,6 +221,7 @@ copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</
     <ClCompile Include="ScreenRenderer.cpp" />
     <ClCompile Include="SlicedSprite.cpp" />
     <ClCompile Include="Song.cpp" />
+    <ClCompile Include="SoundEffects.cpp" />
     <ClCompile Include="SpriteShader.cpp" />
     <ClCompile Include="SystemSettings.cpp" />
     <ClCompile Include="TextShader.cpp" />
@@ -260,6 +261,7 @@ copy $(SolutionDir)dependencies\ffmpeg-4.5\bin\swresample-4.dll  $(OutputPath)</
     <ClInclude Include="ScreenRenderer.h" />
     <ClInclude Include="SlicedSprite.h" />
     <ClInclude Include="Song.h" />
+    <ClInclude Include="SoundEffects.h" />
     <ClInclude Include="SpriteShader.h" />
     <ClInclude Include="SystemSettings.h" />
     <ClInclude Include="TextShader.h" />
