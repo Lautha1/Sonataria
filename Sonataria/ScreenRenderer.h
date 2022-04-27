@@ -88,6 +88,11 @@ class ScreenRenderer {
 		QuadSprite* SpotlightRight;
 		QuadSprite* CurvySymbol;
 
+		// Login
+		QuadSprite* TapLifeLinkPass;
+		QuadSprite* OR;
+		QuadSprite* BeginAsGuest;
+
 		// UI Elements
 		QuadSprite* Frame;
 

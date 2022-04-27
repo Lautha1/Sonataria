@@ -130,6 +130,11 @@ ScreenRenderer::ScreenRenderer() {
 	SpotlightRight = new QuadSprite(L"Spotlight Right");
 	CurvySymbol = new QuadSprite(L"Curvy Symbol");
 
+	// Login
+	TapLifeLinkPass = new QuadSprite(L"Tap Life Link Pass");
+	OR = new QuadSprite(L"OR");
+	BeginAsGuest = new QuadSprite(L"Begin As Guest");
+
 	// UI Elements
 	Frame = new QuadSprite(L"Frame");
 
@@ -221,6 +226,11 @@ ScreenRenderer::~ScreenRenderer() {
 	delete SpotlightRight;
 	delete CurvySymbol;
 
+	// Login
+	delete TapLifeLinkPass;
+	delete OR;
+	delete BeginAsGuest;
+
 	// UI Elements
 	delete Frame;
 
@@ -277,6 +287,11 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightRight->initSprite(spriteShader.getProgram());
 		CurvySymbol->initSprite(spriteShader.getProgram());
 
+		// Login
+		TapLifeLinkPass->initSprite(spriteShader.getProgram());
+		OR->initSprite(spriteShader.getProgram());
+		BeginAsGuest->initSprite(spriteShader.getProgram());
+
 		// UI Elements
 		Frame->initSprite(spriteShader.getProgram());
 
@@ -299,6 +314,11 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Spotlights/Spotlight-Right.png"));
 		CurvySymbol->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/CurvySymbol.png"));
 
+		// Login
+		TapLifeLinkPass->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/TapLifeLinkPass.png"));
+		OR->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/OR.png"));
+		BeginAsGuest->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/BeginAsGuest.png"));
+
 		// UI Elements
 		Frame->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Frame.png"));
 
@@ -320,6 +340,14 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightRight->scale(2.f * aspect, 2.f, 1.f);
 		CurvySymbol->scale(.4f * aspect, .4f, 1.f);
 		CurvySymbol->translate(0.f, -0.1f, 0.f);
+
+		// Login
+		TapLifeLinkPass->scale(.15f * 6.25f, .15f, 1.f);
+		TapLifeLinkPass->translate(.75f, 0.08f, 0.f);
+		OR->scale(0.2f * 1.5f, 0.2f, 1.f);
+		OR->translate(-0.01f, 0.05f, 0.f);
+		BeginAsGuest->scale(.4f * 2.25f, .4f, 1.f);
+		BeginAsGuest->translate(-.75f, 0.f, 0.f);
 
 		// Backgrounds
 		SetMorning->scale(2.f * aspect, 2.f, 1.f);
@@ -613,8 +641,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				Frame->translate(1.5f, 0.f, 0.f);
 				Frame->render(PROJECTION::ORTHOGRAPHIC);
 
+				BeginAsGuest->render(PROJECTION::ORTHOGRAPHIC);
+
+				TapLifeLinkPass->render(PROJECTION::ORTHOGRAPHIC);
 				LifeLinkIcon->render(PROJECTION::ORTHOGRAPHIC);
 
+				OR->render(PROJECTION::ORTHOGRAPHIC);
 				CurvySymbol->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
