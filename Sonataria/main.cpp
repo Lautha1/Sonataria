@@ -12,6 +12,7 @@
 #include "RFIDCardReader.h"
 #include <GL/glew.h>
 #include <sstream>
+#include "SoundEffects.h"
 
 //Forward Declarations
 void renderingThread(sf::RenderWindow* window);
@@ -298,13 +299,16 @@ int main(int argc, char** argv) {
 						 }
 						 else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 							 RFIDCardReader::getCardReader()->clearLastCardData();
+							 soundEffects.playSoundEffect(SoundEffects::Effects::FX_CardTap);
 							 gameState.setGameState(GameState::CurrentState::PRELOGIN);
 							 controllerInput.reset();
 						 }
 						 else if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
-							 // TODO: go to tutorial and such...
-							 gameState.setGameState(GameState::CurrentState::SONG_SELECT);
+							 gameState.setGameState(GameState::CurrentState::LOGIN_DETAILS);
 							 controllerInput.reset();
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
+							 gameState.setGameState(GameState::CurrentState::SONG_SELECT);
 						 }
 						 else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
 							 if (screenRenderer.isCurrentSongValidToPlay()) {
@@ -312,7 +316,7 @@ int main(int argc, char** argv) {
 								 gameState.setGameState(GameState::CurrentState::GAME);
 							 }
 							 else {
-								 // TODO: Play the invalid selection sound effect
+								 soundEffects.playSoundEffect(SoundEffects::Effects::FX_Error);
 							 }
 							 controllerInput.reset();
 						 }

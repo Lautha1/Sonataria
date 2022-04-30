@@ -188,8 +188,10 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		// Background
 		Audience->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Audience.png"));
 
-		track->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Track.png"));
-		laneNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_Note.png"));
+		// Game
+		track->setTextureID(TextureList::Inst()->GetTextureID("Textures/Game/Notes/Track.png"));
+		laneNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/Game/Notes/standardNote.png"));
+
 		wheelSlamLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_SlamLeft.png"));
 		wheelSlamRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_SlamRight.png"));
 		wheelPixelNote->setTextureID(TextureList::Inst()->GetTextureID("Textures/temp_wheel_Note.png"));

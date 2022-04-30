@@ -56,6 +56,15 @@ class ScreenRenderer {
 
 		void ToggleCurtains(bool);
 
+		// Login Thread States
+		/*
+		* -1 - Thread Not Started
+		* 0  - Not completed
+		* 1  - Successfully Completed
+		* 2  - Not Successful For X Reason
+		*/
+		int loginComplete;
+
 	private:
 		int testMenuPos;
 		int testMenuTotalOptions;
@@ -92,6 +101,8 @@ class ScreenRenderer {
 		QuadSprite* TapLifeLinkPass;
 		QuadSprite* OR;
 		QuadSprite* BeginAsGuest;
+		QuadSprite* PosterA;
+		QuadSprite* PosterB;
 
 		// UI Elements
 		QuadSprite* Frame;
@@ -103,6 +114,12 @@ class ScreenRenderer {
 
 		// PreLogin Sprites
 		QuadSprite* LifeLinkIcon;
+
+		// Text
+		OpenGLText* DisplayName;
+		OpenGLText* UserTitle;
+		OpenGLText* Level;
+		OpenGLText* PlayCount;
 };
 
 extern ScreenRenderer screenRenderer;

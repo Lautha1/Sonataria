@@ -78,7 +78,7 @@ void UserData::clearData() {
 	// Profile Information
 	this->DisplayName = "GUEST";
 	this->CardNumber = "";
-	this->Title = "Newcomer";
+	this->Title = "New Act";
 	this->Level = 1;
 	this->EXP = 0;
 	this->PlayCount = 0;
@@ -110,4 +110,16 @@ bool UserData::useCustomSpeed() {
 
 int UserData::getGameSpeed() {
 	return this->Speed;
+}
+
+string UserData::getTitle() {
+	return this->Title;
+}
+
+int UserData::getLevel() {
+	return this->Level;
+}
+
+int UserData::getPlayCount() {
+	return this->PlayCount;
 }

@@ -3,7 +3,8 @@
 class SoundEffects {
 	public:
 		enum Effects {
-			FX_CardTap
+			FX_CardTap,
+			FX_Error
 		};
 
 		SoundEffects();
@@ -13,6 +14,7 @@ class SoundEffects {
 	private:
 		// All SFX get their own buffer
 		sf::SoundBuffer CardTap;
+		sf::SoundBuffer Error;
 
 		// The actual object that plays the sounds
 		sf::Sound player;

@@ -15,6 +15,9 @@ class UserData {
 		
 		bool isNewUser();
 		string getDisplayName();
+		string getTitle();
+		int getLevel();
+		int getPlayCount();
 
 		bool useCustomSpeed();
 		int getGameSpeed();

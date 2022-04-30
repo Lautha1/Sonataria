@@ -22,9 +22,11 @@ TextureList* TextureList::Inst()
 
 // Pre-defined, known textures (we insert these into the hash-map right away)
 TextureManager::TextureInfo tempTexList[] = {
+	// Game
+	{ "Textures/Game/Notes/Track.png", 1, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Game/Notes/standardNote.png", 2, GL_BGRA, GL_RGBA, nullptr },
+
 	// TEMPORARY TEXTURES
-	{ "Textures/temp_Track.png", 1, GL_BGR, GL_RGB, nullptr },
-	{ "Textures/temp_Note.png", 2, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_hold_Note.png", 3, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_wheel_Note.png", 4, GL_BGR, GL_RGB, nullptr },
 	{ "Textures/temp_SlamLeft.png", 5, GL_BGRA, GL_RGBA, nullptr },

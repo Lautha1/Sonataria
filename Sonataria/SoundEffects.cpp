@@ -6,6 +6,7 @@ SoundEffects soundEffects;
 
 SoundEffects::SoundEffects() {
 	CardTap.loadFromFile("MusicFX/CardTap.wav");
+	Error.loadFromFile("MusicFX/Error.wav");
 }
 
 SoundEffects::~SoundEffects() {}
@@ -15,6 +16,9 @@ void SoundEffects::playSoundEffect(Effects sfx) {
 	switch (sfx) {
 		case Effects::FX_CardTap:
 			player.setBuffer(CardTap);
+			break;
+		case Effects::FX_Error:
+			player.setBuffer(Error);
 			break;
 	}
 	

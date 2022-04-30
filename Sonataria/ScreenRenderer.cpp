@@ -63,7 +63,7 @@ const float aspect = 16.f / 9.f;
 void execStartupChecks();
 void execDownloadUpdate();
 void rThread(sf::RenderWindow* window);
-void checkForProfile(int& loginComplete);
+void checkForProfile();
 
 /**
  * Constructor for the screen renderer.
@@ -120,6 +120,8 @@ ScreenRenderer::ScreenRenderer() {
 	this->isNetworkChecking = false;
 	this->openGLInitialized = false;
 
+	this->loginComplete = -1;
+
 	// SETUP SPRITES
 	
 	// General Sprites
@@ -135,6 +137,8 @@ ScreenRenderer::ScreenRenderer() {
 	TapLifeLinkPass = new QuadSprite(L"Tap Life Link Pass");
 	OR = new QuadSprite(L"OR");
 	BeginAsGuest = new QuadSprite(L"Begin As Guest");
+	PosterA = new QuadSprite(L"Poster A");
+	PosterB = new QuadSprite(L"Poster B");
 
 	// UI Elements
 	Frame = new QuadSprite(L"Frame");
@@ -231,6 +235,8 @@ ScreenRenderer::~ScreenRenderer() {
 	delete TapLifeLinkPass;
 	delete OR;
 	delete BeginAsGuest;
+	delete PosterA;
+	delete PosterB;
 
 	// UI Elements
 	delete Frame;
@@ -242,6 +248,12 @@ ScreenRenderer::~ScreenRenderer() {
 
 	// PreLogin Sprites
 	delete LifeLinkIcon;
+
+	// DELETE TEXTS
+	delete DisplayName;
+	delete UserTitle;
+	delete Level;
+	delete PlayCount;
 }
 
 /**
@@ -292,6 +304,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		TapLifeLinkPass->initSprite(spriteShader.getProgram());
 		OR->initSprite(spriteShader.getProgram());
 		BeginAsGuest->initSprite(spriteShader.getProgram());
+		PosterA->initSprite(spriteShader.getProgram());
+		PosterB->initSprite(spriteShader.getProgram());
 
 		// UI Elements
 		Frame->initSprite(spriteShader.getProgram());
@@ -319,6 +333,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		TapLifeLinkPass->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/TapLifeLinkPass.png"));
 		OR->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/OR.png"));
 		BeginAsGuest->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/BeginAsGuest.png"));
+		PosterA->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/PosterA.png"));
+		PosterB->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/PosterB.png"));
 
 		// UI Elements
 		Frame->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Frame.png"));
@@ -349,6 +365,10 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		OR->translate(-0.01f, 0.05f, 0.f);
 		BeginAsGuest->scale(.4f * 2.25f, .4f, 1.f);
 		BeginAsGuest->translate(-.75f, 0.f, 0.f);
+		PosterA->scale(1.f, 1.3138f, 1.f);
+		PosterA->translate(-0.5f, -0.2f, 0.f);
+		PosterB->scale(1.f, 1.1368f, 1.f);
+		PosterB->translate(0.5f, -0.2f, 0.f);
 
 		// Backgrounds
 		SetMorning->scale(2.f * aspect, 2.f, 1.f);
@@ -393,7 +413,23 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	TextureManager::TextureInfo Stayola = TextureList::Inst()->GetTextureInfo("Fonts/Stayola-Regular.otf");
 
 	// INITIALIZE TEXT
-	/* none for now */
+
+	// Login Details
+	DisplayName = new OpenGLText(L"Display Name", *HonyaJi.font);
+	UserTitle = new OpenGLText(L"User Title", *HonyaJi.font);
+	Level = new OpenGLText(L"Level", *HonyaJi.font);
+	PlayCount = new OpenGLText(L"Play Count", *HonyaJi.font);
+
+	DisplayName->initSprite(textShader.getProgram());
+	UserTitle->initSprite(textShader.getProgram());
+	Level->initSprite(textShader.getProgram());
+	PlayCount->initSprite(textShader.getProgram());
+
+	DisplayName->scale(.75f);
+	DisplayName->translate(-1200.f, 0.f, 0.f);
+
+	UserTitle->scale(.4f);
+	UserTitle->translate(-1200.f, -100.f, 0.f);
 
 	// Clear color for the background
 	glClearColor(0.f, 0.f, 0.f, 1.0f);
@@ -476,17 +512,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	// Timer used for countdowns
 	bool timerRunning = false;
 
-	// Login Thread States
-	/*
-	* -1 - Thread Not Started
-	* 0  - Not completed
-	* 1  - Successfully Completed
-	* 2  - Not Successful For X Reason
-	*/
-	int loginComplete = -1;
-
 	// Forward declaration of this thread for use in login
-	sf::Thread loginThread(&checkForProfile, loginComplete);
+	sf::Thread loginThread(&checkForProfile);
 
 	// Create time variables
 	typedef std::chrono::high_resolution_clock Time;
@@ -634,7 +661,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 						break;
 					case 2:
 						// Can't login as we were unable to connect or some other error occurred
-						// TODO: SHOW ERROR AND ERROR NOISE
+						soundEffects.playSoundEffect(SoundEffects::Effects::FX_Error);
+						loginComplete = -1;
 						break;
 				}
 			}
@@ -658,6 +686,10 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 				OR->render(PROJECTION::ORTHOGRAPHIC);
 				CurvySymbol->render(PROJECTION::ORTHOGRAPHIC);
+			}
+			else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
+				PosterA->render(PROJECTION::ORTHOGRAPHIC);
+				PosterB->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -1149,81 +1181,96 @@ break;
 				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"GAME WILL REBOOT WHEN COMPLETED!", ALIGNMENT::CENTERED);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
-			if (gameState.results.size() <= 0) {
-				continue;
-			}
+				if (gameState.results.size() <= 0) {
+					continue;
+				}
 
-			// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
-			testMenuTitle->reset();
-			testMenuTitle->translate(0.f, 900.f, 0.f);
-			testMenuTitle->scale(0.5f);
-			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"RESULTS", ALIGNMENT::CENTERED);
+				// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
+				testMenuTitle->reset();
+				testMenuTitle->translate(0.f, 900.f, 0.f);
+				testMenuTitle->scale(0.5f);
+				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"RESULTS", ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 800.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 800.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 700.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 700.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 600.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 600.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 500.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 500.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 400.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 400.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 300.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 300.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, 200.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, 200.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED);
 
-			testMenuText1->reset();
-			testMenuText1->translate(0.f, -400.f, 0.f);
-			testMenuText1->scale(0.5f);
-			testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED);
+				testMenuText1->reset();
+				testMenuText1->translate(0.f, -400.f, 0.f);
+				testMenuText1->scale(0.5f);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
-			// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
-			testMenuTitle->reset();
-			testMenuTitle->translate(0.f, 900.f, 0.f);
-			testMenuTitle->scale(0.5f);
-			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"Final Results", ALIGNMENT::CENTERED);
+				// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
+				testMenuTitle->reset();
+				testMenuTitle->translate(0.f, 900.f, 0.f);
+				testMenuTitle->scale(0.5f);
+				testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, L"Final Results", ALIGNMENT::CENTERED);
 
-			for (size_t i = 0; i < gameState.results.size(); i++) {
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 800.f - ((float)i * 400.f), 0.f);
-				testMenuText1->scale(0.4f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+				for (size_t i = 0; i < gameState.results.size(); i++) {
+					testMenuText1->reset();
+					testMenuText1->translate(0.f, 800.f - ((float)i * 400.f), 0.f);
+					testMenuText1->scale(0.4f);
+					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
 
-				testMenuText1->reset();
-				testMenuText1->translate(0.f, 600.f - ((float)i * 400.f), 0.f);
-				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
-			}
+					testMenuText1->reset();
+					testMenuText1->translate(0.f, 600.f - ((float)i * 400.f), 0.f);
+					testMenuText1->scale(0.5f);
+					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+				}
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
-			// TODO: ACTUALLY MAKE THIS SCREEN LOOK NICE
-			testMenuTitle->reset();
-			testMenuTitle->translate(0.f, 900.f, 0.f);
-			testMenuTitle->scale(0.5f);
-			testMenuTitle->render(PROJECTION::ORTHOGRAPHIC, userData.getDisplayName(), ALIGNMENT::CENTERED);
+				DisplayName->render(PROJECTION::ORTHOGRAPHIC, userData.getDisplayName(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+				UserTitle->render(PROJECTION::ORTHOGRAPHIC, userData.getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f, .65f);
+
+				Level->reset();
+				Level->translate(950.f, -75.f, 0.f);
+				Level->scale(0.75f);
+				Level->render(PROJECTION::ORTHOGRAPHIC, L"Level", ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
+
+				Level->translate(0.f, -100.f, 0.f);
+				Level->scale(0.65f);
+				Level->render(PROJECTION::ORTHOGRAPHIC, to_string(userData.getLevel()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
+
+				PlayCount->reset();
+				PlayCount->translate(950.f, -300.f, 0.f);
+				PlayCount->scale(0.75f);
+				PlayCount->render(PROJECTION::ORTHOGRAPHIC, L"Play Count", ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
+
+				PlayCount->translate(0.f, -100.f, 0.f);
+				PlayCount->scale(0.65f);
+				PlayCount->render(PROJECTION::ORTHOGRAPHIC, to_string(userData.getPlayCount()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 			}
 		}
 
@@ -1690,7 +1737,7 @@ void rThread(sf::RenderWindow* window) {
 	gameRenderer.render(window);
 }
 
-void checkForProfile(int& loginComplete) {
+void checkForProfile() {
 	// Grab the card ID to check for a profile
 	string cardID = RFIDCardReader::getCardReader()->getLastCardData();
 
@@ -1702,10 +1749,10 @@ void checkForProfile(int& loginComplete) {
 	// IF FAILED set loginComplete = 2
 	if (network.GetProfileData(cardID)) {
 		// Grabbed the profile data successfully
-		loginComplete = 1;
+		screenRenderer.loginComplete = 1;
 	}
 	else {
-		loginComplete = 2;
+		screenRenderer.loginComplete = 2;
 	}
 	
 	// Clear the card out of the RFID Reader
