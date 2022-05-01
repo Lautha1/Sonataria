@@ -348,7 +348,6 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		JacketArt->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
-		//TextureList::Inst()->PreloadTextures();
 
 		// General Sprites
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
@@ -384,7 +383,9 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill Fin.png"));
 		PreSelectAllBoxes->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Song Preselect Boxes/AllBoxes.png"));
 
-		JacketArt->setTextureID(TextureList::Inst()->GetTextureID("Songs/+ERABY+E CONNEC+10N/jacket.png"));
+		JacketArt->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[this->songSelectHoverOver].getJacketArtPath()));
+		logger.logError(this->currentPageSongs[this->songSelectHoverOver].getJacketArtPath());
+		logger.logError("Songs/+ERABY+E CONNEC+10N/jacket.png");
 
 		// SET THE TRANSFORMATIONS
 

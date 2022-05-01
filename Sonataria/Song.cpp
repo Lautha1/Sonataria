@@ -200,7 +200,9 @@ string eraseAllSubStr(string mainStr, string toErase) {
  * @return the jacket art path
  */
 string Song::getJacketArtPath() {
-	return this->path + this->jacketArt;
+	string path = this->path + this->jacketArt;
+	path.erase(0, 2);
+	return path;
 }
 
 /**
