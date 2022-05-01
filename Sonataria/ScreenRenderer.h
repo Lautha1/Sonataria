@@ -123,7 +123,12 @@ class ScreenRenderer {
 		QuadSprite* Fin;
 		QuadSprite* PreSelectAllBoxes;
 
-		QuadSprite* JacketArt;
+		QuadSprite* JacketArt1;
+		QuadSprite* JacketArt2;
+		QuadSprite* JacketArt3;
+		QuadSprite* JacketArt4;
+		QuadSprite* JacketArt5;
+		QuadSprite* JacketArt6;
 
 		// Text
 		OpenGLText* DisplayName;

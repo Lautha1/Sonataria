@@ -159,7 +159,12 @@ ScreenRenderer::ScreenRenderer() {
 	Fin = new QuadSprite(L"Fin");
 	PreSelectAllBoxes = new QuadSprite(L"PreSelect All Boxes");
 
-	JacketArt = new QuadSprite(L"Jacket Art");
+	JacketArt1 = new QuadSprite(L"Jacket Art 1");
+	JacketArt2 = new QuadSprite(L"Jacket Art 2");
+	JacketArt3 = new QuadSprite(L"Jacket Art 3");
+	JacketArt4 = new QuadSprite(L"Jacket Art 4");
+	JacketArt5 = new QuadSprite(L"Jacket Art 5");
+	JacketArt6 = new QuadSprite(L"Jacket Art 6");
 
 	std::string dir = "./Songs";
 
@@ -267,7 +272,12 @@ ScreenRenderer::~ScreenRenderer() {
 	delete Fin;
 	delete PreSelectAllBoxes;
 
-	delete JacketArt;
+	delete JacketArt1;
+	delete JacketArt2;
+	delete JacketArt3;
+	delete JacketArt4;
+	delete JacketArt5;
+	delete JacketArt6;
 
 	// DELETE TEXTS
 	delete DisplayName;
@@ -345,7 +355,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->initSprite(spriteShader.getProgram());
 		PreSelectAllBoxes->initSprite(spriteShader.getProgram());
 
-		JacketArt->initSprite(spriteShader.getProgram());
+		JacketArt1->initSprite(spriteShader.getProgram());
+		JacketArt2->initSprite(spriteShader.getProgram());
+		JacketArt3->initSprite(spriteShader.getProgram());
+		JacketArt4->initSprite(spriteShader.getProgram());
+		JacketArt5->initSprite(spriteShader.getProgram());
+		JacketArt6->initSprite(spriteShader.getProgram());
 
 		// INITIALIZE THE TEXTURES
 
@@ -383,9 +398,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill Fin.png"));
 		PreSelectAllBoxes->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Song Preselect Boxes/AllBoxes.png"));
 
-		JacketArt->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[this->songSelectHoverOver].getJacketArtPath()));
-		logger.logError(this->currentPageSongs[this->songSelectHoverOver].getJacketArtPath());
-		logger.logError("Songs/+ERABY+E CONNEC+10N/jacket.png");
+		//JacketArt1->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[0].getJacketArtPath()));
+		//JacketArt2->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[1].getJacketArtPath()));
+		//JacketArt3->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[2].getJacketArtPath()));
+		//JacketArt4->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[3].getJacketArtPath()));
+		//JacketArt5->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[4].getJacketArtPath()));
+		//JacketArt6->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[5].getJacketArtPath()));
 
 		// SET THE TRANSFORMATIONS
 
@@ -432,6 +450,9 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->translate(0.f, -0.25f, 0.f);
 		PreSelectAllBoxes->scale(1.5f * aspect, 1.5f, 1.f);
 		PreSelectAllBoxes->translate(0.f, -0.25f, 0.f);
+		
+		JacketArt1->scale(.75f);
+		JacketArt1->translate(-0.1f, 0.05f, 0.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -447,18 +468,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// Initialize Videos
-		if (!AttractTitleScreen->loadVideo("Videos/temp_AttractTitleScreen.mp4")) {
+		/*if (!AttractTitleScreen->loadVideo("Videos/temp_AttractTitleScreen.mp4")) {
 			logger.logError("Failed to load video: Videos/temp_AttractTitleScreen.mp4");
 			exit(1);
-		}
+		}*/
 
 		// Link video sprite and shader
-		AttractTitleScreen->initSprite(videoShader.getProgram());
-		AttractTitleScreen->enableLooping(true);
+		//AttractTitleScreen->initSprite(videoShader.getProgram());
+		//AttractTitleScreen->enableLooping(true);
 
 		// Load the first frame
-		AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
-		AttractTitleScreen->update(0);
+		//AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
+		//AttractTitleScreen->update(0);
 
 		logger.log(L"OpenGL initialized.");
 	}
@@ -631,13 +652,13 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 				// Swap to the video shader program
-				glUseProgram(videoShader.getProgram());
+				//glUseProgram(videoShader.getProgram());
 
 				// Update the current frame
-				AttractTitleScreen->update((double)fs.count());
+				//AttractTitleScreen->update((double)fs.count());
 
 				// Render that frame
-				AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
+				//AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
 			else {
 				// Render Background
@@ -762,7 +783,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 				PreSelectAllBoxes->render(PROJECTION::ORTHOGRAPHIC);
 
-				JacketArt->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt1->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
