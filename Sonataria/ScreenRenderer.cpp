@@ -398,12 +398,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill Fin.png"));
 		PreSelectAllBoxes->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Song Preselect Boxes/AllBoxes.png"));
 
-		//JacketArt1->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[0].getJacketArtPath()));
-		//JacketArt2->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[1].getJacketArtPath()));
-		//JacketArt3->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[2].getJacketArtPath()));
-		//JacketArt4->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[3].getJacketArtPath()));
-		//JacketArt5->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[4].getJacketArtPath()));
-		//JacketArt6->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[5].getJacketArtPath()));
+		JacketArt6->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[5].getJacketArtPath()));
+		JacketArt1->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[0].getJacketArtPath()));
+		JacketArt2->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[1].getJacketArtPath()));
+		JacketArt3->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[2].getJacketArtPath()));
+		JacketArt4->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[3].getJacketArtPath()));
+		JacketArt5->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[4].getJacketArtPath()));
 
 		// SET THE TRANSFORMATIONS
 
@@ -451,8 +451,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		PreSelectAllBoxes->scale(1.5f * aspect, 1.5f, 1.f);
 		PreSelectAllBoxes->translate(0.f, -0.25f, 0.f);
 		
-		JacketArt1->scale(.75f);
-		JacketArt1->translate(-0.1f, 0.05f, 0.f);
+		JacketArt1->scale(.22f);
+		JacketArt1->translate(-1.1f, -.055f, 0.f);
+		JacketArt2->scale(.22f);
+		JacketArt2->translate(-1.1f, -.38f, 0.f);
+		JacketArt3->scale(.22f);
+		JacketArt3->translate(-1.09f, -.715f, 0.f);
+		JacketArt4->scale(.22f);
+		JacketArt4->translate(0.15f, -.055f, 0.f);
+		JacketArt5->scale(.22f);
+		JacketArt5->translate(0.15f, -.37f, 0.f);
+		JacketArt6->scale(.22f);
+		JacketArt6->translate(0.14f, -.72f, 0.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -784,6 +794,11 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				PreSelectAllBoxes->render(PROJECTION::ORTHOGRAPHIC);
 
 				JacketArt1->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt2->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt3->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt4->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt5->render(PROJECTION::ORTHOGRAPHIC);
+				JacketArt6->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -1707,6 +1722,13 @@ void ScreenRenderer::changeSongPage(int direction) {
 	for (int i = 0; i < 6; i++) {
 		this->currentPageSongs.push_back(this->songs[(startingPoint + i)]);
 	}
+
+	JacketArt6->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[5].getJacketArtPath()));
+	JacketArt1->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[0].getJacketArtPath()));
+	JacketArt2->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[1].getJacketArtPath()));
+	JacketArt3->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[2].getJacketArtPath()));
+	JacketArt4->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[3].getJacketArtPath()));
+	JacketArt5->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[4].getJacketArtPath()));
 
 	logger.log(L"Switching Song Select to Page: " + to_wstring(this->currentSongPage));
 }

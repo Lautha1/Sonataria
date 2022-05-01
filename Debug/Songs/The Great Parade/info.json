@@ -1,0 +1,14 @@
+{
+    "songId": 2,
+	"title": "The Great Parade",
+	"author": "Azu Crystal",
+	"bpm": 160,
+	"diffs": {
+		"easyDiff": 1,
+		"mediumDiff": 0,
+		"hardDiff": 0,
+		"extremeDiff": 0
+	},
+	"jacketArt": "jacket.png",
+	"audioFile": "The_Great_Parade.wav"
+}

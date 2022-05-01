@@ -1,8 +1,8 @@
 {
-    "songId": 6,
-	"title": "Psyched Fevereiro",
+    "songId": 4,
+	"title": "Chartreuse Green",
 	"author": "t+pazolite",
-	"bpm": 150,
+	"bpm": 180,
 	"diffs": {
 		"easyDiff": 1,
 		"mediumDiff": 0,
@@ -11,5 +11,5 @@
 	},
 	"jacketArt": "jacket.png",
 	"roundArt": "round.png",
-	"audioFile": "PsychedFevereiro.flac"
+	"audioFile": "ChartreuseGreen.flac"
 }

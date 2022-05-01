@@ -104,25 +104,16 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Playbills/Song Preselect Boxes/AllBoxes.png", 61, GL_BGRA, GL_RGBA, nullptr },
 
 	// Songs
-	{ "Songs/+ERABY+E CONNEC+10N/jacket.png", 62, GL_BGRA, GL_RGBA, nullptr},
-	{ "Songs/1nput This 2 Y0ur Spine/jacket.png", 63, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/BAD ACCESS (FROM A MOE MAID)/jacket.png", 64, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Body F10ating in the Zero Gravity Space/jacket.png", 65, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/BPM=RT/jacket.png", 66, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Chartreuse Green/jacket.png", 67, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Compute It With Some Devilish Alcoholic Steampunk Engines/jacket.png", 68, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Dance with Silence/jacket.png", 69, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Dogbite/jacket.png", 70, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Flamewall/jacket.png", 71, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Fly Wit Me/jacket.png", 72, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Glow/jacket.png", 73, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/M1LLI0N PP/jacket.png", 74, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Psyched Fevereiro/jacket.png", 75, GL_BGRA, GL_RGBA, nullptr },
-	{ "Songs/Tera I-O/jacket.png", 76, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/BPMRT/jacket.png", 66, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/ChartreuseGreen/jacket.png", 67, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/Dogbite/jacket.png", 68, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/Glow/jacket.png", 69, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/Psyched Fevereiro/jacket.png", 70, GL_BGRA, GL_RGBA, nullptr },
+	{ "Songs/The Great Parade/jacket.png", 71, GL_BGRA, GL_RGBA, nullptr },
 
 	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 77, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 78, 0, 0, nullptr}
+	{ "Fonts/HonyaJi-Re.ttf", 72, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 73, 0, 0, nullptr}
 };
 
 // Declare static members of TextureList
