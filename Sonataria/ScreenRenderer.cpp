@@ -151,6 +151,16 @@ ScreenRenderer::ScreenRenderer() {
 	// PreLogin Sprites
 	LifeLinkIcon = new QuadSprite(L"Life Link Icon");
 
+	// Playbills
+	Act1 = new QuadSprite(L"Act 1");
+	Act1Fin = new QuadSprite(L"Act 1 Fin");
+	Act2 = new QuadSprite(L"Act 2");
+	Act2Fin = new QuadSprite(L"Act 2 Fin");
+	Fin = new QuadSprite(L"Fin");
+	PreSelectAllBoxes = new QuadSprite(L"PreSelect All Boxes");
+
+	JacketArt = new QuadSprite(L"Jacket Art");
+
 	std::string dir = "./Songs";
 
 	logger.log(L"Reading in song paths...");
@@ -249,6 +259,16 @@ ScreenRenderer::~ScreenRenderer() {
 	// PreLogin Sprites
 	delete LifeLinkIcon;
 
+	// Playbills
+	delete Act1;
+	delete Act1Fin;
+	delete Act2;
+	delete Act2Fin;
+	delete Fin;
+	delete PreSelectAllBoxes;
+
+	delete JacketArt;
+
 	// DELETE TEXTS
 	delete DisplayName;
 	delete UserTitle;
@@ -317,8 +337,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// PreLogin Sprites
 		LifeLinkIcon->initSprite(spriteShader.getProgram());
 
+		// Playbills
+		Act1->initSprite(spriteShader.getProgram());
+		Act1Fin->initSprite(spriteShader.getProgram());
+		Act2->initSprite(spriteShader.getProgram());
+		Act2Fin->initSprite(spriteShader.getProgram());
+		Fin->initSprite(spriteShader.getProgram());
+		PreSelectAllBoxes->initSprite(spriteShader.getProgram());
+
+		JacketArt->initSprite(spriteShader.getProgram());
+
 		// INITIALIZE THE TEXTURES
-		TextureList::Inst()->PreloadTextures();
+		//TextureList::Inst()->PreloadTextures();
 
 		// General Sprites
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
@@ -345,6 +375,16 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// PreLogin Sprites
 		LifeLinkIcon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/LifeLink.png"));
+
+		// Playbills
+		Act1->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill-Act1.png"));
+		Act1Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill-Act1Fin.png"));
+		Act2->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill-Act2.png"));
+		Act2Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill-Act2Fin.png"));
+		Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill Fin.png"));
+		PreSelectAllBoxes->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Song Preselect Boxes/AllBoxes.png"));
+
+		JacketArt->setTextureID(TextureList::Inst()->GetTextureID("Songs/+ERABY+E CONNEC+10N/jacket.png"));
 
 		// SET THE TRANSFORMATIONS
 
@@ -377,6 +417,20 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// PreLogin Sprites
 		LifeLinkIcon->scale(.35f * aspect, .35f, 1.f);
 		LifeLinkIcon->translate(.75f, -0.1f, 0.f);
+
+		// Playbills
+		Act1->scale(1.5f * aspect, 1.5f, 1.f);
+		Act1->translate(0.f, -0.25f, 0.f);
+		Act1Fin->scale(1.5f * aspect, 1.5f, 1.f);
+		Act1Fin->translate(0.f, -0.25f, 0.f);
+		Act2->scale(1.5f * aspect, 1.5f, 1.f);
+		Act2->translate(0.f, -0.25f, 0.f);
+		Act2Fin->scale(1.5f * aspect, 1.5f, 1.f);
+		Act2Fin->translate(0.f, -0.25f, 0.f);
+		Fin->scale(1.5f * aspect, 1.5f, 1.f);
+		Fin->translate(0.f, -0.25f, 0.f);
+		PreSelectAllBoxes->scale(1.5f * aspect, 1.5f, 1.f);
+		PreSelectAllBoxes->translate(0.f, -0.25f, 0.f);
 
 		// INITIALIZE TEXT SHADER
 		logger.log(L"Initializing text shader.");
@@ -690,6 +744,24 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 			else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
 				PosterA->render(PROJECTION::ORTHOGRAPHIC);
 				PosterB->render(PROJECTION::ORTHOGRAPHIC);
+			}
+			else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
+				if (gameState.results.size() == 0) {
+					// Song 1 - Act 1
+					Act1->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else if (gameState.results.size() == 1) {
+					// Song 2 - Act 2
+					Act2->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else {
+					// Error or EX track
+					// NOT IMPLEMENTED
+				}
+
+				PreSelectAllBoxes->render(PROJECTION::ORTHOGRAPHIC);
+
+				JacketArt->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -1767,4 +1839,8 @@ void ScreenRenderer::ToggleCurtains(bool open) {
 		ClosedCurtainLeft->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(-2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
 		ClosedCurtainRight->addInterpolation(INTERP_LINEAR, PROP_POSITION, Vector3(2.f, 0.f, 0.f), Vector3(0.f, 0.f, 0.f), (float)gameState.CurtainTransitionTime);
 	}
+}
+
+int ScreenRenderer::getSongHoverOver() {
+	return this->songSelectHoverOver;
 }

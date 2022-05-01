@@ -29,7 +29,6 @@ Song::Song() {
 	this->author = L"-";
 	this->bpm = "-";
 	this->jacketArt = "./Textures/MissingJacketArt.png";
-	this->roundArt = "./Textures/MissingRoundArt.png";
 	this->path = "";
 	this->valid = false;
 }
@@ -97,9 +96,6 @@ Song::Song(string path) {
 	// Jacket Art
 	this->jacketArt = j["jacketArt"];
 
-	// Round Art
-	this->roundArt = j["roundArt"];
-
 	// Audio File
 	this->audioFile = j["audioFile"];
 
@@ -154,18 +150,8 @@ Song::Song(const Song& old_str) {
 	this->bpm = old_str.bpm;
 	this->charts = old_str.charts;
 	this->jacketArt = old_str.jacketArt;
-	this->roundArt = old_str.roundArt;
 	this->path = old_str.path;
 	this->audioFile = old_str.audioFile;
-}
-
-/**
- * Gets the path to the round art.
- * 
- * @return path to round art
- */
-string Song::getRoundArtPath() {
-	return this->path + this->roundArt;
 }
 
 /**

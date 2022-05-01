@@ -24,7 +24,6 @@ class Song {
 		string bpm;
 		vector<Chart> charts;
 		string jacketArt;
-		string roundArt;
 		string path;
 		string audioFile;
 
@@ -33,7 +32,6 @@ class Song {
 		Song(string);
 		Song(const Song& old_obj);
 		~Song();
-		string getRoundArtPath();
 		string getJacketArtPath();
 		wstring getTitle();
 		wstring getArtist();

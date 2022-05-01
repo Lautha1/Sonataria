@@ -95,9 +95,20 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Game/Bar.png", 54, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Game/Scrubber.png", 55, GL_BGRA, GL_RGBA, nullptr },
 
+	// Playbills
+	{ "Textures/Playbills/Base Playbills/Playbill-Act1.png", 56, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Playbills/Base Playbills/Playbill-Act1Fin.png", 57, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Playbills/Base Playbills/Playbill-Act2.png", 58, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Playbills/Base Playbills/Playbill-Act2Fin.png", 59, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Playbills/Base Playbills/Playbill Fin.png", 60, GL_BGRA, GL_RGBA, nullptr },
+	{ "Textures/Playbills/Song Preselect Boxes/AllBoxes.png", 61, GL_BGRA, GL_RGBA, nullptr },
+
+	// Songs
+	{ "Songs/+ERABY+E CONNEC+10N/jacket.png", 62, GL_BGRA, GL_RGBA, nullptr },
+
 	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 56, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 57, 0, 0, nullptr}
+	{ "Fonts/HonyaJi-Re.ttf", 62, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 63, 0, 0, nullptr}
 };
 
 // Declare static members of TextureList
@@ -166,7 +177,7 @@ void TextureList::LoadJacketArts() {
 
 		replace(path.begin(), path.end(), '\\', '/');
 
-		AddTextureInfo(path, GL_BGRA, GL_RGBA);
+		AddTextureInfo(path, GL_BGR, GL_RGB);
 	}
 }
 

@@ -115,6 +115,16 @@ class ScreenRenderer {
 		// PreLogin Sprites
 		QuadSprite* LifeLinkIcon;
 
+		// Playbills
+		QuadSprite* Act1;
+		QuadSprite* Act1Fin;
+		QuadSprite* Act2;
+		QuadSprite* Act2Fin;
+		QuadSprite* Fin;
+		QuadSprite* PreSelectAllBoxes;
+
+		QuadSprite* JacketArt;
+
 		// Text
 		OpenGLText* DisplayName;
 		OpenGLText* UserTitle;
