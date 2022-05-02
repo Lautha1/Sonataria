@@ -96,6 +96,8 @@ class ScreenRenderer {
 		QuadSprite* SpotlightLeft;
 		QuadSprite* SpotlightRight;
 		QuadSprite* CurvySymbol;
+		QuadSprite* LeftBracket;
+		QuadSprite* RightBracket;
 
 		// Login
 		QuadSprite* TapLifeLinkPass;
@@ -135,6 +137,10 @@ class ScreenRenderer {
 		OpenGLText* UserTitle;
 		OpenGLText* Level;
 		OpenGLText* PlayCount;
+
+		OpenGLText* Title;
+		OpenGLText* Artist;
+		OpenGLText* Duration;
 };
 
 extern ScreenRenderer screenRenderer;

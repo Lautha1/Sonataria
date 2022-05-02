@@ -132,6 +132,8 @@ ScreenRenderer::ScreenRenderer() {
 	SpotlightLeft = new QuadSprite(L"Spotlight Left");
 	SpotlightRight = new QuadSprite(L"Spotlight Right");
 	CurvySymbol = new QuadSprite(L"Curvy Symbol");
+	LeftBracket = new QuadSprite(L"Left Bracket");
+	RightBracket = new QuadSprite(L"Right Bracket");
 
 	// Login
 	TapLifeLinkPass = new QuadSprite(L"Tap Life Link Pass");
@@ -245,6 +247,8 @@ ScreenRenderer::~ScreenRenderer() {
 	delete SpotlightLeft;
 	delete SpotlightRight;
 	delete CurvySymbol;
+	delete LeftBracket;
+	delete RightBracket;
 
 	// Login
 	delete TapLifeLinkPass;
@@ -284,6 +288,10 @@ ScreenRenderer::~ScreenRenderer() {
 	delete UserTitle;
 	delete Level;
 	delete PlayCount;
+
+	delete Title;
+	delete Artist;
+	delete Duration;
 }
 
 /**
@@ -329,6 +337,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightLeft->initSprite(spriteShader.getProgram());
 		SpotlightRight->initSprite(spriteShader.getProgram());
 		CurvySymbol->initSprite(spriteShader.getProgram());
+		LeftBracket->initSprite(spriteShader.getProgram());
+		RightBracket->initSprite(spriteShader.getProgram());
 
 		// Login
 		TapLifeLinkPass->initSprite(spriteShader.getProgram());
@@ -372,6 +382,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Spotlights/Spotlight-Left.png"));
 		SpotlightRight->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Spotlights/Spotlight-Right.png"));
 		CurvySymbol->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/CurvySymbol.png"));
+		LeftBracket->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Brackets/LeftBracket.png"));
+		RightBracket->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Brackets/RightBracket.png"));
 
 		// Login
 		TapLifeLinkPass->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/TapLifeLinkPass.png"));
@@ -506,10 +518,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 	Level = new OpenGLText(L"Level", *HonyaJi.font);
 	PlayCount = new OpenGLText(L"Play Count", *HonyaJi.font);
 
+	Title = new OpenGLText(L"Play Count", *HonyaJi.font);
+	Artist = new OpenGLText(L"Play Count", *HonyaJi.font);
+	Duration = new OpenGLText(L"Play Count", *HonyaJi.font);
+
 	DisplayName->initSprite(textShader.getProgram());
 	UserTitle->initSprite(textShader.getProgram());
 	Level->initSprite(textShader.getProgram());
 	PlayCount->initSprite(textShader.getProgram());
+
+	Title->initSprite(textShader.getProgram());
+	Artist->initSprite(textShader.getProgram());
+	Duration->initSprite(textShader.getProgram());
 
 	DisplayName->scale(.75f);
 	DisplayName->translate(-1200.f, 0.f, 0.f);
@@ -799,6 +819,46 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				JacketArt4->render(PROJECTION::ORTHOGRAPHIC);
 				JacketArt5->render(PROJECTION::ORTHOGRAPHIC);
 				JacketArt6->render(PROJECTION::ORTHOGRAPHIC);
+
+				// Draw the brackets to show which hovered over
+				LeftBracket->reset();
+				RightBracket->reset();
+				LeftBracket->scale(.3f);
+				RightBracket->scale(.3f);
+				switch (this->songSelectHoverOver) {
+					case 0:
+						// Song 1
+						LeftBracket->translate(-1.2f, -.055f, 0.f);
+						RightBracket->translate(-.2f, -.055f, 0.f);
+						break;
+					case 1:
+						// Song 2
+						LeftBracket->translate(-1.2f, -.38f, 0.f);
+						RightBracket->translate(-.2f, -.38f, 0.f);
+						break;
+					case 2:
+						// Song 3
+						LeftBracket->translate(-1.2f, -.715f, 0.f);
+						RightBracket->translate(-.2f, -.715f, 0.f);
+						break;
+					case 3:
+						// Song 4
+						LeftBracket->translate(0.05f, -.055f, 0.f);
+						RightBracket->translate(1.05f, -.055f, 0.f);
+						break;
+					case 4:
+						// Song 5
+						LeftBracket->translate(0.05f, -.38f, 0.f);
+						RightBracket->translate(1.05f, -.38f, 0.f);
+						break;
+					case 5:
+						// Song 6
+						LeftBracket->translate(0.05f, -.715f, 0.f);
+						RightBracket->translate(1.05f, -.715f, 0.f);
+						break;
+				}
+				LeftBracket->render(PROJECTION::ORTHOGRAPHIC);
+				RightBracket->render(PROJECTION::ORTHOGRAPHIC);
 			}
 		}
 
@@ -1380,6 +1440,43 @@ break;
 				PlayCount->translate(0.f, -100.f, 0.f);
 				PlayCount->scale(0.65f);
 				PlayCount->render(PROJECTION::ORTHOGRAPHIC, to_string(userData.getPlayCount()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
+			}
+			else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
+				// Song 1
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(-1850.f, -40.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[0].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+
+				// Song 2
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(-1850.f, -390.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[1].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+
+				// Song 3
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(-1850.f, -740.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[2].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+
+				// Song 4
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(550.f, -40.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[3].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+
+				// Song 5
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(550.f, -390.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[4].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
+
+				// Song 6
+				Title->reset();
+				Title->scale(0.7f);
+				Title->translate(550.f, -750.f, 0.f);
+				Title->render(PROJECTION::ORTHOGRAPHIC, this->currentPageSongs[5].getTitle(), ALIGNMENT::LEFT, 0.f, 0.f, 0.f);
 			}
 		}
 
