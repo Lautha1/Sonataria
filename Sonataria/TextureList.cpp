@@ -40,7 +40,7 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Backgrounds/Set-Morning.png", 11, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Backgrounds/Set-Afternoon.png", 12, GL_BGRA, GL_RGBA, nullptr },
 	{ "Textures/Backgrounds/Set-Evening.png", 13, GL_BGRA, GL_RGBA, nullptr },
-	{ "Textures/Backgrounds/Audience.png", 14, GL_BGRA, GL_RGB, nullptr},
+	{ "Textures/Backgrounds/Audience.png", 14, GL_BGRA, GL_RGBA, nullptr},
 
 	// General
 	{ "Textures/General/ClosedCurtainLeft.png", 15, GL_BGRA, GL_RGBA, nullptr },
@@ -83,7 +83,7 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Textures/Difficulties/Extreme.png", 46, GL_BGRA, GL_RGBA, nullptr },
 
 	// Thanks For Playing
-	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 47, GL_BGR, GL_RGB, nullptr },
+	{ "Textures/ThanksForPlaying/ThanksForPlaying.png", 47, GL_BGRA, GL_RGBA, nullptr },
 
 	// Game
 	{ "Textures/Game/Grades/S.png", 48, GL_BGRA, GL_RGBA, nullptr },
@@ -111,9 +111,11 @@ TextureManager::TextureInfo tempTexList[] = {
 	{ "Songs/Psyched Fevereiro/jacket.png", 70, GL_BGRA, GL_RGBA, nullptr },
 	{ "Songs/The Great Parade/jacket.png", 71, GL_BGRA, GL_RGBA, nullptr },
 
+	{ "Textures/Playbills/Instructions.png", 72, GL_BGRA, GL_RGBA, nullptr },
+
 	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 72, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 73, 0, 0, nullptr}
+	{ "Fonts/HonyaJi-Re.ttf", 73, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 74, 0, 0, nullptr}
 };
 
 // Declare static members of TextureList

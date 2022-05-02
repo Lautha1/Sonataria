@@ -21,7 +21,7 @@ class GameState {
 		enum class CurrentState {
 			STARTUP, SHUTDOWN, ERROR_CODE, TEST_MENU_MAIN, TITLE_SCREEN, UPDATES, TEST_MENU_IOCHECK, 
 			TEST_MENU_INPUTCHECK, TEST_MENU_SYSINFO, PRELOGIN, LOGIN_DETAILS, CREATE_PROFILE, SONG_SELECT, GAME, RESULTS, FINAL_RESULTS, 
-			TEST_MENU_SOUNDOPTIONS, TEST_MENU_NETWORKING
+			TEST_MENU_SOUNDOPTIONS, TEST_MENU_NETWORKING, THANKS_FOR_PLAYING
 		};
 		enum class OnlineState {
 			OFFLINE, ONLINE, MAINTENENCE
@@ -66,7 +66,9 @@ class GameState {
 		vector<CurrentState> serviceStates{ 
 			CurrentState::STARTUP, CurrentState::SHUTDOWN, CurrentState::ERROR_CODE, CurrentState::TEST_MENU_MAIN, 
 			CurrentState::UPDATES, CurrentState::TEST_MENU_IOCHECK, CurrentState::TEST_MENU_INPUTCHECK, 
-			CurrentState::TEST_MENU_SYSINFO, CurrentState::TEST_MENU_SOUNDOPTIONS, CurrentState::TEST_MENU_NETWORKING };
+			CurrentState::TEST_MENU_SYSINFO, CurrentState::TEST_MENU_SOUNDOPTIONS, CurrentState::TEST_MENU_NETWORKING,
+			CurrentState::RESULTS, CurrentState::GAME
+		};
 
 		bool isSwitchingStates;
 };

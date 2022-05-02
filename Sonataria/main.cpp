@@ -331,9 +331,12 @@ int main(int argc, char** argv) {
 							 controllerInput.reset();
 						 }
 						 else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
-							 gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
-							 // Clear the saved data at the end of the credit regardless of whether or not they are carded in
-							 userData.clearData();
+							 gameState.setGameState(GameState::CurrentState::THANKS_FOR_PLAYING);
+						 }
+						 else if (gameState.getGameState() == GameState::CurrentState::THANKS_FOR_PLAYING) {
+							// Clear the saved data at the end of the credit regardless of whether or not they are carded in
+							userData.clearData();
+							gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
 						 }
 					 }
 				 }

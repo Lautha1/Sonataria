@@ -2,6 +2,7 @@
 #include "GameState.h"
 #include <iostream>
 #include "Logger.h"
+#include "MusicPlayer.h"
 #include "RFIDCardReader.h"
 #include "ScreenRenderer.h"
 #include <thread>
@@ -152,13 +153,27 @@ void GameState::onStateUnload(GameState::CurrentState stateUnloaded) {
 void GameState::onStateLoad(GameState::CurrentState stateLoaded) {
 	// Handle Any Scene Load Items
 	switch (stateLoaded) {
-		default:
 		case GameState::CurrentState::TITLE_SCREEN:
 			resetResults();
 			userData.clearData();
+			musicPlayer.playSong("MusicFX/Songs/The_Great_Parade.wav");
 			break;
 		case GameState::CurrentState::PRELOGIN:
 			RFIDCardReader::getCardReader()->clearLastCardData();
+			musicPlayer.playSong("MusicFX/Songs/Login_bg_m.wav");
+			break;
+		case GameState::CurrentState::SONG_SELECT:
+			musicPlayer.playSong("MusicFX/Songs/Curtain_Rise.wav");
+			break;
+		case GameState::CurrentState::RESULTS:
+		case GameState::CurrentState::FINAL_RESULTS:
+			musicPlayer.playSong("MusicFX/Songs/Results_Score.wav");
+			break;
+		case GameState::CurrentState::GAME:
+			musicPlayer.stopSong();
+			break;
+		case GameState::CurrentState::TEST_MENU_MAIN:
+			musicPlayer.stopSong();
 			break;
 	}
 }

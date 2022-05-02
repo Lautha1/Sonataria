@@ -25,6 +25,8 @@ using namespace std;
 #include "OpenGLText.h"
 #include "TextureList.h"
 
+#include "ScreenRenderer.h"
+
 void parseInNotes(vector<Note>& lane, int LaneNum, string songPath, int diffNumber, int bpm);
 void parseInWheel(vector<WheelNote>& wheel, string songPath, int diffNumber, int bpm);
 void tokenize2(std::string const& str, const char delim, std::vector<std::string>& out);
@@ -1225,6 +1227,7 @@ void GameRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 	}
 	// End of Song
+	screenRenderer.gameEnded = true;
 
 	// Only save the status of the song when the service button wasn't pressed
 	if (!gameState.checkService() && gameState.getGameState() != GameState::CurrentState::SHUTDOWN) {

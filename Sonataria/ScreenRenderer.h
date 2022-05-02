@@ -65,6 +65,8 @@ class ScreenRenderer {
 		*/
 		int loginComplete;
 
+		bool gameEnded = false;
+
 	private:
 		int testMenuPos;
 		int testMenuTotalOptions;
@@ -98,6 +100,7 @@ class ScreenRenderer {
 		QuadSprite* CurvySymbol;
 		QuadSprite* LeftBracket;
 		QuadSprite* RightBracket;
+		QuadSprite* Thanks;
 
 		// Login
 		QuadSprite* TapLifeLinkPass;
@@ -113,6 +116,7 @@ class ScreenRenderer {
 		VideoSprite* AttractTitleScreen;
 		QuadSprite* SetMorning;
 		QuadSprite* SetAfternoon;
+		QuadSprite* SetEvening;
 
 		// PreLogin Sprites
 		QuadSprite* LifeLinkIcon;
@@ -124,6 +128,7 @@ class ScreenRenderer {
 		QuadSprite* Act2Fin;
 		QuadSprite* Fin;
 		QuadSprite* PreSelectAllBoxes;
+		QuadSprite* Instructions;
 
 		QuadSprite* JacketArt1;
 		QuadSprite* JacketArt2;

@@ -134,6 +134,7 @@ ScreenRenderer::ScreenRenderer() {
 	CurvySymbol = new QuadSprite(L"Curvy Symbol");
 	LeftBracket = new QuadSprite(L"Left Bracket");
 	RightBracket = new QuadSprite(L"Right Bracket");
+	Thanks = new QuadSprite(L"Thanks for Playing");
 
 	// Login
 	TapLifeLinkPass = new QuadSprite(L"Tap Life Link Pass");
@@ -149,6 +150,7 @@ ScreenRenderer::ScreenRenderer() {
 	AttractTitleScreen = new VideoSprite(L"Attract Title Screen Video");
 	SetMorning = new QuadSprite(L"Set Morning");
 	SetAfternoon = new QuadSprite(L"Set Afternoon");
+	SetEvening = new QuadSprite(L"Set Evening");
 
 	// PreLogin Sprites
 	LifeLinkIcon = new QuadSprite(L"Life Link Icon");
@@ -160,6 +162,7 @@ ScreenRenderer::ScreenRenderer() {
 	Act2Fin = new QuadSprite(L"Act 2 Fin");
 	Fin = new QuadSprite(L"Fin");
 	PreSelectAllBoxes = new QuadSprite(L"PreSelect All Boxes");
+	Instructions = new QuadSprite(L"Instructions");
 
 	JacketArt1 = new QuadSprite(L"Jacket Art 1");
 	JacketArt2 = new QuadSprite(L"Jacket Art 2");
@@ -249,6 +252,7 @@ ScreenRenderer::~ScreenRenderer() {
 	delete CurvySymbol;
 	delete LeftBracket;
 	delete RightBracket;
+	delete Thanks;
 
 	// Login
 	delete TapLifeLinkPass;
@@ -264,6 +268,7 @@ ScreenRenderer::~ScreenRenderer() {
 	delete AttractTitleScreen;
 	delete SetMorning;
 	delete SetAfternoon;
+	delete SetEvening;
 
 	// PreLogin Sprites
 	delete LifeLinkIcon;
@@ -275,6 +280,7 @@ ScreenRenderer::~ScreenRenderer() {
 	delete Act2Fin;
 	delete Fin;
 	delete PreSelectAllBoxes;
+	delete Instructions;
 
 	delete JacketArt1;
 	delete JacketArt2;
@@ -339,6 +345,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		CurvySymbol->initSprite(spriteShader.getProgram());
 		LeftBracket->initSprite(spriteShader.getProgram());
 		RightBracket->initSprite(spriteShader.getProgram());
+		Thanks->initSprite(spriteShader.getProgram());
 
 		// Login
 		TapLifeLinkPass->initSprite(spriteShader.getProgram());
@@ -353,6 +360,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// Backgrounds
 		SetMorning->initSprite(spriteShader.getProgram());
 		SetAfternoon->initSprite(spriteShader.getProgram());
+		SetEvening->initSprite(spriteShader.getProgram());
 
 		// PreLogin Sprites
 		LifeLinkIcon->initSprite(spriteShader.getProgram());
@@ -364,6 +372,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Act2Fin->initSprite(spriteShader.getProgram());
 		Fin->initSprite(spriteShader.getProgram());
 		PreSelectAllBoxes->initSprite(spriteShader.getProgram());
+		Instructions->initSprite(spriteShader.getProgram());
 
 		JacketArt1->initSprite(spriteShader.getProgram());
 		JacketArt2->initSprite(spriteShader.getProgram());
@@ -384,6 +393,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		CurvySymbol->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/CurvySymbol.png"));
 		LeftBracket->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Brackets/LeftBracket.png"));
 		RightBracket->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Brackets/RightBracket.png"));
+		Thanks->setTextureID(TextureList::Inst()->GetTextureID("Textures/ThanksForPlaying/ThanksForPlaying.png"));
 
 		// Login
 		TapLifeLinkPass->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/TapLifeLinkPass.png"));
@@ -398,6 +408,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// Backgrounds
 		SetMorning->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Morning.png"));
 		SetAfternoon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Afternoon.png"));
+		SetEvening->setTextureID(TextureList::Inst()->GetTextureID("Textures/Backgrounds/Set-Evening.png"));
 
 		// PreLogin Sprites
 		LifeLinkIcon->setTextureID(TextureList::Inst()->GetTextureID("Textures/Login/LifeLink.png"));
@@ -409,6 +420,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Act2Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill-Act2Fin.png"));
 		Fin->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Base Playbills/Playbill Fin.png"));
 		PreSelectAllBoxes->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Song Preselect Boxes/AllBoxes.png"));
+		Instructions->setTextureID(TextureList::Inst()->GetTextureID("Textures/Playbills/Instructions.png"));
 
 		JacketArt6->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[5].getJacketArtPath()));
 		JacketArt1->setTextureID(TextureList::Inst()->GetTextureID(this->currentPageSongs[0].getJacketArtPath()));
@@ -428,6 +440,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		SpotlightRight->scale(2.f * aspect, 2.f, 1.f);
 		CurvySymbol->scale(.4f * aspect, .4f, 1.f);
 		CurvySymbol->translate(0.f, -0.1f, 0.f);
+		Thanks->scale(2.f * aspect, 2.f, 1.f);
 
 		// Login
 		TapLifeLinkPass->scale(.15f * 6.25f, .15f, 1.f);
@@ -444,6 +457,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// Backgrounds
 		SetMorning->scale(2.f * aspect, 2.f, 1.f);
 		SetAfternoon->scale(2.f * aspect, 2.f, 1.f);
+		SetEvening->scale(2.f * aspect, 2.f, 1.f);
 
 		// PreLogin Sprites
 		LifeLinkIcon->scale(.35f * aspect, .35f, 1.f);
@@ -462,6 +476,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		Fin->translate(0.f, -0.25f, 0.f);
 		PreSelectAllBoxes->scale(1.5f * aspect, 1.5f, 1.f);
 		PreSelectAllBoxes->translate(0.f, -0.25f, 0.f);
+		Instructions->scale(7.68f * 0.18f, 0.18f, 1.f);
+		Instructions->translate(.55f, 0.2f, 0.f);
 		
 		JacketArt1->scale(.22f);
 		JacketArt1->translate(-1.1f, -.055f, 0.f);
@@ -490,8 +506,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// Initialize Videos
-		/*if (!AttractTitleScreen->loadVideo("Videos/temp_AttractTitleScreen.mp4")) {
-			logger.logError("Failed to load video: Videos/temp_AttractTitleScreen.mp4");
+		/*if (!AttractTitleScreen->loadVideo("Videos/AttractTitleScreen.mp4")) {
+			logger.logError("Failed to load video: Videos/AttractTitleScreen.mp4");
 			exit(1);
 		}*/
 
@@ -641,8 +657,15 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		ms currentOffset = std::chrono::duration_cast<ms>(fs);
 		// Use currentOffset.count() to get millisecond value
 
+		if (gameEnded == true && gameState.getGameState() != GameState::CurrentState::GAME) {
+			gameEnded = false;
+		}
+
 		// Check if switching to the GAME game state
 		if (gameState.getGameState() == GameState::CurrentState::GAME) {
+			if (gameEnded == true) {
+				continue;
+			}
 			// Clear the buffers
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -677,7 +700,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 
 		// DRAW BACKGROUNDS / STAGE (MAIN SET)
 		{
-			if (gameState.isInServiceGameState()) {
+			if (!(gameState.getGameState() == GameState::CurrentState::RESULTS) && gameState.isInServiceGameState()) {
 				// Don't render anything background related when in a service state
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
@@ -690,6 +713,9 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				// Render that frame
 				//AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
+			else if (gameState.getGameState() == GameState::CurrentState::THANKS_FOR_PLAYING) {
+				Thanks->render(PROJECTION::ORTHOGRAPHIC);
+			}
 			else {
 				// Render Background
 				if (gameState.getGameState() == GameState::CurrentState::PRELOGIN) {
@@ -700,6 +726,12 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				}
 				else if (gameState.getGameState() == GameState::CurrentState::SONG_SELECT) {
 					SetAfternoon->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else if (gameState.getGameState() == GameState::CurrentState::RESULTS) {
+					SetEvening->render(PROJECTION::ORTHOGRAPHIC);
+				}
+				else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
+					SetEvening->render(PROJECTION::ORTHOGRAPHIC);
 				}
 
 				// Render Set
@@ -819,6 +851,8 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 				JacketArt4->render(PROJECTION::ORTHOGRAPHIC);
 				JacketArt5->render(PROJECTION::ORTHOGRAPHIC);
 				JacketArt6->render(PROJECTION::ORTHOGRAPHIC);
+
+				Instructions->render(PROJECTION::ORTHOGRAPHIC);
 
 				// Draw the brackets to show which hovered over
 				LeftBracket->reset();
@@ -1363,42 +1397,42 @@ break;
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 800.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getTitle(), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 700.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 600.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Difficulty: " + to_wstring(gameState.results.back().getDifficulty()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 500.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Score: " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 400.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Perfects: " + to_wstring(gameState.results.back().getPerfectCount()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 300.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Nears: " + to_wstring(gameState.results.back().getNearCount()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
 				testMenuText1->translate(0.f, 200.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Miss: " + to_wstring(gameState.results.back().getMissCount()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 				testMenuText1->reset();
-				testMenuText1->translate(0.f, -400.f, 0.f);
+				testMenuText1->translate(0.f, -220.f, 0.f);
 				testMenuText1->scale(0.5f);
-				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED);
+				testMenuText1->render(PROJECTION::ORTHOGRAPHIC, L"Press Start To Continue...", ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::FINAL_RESULTS) {
 				// NOTE: THIS WHOLE SECTION IS JUST PLACEHOLDER UNTIL FINAL ART IS ADDED
@@ -1411,12 +1445,12 @@ break;
 					testMenuText1->reset();
 					testMenuText1->translate(0.f, 800.f - ((float)i * 400.f), 0.f);
 					testMenuText1->scale(0.4f);
-					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED);
+					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, gameState.results[i].getSong().getTitle() + L" - " + gameState.results.back().getSong().getArtist(), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 
 					testMenuText1->reset();
 					testMenuText1->translate(0.f, 600.f - ((float)i * 400.f), 0.f);
 					testMenuText1->scale(0.5f);
-					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED);
+					testMenuText1->render(PROJECTION::ORTHOGRAPHIC, to_wstring(gameState.results[i].getDifficulty()) + L" - " + to_wstring(gameState.results.back().getScore()), ALIGNMENT::CENTERED, 0.f, 0.f, 0.f);
 				}
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::LOGIN_DETAILS) {
@@ -1509,16 +1543,6 @@ break;
 				// Otherwise, proceed as normal and go to the title screen
 				gameState.setGameState(GameState::CurrentState::TITLE_SCREEN);
 			}
-
-			// Clear up all the memory for the text used on the startup screen as it won't be needed anymore
-			delete gameVersion;
-			delete startupText;
-			delete networkText;
-			delete colon1;
-			delete updatesText;
-			delete colon2;
-			delete networkStatusText;
-			delete updatesStatusText;
 		}
 	}
 
