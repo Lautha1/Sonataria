@@ -88,9 +88,10 @@ class ScreenRenderer {
 
 		SpriteShader spriteShader;
 		TextShader textShader;
-		VideoShader videoShader;
+		//VideoShader videoShader;
 
 		// General Sprites
+		QuadSprite* TitleScreen;
 		QuadSprite* Stage;
 		QuadSprite* OpenCurtains;
 		QuadSprite* ClosedCurtainLeft;
@@ -113,7 +114,7 @@ class ScreenRenderer {
 		QuadSprite* Frame;
 
 		// Backgrounds
-		VideoSprite* AttractTitleScreen;
+		//VideoSprite* AttractTitleScreen;
 		QuadSprite* SetMorning;
 		QuadSprite* SetAfternoon;
 		QuadSprite* SetEvening;

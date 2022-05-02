@@ -155,11 +155,11 @@ int main(int argc, char** argv) {
 			 if (evnt.type == sf::Event::KeyPressed) {
 				 if (evnt.key.code == sf::Keyboard::A) {
 					 controllerInput.setKeyState(1, true);
-					 PacSetLEDState(0, 5, true);
+					 PacSetLEDState(0, 0, true);
 				 } 
 				 else if(evnt.key.code == sf::Keyboard::C) {
 					 controllerInput.setKeyState(2, true);
-					 PacSetLEDState(0, 4, true);
+					 PacSetLEDState(0, 1, true);
 					 if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {
 						 screenRenderer.testMenuPosPlus();
 					 } 
@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
 				 } 
 				 else if(evnt.key.code == sf::Keyboard::M) {
 					 controllerInput.setKeyState(4, true);
-					 PacSetLEDState(0, 1, true);
+					 PacSetLEDState(0, 2, true);
 					 if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {
 						 screenRenderer.testMenuPosMinus();
 					 }
@@ -202,11 +202,11 @@ int main(int argc, char** argv) {
 				 } 
 				 else if(evnt.key.code == sf::Keyboard::L) {
 					 controllerInput.setKeyState(5, true);
-					 PacSetLEDState(0, 0, true);
+					 PacSetLEDState(0, 4, true);
 				 } 
 				 else if(evnt.key.code == sf::Keyboard::T) {
 					 controllerInput.setKeyState(6, true);
-					 PacSetLEDState(0, 3, true);
+					 PacSetLEDState(0, 5, true);
 					 // Only do actions if the game isn't doing the curtain transition effect
 					 if (!gameState.isTransitioning) {
 						 if (gameState.getGameState() == GameState::CurrentState::TEST_MENU_MAIN) {

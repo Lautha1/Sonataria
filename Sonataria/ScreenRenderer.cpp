@@ -125,6 +125,7 @@ ScreenRenderer::ScreenRenderer() {
 	// SETUP SPRITES
 	
 	// General Sprites
+	TitleScreen = new QuadSprite(L"Title");
 	Stage = new QuadSprite(L"Stage");
 	OpenCurtains = new QuadSprite(L"Open Curtains");
 	ClosedCurtainLeft = new QuadSprite(L"Closed Curtain Left");
@@ -147,7 +148,7 @@ ScreenRenderer::ScreenRenderer() {
 	Frame = new QuadSprite(L"Frame");
 
 	// Backgrounds
-	AttractTitleScreen = new VideoSprite(L"Attract Title Screen Video");
+	//AttractTitleScreen = new VideoSprite(L"Attract Title Screen Video");
 	SetMorning = new QuadSprite(L"Set Morning");
 	SetAfternoon = new QuadSprite(L"Set Afternoon");
 	SetEvening = new QuadSprite(L"Set Evening");
@@ -243,6 +244,7 @@ ScreenRenderer::~ScreenRenderer() {
 	// DELETE SPRITES
 	
 	// General Sprites
+	delete TitleScreen;
 	delete Stage;
 	delete OpenCurtains;
 	delete ClosedCurtainLeft;
@@ -265,7 +267,7 @@ ScreenRenderer::~ScreenRenderer() {
 	delete Frame;
 
 	// Backgrounds
-	delete AttractTitleScreen;
+	//delete AttractTitleScreen;
 	delete SetMorning;
 	delete SetAfternoon;
 	delete SetEvening;
@@ -336,6 +338,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// INITIALIZE THE SPRITES
 
 		// General Sprites
+		TitleScreen->initSprite(spriteShader.getProgram());
 		Stage->initSprite(spriteShader.getProgram());
 		OpenCurtains->initSprite(spriteShader.getProgram());
 		ClosedCurtainLeft->initSprite(spriteShader.getProgram());
@@ -384,6 +387,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// INITIALIZE THE TEXTURES
 
 		// General Sprites
+		TitleScreen->setTextureID(TextureList::Inst()->GetTextureID("Textures/TitleScreen.png"));
 		Stage->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/Stage.png"));
 		OpenCurtains->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/OpenCurtains.png"));
 		ClosedCurtainLeft->setTextureID(TextureList::Inst()->GetTextureID("Textures/General/ClosedCurtainLeft.png"));
@@ -432,6 +436,7 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		// SET THE TRANSFORMATIONS
 
 		// General Sprites
+		TitleScreen->scale(2.f * aspect, 2.f, 1.f);
 		Stage->scale(2.f * aspect, 2.f, 1.f);
 		OpenCurtains->scale(2.f * aspect, 2.f, 1.f);
 		ClosedCurtainLeft->scale(2.f * aspect, 2.f, 1.f);
@@ -500,24 +505,24 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// INITIALIZE VIDEO SHADER
-		if (!videoShader.initShader()) {
+		/*if (!videoShader.initShader()) {
 			logger.logError("Failed to initialize video shader.");
 			exit(1);
-		}
+		}*/
 
 		// Initialize Videos
-		if (!AttractTitleScreen->loadVideo("Videos/AttractTitleScreen.mp4")) {
+		/*if (!AttractTitleScreen->loadVideo("Videos/AttractTitleScreen.mp4")) {
 			logger.logError("Failed to load video: Videos/AttractTitleScreen.mp4");
 			exit(1);
-		}
+		}*/
 
 		// Link video sprite and shader
-		AttractTitleScreen->initSprite(videoShader.getProgram());
-		AttractTitleScreen->enableLooping(true);
+		//AttractTitleScreen->initSprite(videoShader.getProgram());
+		//AttractTitleScreen->enableLooping(true);
 
 		// Load the first frame
-		AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
-		AttractTitleScreen->update(0);
+		//AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
+		//AttractTitleScreen->update(0);
 
 		logger.log(L"OpenGL initialized.");
 	}
@@ -705,13 +710,14 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 				// Swap to the video shader program
-				glUseProgram(videoShader.getProgram());
+				//glUseProgram(videoShader.getProgram());
 
 				// Update the current frame
-				AttractTitleScreen->update((double)fs.count());
+				//AttractTitleScreen->update((double)fs.count());
 
 				// Render that frame
-				AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
+				//AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
+				TitleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::THANKS_FOR_PLAYING) {
 				Thanks->render(PROJECTION::ORTHOGRAPHIC);

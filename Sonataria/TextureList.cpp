@@ -113,9 +113,11 @@ TextureManager::TextureInfo tempTexList[] = {
 
 	{ "Textures/Playbills/Instructions.png", 72, GL_BGRA, GL_RGBA, nullptr },
 
+	{ "Textures/TitleScreen.png", 73, GL_BGRA, GL_RGBA, nullptr},
+
 	// Fonts
-	{ "Fonts/HonyaJi-Re.ttf", 73, 0, 0, nullptr },
-	{ "Fonts/Stayola-Regular.otf", 74, 0, 0, nullptr}
+	{ "Fonts/HonyaJi-Re.ttf", 74, 0, 0, nullptr },
+	{ "Fonts/Stayola-Regular.otf", 75, 0, 0, nullptr}
 };
 
 // Declare static members of TextureList
