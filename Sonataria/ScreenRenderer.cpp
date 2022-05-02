@@ -506,18 +506,18 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 		}
 
 		// Initialize Videos
-		/*if (!AttractTitleScreen->loadVideo("Videos/AttractTitleScreen.mp4")) {
+		if (!AttractTitleScreen->loadVideo("Videos/AttractTitleScreen.mp4")) {
 			logger.logError("Failed to load video: Videos/AttractTitleScreen.mp4");
 			exit(1);
-		}*/
+		}
 
 		// Link video sprite and shader
-		//AttractTitleScreen->initSprite(videoShader.getProgram());
-		//AttractTitleScreen->enableLooping(true);
+		AttractTitleScreen->initSprite(videoShader.getProgram());
+		AttractTitleScreen->enableLooping(true);
 
 		// Load the first frame
-		//AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
-		//AttractTitleScreen->update(0);
+		AttractTitleScreen->scale(2.f * aspect, -2.f, 1.f);
+		AttractTitleScreen->update(0);
 
 		logger.log(L"OpenGL initialized.");
 	}
@@ -705,13 +705,13 @@ void ScreenRenderer::render(sf::RenderWindow* gameWindow) {
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::TITLE_SCREEN) {
 				// Swap to the video shader program
-				//glUseProgram(videoShader.getProgram());
+				glUseProgram(videoShader.getProgram());
 
 				// Update the current frame
-				//AttractTitleScreen->update((double)fs.count());
+				AttractTitleScreen->update((double)fs.count());
 
 				// Render that frame
-				//AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
+				AttractTitleScreen->render(PROJECTION::ORTHOGRAPHIC);
 			}
 			else if (gameState.getGameState() == GameState::CurrentState::THANKS_FOR_PLAYING) {
 				Thanks->render(PROJECTION::ORTHOGRAPHIC);
